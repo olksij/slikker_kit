@@ -27,8 +27,8 @@ double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallb
 	return math.max(d1, d2) / 2.0;
 }
 
-class _SlikkerRippleFactory extends InteractiveInkFeatureFactory {
-	const _SlikkerRippleFactory();
+class SlikkerRipple extends InteractiveInkFeatureFactory {
+	const SlikkerRipple();
 
 	@override
 	InteractiveInkFeature create({
@@ -44,7 +44,7 @@ class _SlikkerRippleFactory extends InteractiveInkFeatureFactory {
 		double radius,
 		VoidCallback onRemoved,
 	}) {
-		return SlikkerRipple(
+		return SlikkerRippleInk(
 			controller: controller,
 			referenceBox: referenceBox,
 			position: position,
@@ -60,32 +60,10 @@ class _SlikkerRippleFactory extends InteractiveInkFeatureFactory {
 	}
 }
 
-/// -- ..SOON.. --
 /// A visual reaction on a piece of [Material] to user input.
 ///
-/// A circular ink feature whose origin starts at the input touch point and
-/// whose radius expands from 60% of the final radius. The splash origin
-/// animates to the center of its [referenceBox].
-///
-/// This object is rarely created directly. Instead of creating an ink ripple,
-/// consider using an [InkResponse] or [InkWell] widget, which uses
-/// gestures (such as tap and long-press) to trigger ink splashes. This class
-/// is used when the [Theme]'s [ThemeData.splashFactory] is [InkRipple.splashFactory].
-///
-/// See also:
-///
-///  * [InkSplash], which is an ink splash feature that expands less
-///    aggressively than the ripple.
-///  * [InkResponse], which uses gestures to trigger ink highlights and ink
-///    splashes in the parent [Material].
-///  * [InkWell], which is a rectangular [InkResponse] (the most common type of
-///    ink response).
-///  * [Material], which is the widget on which the ink splash is painted.
-///  * [InkHighlight], which is an ink feature that emphasizes a part of a
-///    [Material].
-class SlikkerRipple extends InteractiveInkFeature {
-	/// Begin a ripple, centered at [position] relative to [referenceBox].
-	///
+/// This class is used when the [Theme]'s [ThemeData.splashFactory] is [SlikkerRipple.splashFactory].
+class SlikkerRippleInk extends InteractiveInkFeature {
 	/// The [controller] argument is typically obtained via
 	/// `Material.of(context)`.
 	///
@@ -99,7 +77,7 @@ class SlikkerRipple extends InteractiveInkFeature {
 	/// This is the default.
 	///
 	/// When the ripple is removed, [onRemoved] will be called.
-	SlikkerRipple({
+	SlikkerRippleInk({
 		@required MaterialInkController controller,
 		@required RenderBox referenceBox,
 		@required Offset position,
@@ -167,7 +145,7 @@ class SlikkerRipple extends InteractiveInkFeature {
 
 	/// Used to specify this type of ink splash for an [InkWell], [InkResponse]
 	/// or material [Theme].
-	static const InteractiveInkFeatureFactory splashFactory = _SlikkerRippleFactory();
+	static const InteractiveInkFeatureFactory splashFactory = SlikkerRipple();
 
 	static final Animatable<double> _easeCurveTween = CurveTween(curve: Curves.easeOut);
 
