@@ -1,9 +1,7 @@
-<p align="center">
-   <span style="font-family: 'monospace'; font-size: 2em;"><b><i>Slikker Kit</i></b></span>
-   <br>
-   <span style="font-family: 'monospace'; font-size: 1.25em; opacity: 0.7;"><b><i>Slikker Kit is a Flutter package which provides Slikker Design System components</i></b></span>
-   <br>
-</p>
+# ***Slikker Kit***
+### ***Slikker Kit is a Flutter package which provides Slikker Design System components***
+
+<br>
 
 ## **Installation**
 
@@ -12,15 +10,12 @@ of your flutter project, add the following dependency
 ```
 dependencies:
    ...
-   slikker_ripple: 
-      git:
-         url: git://github.com/AlexBesida/slikker_kit.git
+   slikker_ripple: ^1.0.1
 ```
 2. Run command to update the dependencies:
 ```
 $ flutter pub get
 ```
-#### // *Soon the way will be simplified*
 
 <br>
 
