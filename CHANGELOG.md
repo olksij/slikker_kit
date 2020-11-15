@@ -1,3 +1,11 @@
+## [1.0.0] - 15.11.20
+* Added all Slikker Design System components:
+   * SlikkerSacffold
+   * SlikkerCard
+   * TopButton
+   * TextField
+* Updated Readme
+
 ## [0.1.1] - 18.09.20
 
 * Updated docs a bit

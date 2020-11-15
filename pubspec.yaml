@@ -1,7 +1,8 @@
-name: slikker_ripple
-description: The new, real ripple animation, for Flutter.
-version: 0.1.1
-homepage: https://github.com/AlexBesida/slikker_ripple
+name: slikker_kit
+description: Slikker Kit is a Flutter package which provides Slikker Design System components.
+version: 1.0.0
+author: Alexey Besida
+homepage: https://github.com/AlexBesida/slikker_kit
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
