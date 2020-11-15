@@ -1,8 +1,9 @@
-<center>
-   <h1 style="font-family: monospace;"><b><i>Slikker Kit</i></b></h1>
-   <h3 style="opacity: 0.5; font-family: monospace;"><b><i>Slikker Kit is a Flutter package which provides Slikker Design System components</i></b></h2>
+<p align="center">
+   <span style="font-family: 'monospace'; font-size: 2em;"><b><i>Slikker Kit</i></b></span>
    <br>
-</center>
+   <span style="font-family: 'monospace'; font-size: 1.25em; opacity: 0.7;"><b><i>Slikker Kit is a Flutter package which provides Slikker Design System components</i></b></span>
+   <br>
+</p>
 
 ## **Installation**
 

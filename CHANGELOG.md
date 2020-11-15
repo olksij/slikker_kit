@@ -1,3 +1,6 @@
+## [1.0.1] - 15.11.20
+* Improved the way color is choosed in `SlikkerCard`
+
 ## [1.0.0] - 15.11.20
 * Added all Slikker Design System components:
    * SlikkerSacffold

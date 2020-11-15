@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'accent_color.dart';
+import 'get_color.dart';
 
 class SlikkerTextField extends StatelessWidget {
    final TextEditingController controller;
@@ -35,7 +35,7 @@ class SlikkerTextField extends StatelessWidget {
          controller: controller,
          style: TextStyle(
             fontSize: 17,
-            color: accentColor(1, accent, 0.4, 0.4)
+            color: getColor(1, accent, 0.4, 0.4)
          ),
          decoration: InputDecoration(
             prefixIcon: prefixIcon != null ? Container(
@@ -52,9 +52,9 @@ class SlikkerTextField extends StatelessWidget {
                borderRadius: borderRadius,
             ),
             hintText: hintText,
-            hintStyle: TextStyle( color: accentColor(0.5, accent, 0.1, 0.7), fontWeight: FontWeight.w600, ),
+            hintStyle: TextStyle( color: getColor(0.5, accent, 0.1, 0.7), fontWeight: FontWeight.w600, ),
             filled: true,
-            fillColor: isTransperent ? Colors.transparent : accentColor(0.8, accent, 0.04, 0.97),
+            fillColor: isTransperent ? Colors.transparent : getColor(0.8, accent, 0.04, 0.97),
          ),
       );
    }

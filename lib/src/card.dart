@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'get_color.dart';
 import 'ripple.dart';
 
 class SlikkerCard extends StatefulWidget {
@@ -37,19 +38,11 @@ class SlikkerCard extends StatefulWidget {
 }
 
 class _SlikkerCardState extends State<SlikkerCard> with TickerProviderStateMixin{
-   HSVColor color;
    AnimationController tapController;
    CurvedAnimation tapAnimation;
 
    @override void initState() {
       super.initState();
-      color = HSVColor.fromAHSV(
-         widget.isFloating ? 1 : 0.075, 
-         widget.accent, 
-         widget.isFloating ? 0.6 : 0.3, 
-         widget.isFloating ? 1 : 0.75
-      );
-
       tapController = AnimationController(
          vsync: this,
          duration: Duration(milliseconds: 150),
@@ -75,15 +68,30 @@ class _SlikkerCardState extends State<SlikkerCard> with TickerProviderStateMixin
             clipBehavior: Clip.hardEdge,
             decoration: BoxDecoration(
                borderRadius: widget.borderRadius,
-               color: widget.isFloating ? Colors.white : color.toColor(),
+               color: widget.isFloating ? Colors.white : getColor(
+                  widget.isFloating ? 1 : 0.075, 
+                  widget.accent, 
+                  widget.isFloating ? 0.6 : 0.3, 
+                  widget.isFloating ? 1 : 0.75
+               ),
                boxShadow: widget.isFloating ? [
                   BoxShadow (
-                     color: color.withSaturation(0.6).withAlpha(0.12 + tapAnimation.value * -0.05).toColor(),
+                     color: getColor(
+                        widget.isFloating ? 1 : 0.075, 
+                        widget.accent, 
+                        0.6, 
+                        0.12 + tapAnimation.value * -0.05
+                     ),
                      offset: Offset(0, 7 + tapAnimation.value * -2),
                      blurRadius: 40 + tapAnimation.value * -10,
                   ),
                   BoxShadow (
-                     color: color.withSaturation(0.05 + tapAnimation.value * 0.01).toColor(),
+                     color: getColor(
+                        widget.isFloating ? 1 : 0.075, 
+                        widget.accent, 
+                        0.05 + tapAnimation.value * 0.01, 
+                        widget.isFloating ? 1 : 0.75
+                     ),
                      offset: Offset(0,3),
                   ),
                ] : [],          
@@ -92,19 +100,25 @@ class _SlikkerCardState extends State<SlikkerCard> with TickerProviderStateMixin
                color: Colors.transparent,
                child: InkWell(
                   splashFactory: SlikkerRipple(),
-                  splashColor: color.withAlpha(widget.isFloating ? 0.125 : 0.25)
-                     .withValue(widget.isFloating ? 1 : 0.85)
-                     .withSaturation(widget.isFloating ? 0.6 : 0.15)
-                     .toColor(),
-                  highlightColor: color.withAlpha(0.01).toColor(),
+                  splashColor: getColor(
+                     widget.isFloating ? 0.125 : 0.25, 
+                     widget.accent, 
+                     widget.isFloating ? 0.6 : 0.15,
+                     widget.isFloating ? 1 : 0.85
+                  ),
+                  highlightColor: Colors.transparent,
+                  /*highlightColor: getColor(
+                     0.01, 
+                     widget.accent, 
+                     widget.isFloating ? 0.6 : 0.3, 
+                     widget.isFloating ? 1 : 0.75
+                  ),*/
                   hoverColor: Colors.transparent,
                   onTapDown: (a) { 
                      HapticFeedback.lightImpact(); 
                      tapController.forward();
                   },
-                  onTapCancel: () { 
-                     tapController.reverse();
-                  },
+                  onTapCancel: () => tapController.reverse(),
                   onTap: () { 
                      tapController.forward();
                      Future.delayed( Duration(milliseconds: 150), () => tapController.reverse(from: 1) ); 

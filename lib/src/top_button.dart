@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'card.dart';
-import 'accent_color.dart';
+import 'get_color.dart';
 
 class TopButton extends StatefulWidget {       
    final String title; final IconData icon; 
@@ -20,7 +20,7 @@ class TopButtonState extends State<TopButton> {
    @override void initState() {
       super.initState();
       widget.refreshFunction(refresh);
-      color = accentColor(1, widget.accent, 0.4, 0.2);
+      color = getColor(1, widget.accent, 0.4, 0.2);
    }
 
    @override Widget build(BuildContext context) {
