@@ -17,63 +17,51 @@ class SlikkerExampleApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final double accent = 240;
+  int count = 0;
+
   @override
   Widget build(BuildContext context) {
     return SlikkerScaffold(
       content: Container(),
-      topButtonAction: () {},
+      topButtonAction: () => setState(() => count = 0),
       topButtonIcon: Icons.clear,
       topButtonTitle: 'Clear',
-      title: 'Example App',
+      title: 'Example',
       floatingButton: SlikkerCard(
         accent: accent,
         borderRadius: BorderRadius.circular(50),
         child: Text('Tap!'),
+        onTap: () => setState(() => count++),
         padding: EdgeInsets.all(17),
       ),
       header: Padding(
         padding: EdgeInsets.symmetric(horizontal: 30),
         child: SlikkerCard(
-          accent: accent,
-          padding: EdgeInsets.all(15),
-          child: PushedButton(
             accent: accent,
-            count: 1,
-          ),
-        ),
+            padding: EdgeInsets.fromLTRB(20, 12, 12, 12),
+            child: Row(children: [
+              Text('Button taps:',
+                  style: TextStyle(
+                      fontSize: 17, color: getColor(1, accent, 0.4, 0.4))),
+              Expanded(child: Container()),
+              SlikkerCard(
+                accent: 240,
+                isFloating: false,
+                borderRadius: BorderRadius.circular(8),
+                padding: EdgeInsets.symmetric(horizontal: 17, vertical: 10),
+                child: Text(count.toString(),
+                    style: TextStyle(
+                        fontSize: 15, color: getColor(1, accent, 0.4, 0.4))),
+              ),
+            ])),
       ),
     );
-  }
-}
-
-class PushedButton extends StatefulWidget {
-  final int count;
-  final double accent;
-
-  const PushedButton({this.count, this.accent});
-  @override
-  _PushedButtonState createState() => _PushedButtonState();
-}
-
-class _PushedButtonState extends State<PushedButton> {
-  @override
-  Widget build(BuildContext context) {
-    return Row(children: [
-      Text('When your day starts?',
-          style: TextStyle(
-              fontSize: 17, color: getColor(1, widget.accent, 0.4, 0.4))),
-      Expanded(child: Container()),
-      SlikkerCard(
-        accent: 240,
-        isFloating: false,
-        borderRadius: BorderRadius.circular(8),
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        child: Text(widget.count.toString(),
-            style: TextStyle(
-                fontSize: 15, color: getColor(1, widget.accent, 0.4, 0.4))),
-      ),
-    ]);
   }
 }
