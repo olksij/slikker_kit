@@ -1,16 +1,15 @@
 # ***Slikker Kit***
-### ***Slikker Kit is a Flutter package which provides Slikker Design System components***
+### Slikker Kit is a Flutter package which provides Slikker Design System components
 
 <br>
 
 ## **Installation**
 
-of your flutter project, add the following dependency
 1. In your `pubspec.yaml` add the following dependency:
 ```
 dependencies:
    ...
-   slikker_ripple: ^1.0.1
+   slikker_kit: ^1.0.2
 ```
 2. Run command to update the dependencies:
 ```
