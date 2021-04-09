@@ -66,72 +66,70 @@ class _SlikkerCardState extends State<SlikkerCard>
   @override
   Widget build(BuildContext context) {
     return Transform.translate(
-        offset: Offset(0, widget.isFloating ? tapAnimation.value * 3 : 0),
-        child: Container(
-          clipBehavior: Clip.hardEdge,
-          decoration: BoxDecoration(
-            borderRadius: widget.borderRadius,
-            color: widget.isFloating
-                ? Colors.white
-                : getColor(
-                    widget.isFloating ? 1 : 0.075,
-                    widget.accent,
-                    widget.isFloating ? 0.6 : 0.3,
-                    widget.isFloating ? 1 : 0.75),
-            boxShadow: widget.isFloating
-                ? [
-                    BoxShadow(
-                      color: getColor(
-                        0.12 + tapAnimation.value * -0.05,
-                        widget.accent,
-                        0.6,
+      offset: Offset(0, widget.isFloating ? tapAnimation.value * 3 : 0),
+      child: Container(
+        clipBehavior: Clip.hardEdge,
+        decoration: BoxDecoration(
+          borderRadius: widget.borderRadius,
+          color: widget.isFloating
+              ? Colors.white
+              : getColor(widget.isFloating ? 1 : 0.075, widget.accent,
+                  widget.isFloating ? 0.6 : 0.3, widget.isFloating ? 1 : 0.75),
+          boxShadow: widget.isFloating
+              ? [
+                  BoxShadow(
+                    color: getColor(
+                      0.12 + tapAnimation.value * -0.05,
+                      widget.accent,
+                      0.6,
+                      widget.isFloating ? 1 : 0.075,
+                    ),
+                    offset: Offset(0, 7 + tapAnimation.value * -2),
+                    blurRadius: 40 + tapAnimation.value * -10,
+                  ),
+                  BoxShadow(
+                    color: getColor(
                         widget.isFloating ? 1 : 0.075,
-                      ),
-                      offset: Offset(0, 7 + tapAnimation.value * -2),
-                      blurRadius: 40 + tapAnimation.value * -10,
-                    ),
-                    BoxShadow(
-                      color: getColor(
-                          widget.isFloating ? 1 : 0.075,
-                          widget.accent,
-                          0.05 + tapAnimation.value * 0.01,
-                          widget.isFloating ? 1 : 0.75),
-                      offset: Offset(0, 3),
-                    ),
-                  ]
-                : [],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-                splashFactory: SlikkerRipple(),
-                splashColor: getColor(
-                    widget.isFloating ? 0.125 : 0.25,
-                    widget.accent,
-                    widget.isFloating ? 0.6 : 0.15,
-                    widget.isFloating ? 1 : 0.85),
-                highlightColor: Colors.transparent,
-                /*highlightColor: getColor(
-                     0.01, 
-                     widget.accent, 
-                     widget.isFloating ? 0.6 : 0.3, 
-                     widget.isFloating ? 1 : 0.75
-                  ),*/
-                hoverColor: Colors.transparent,
-                onTapDown: (a) {
-                  HapticFeedback.lightImpact();
-                  tapController.forward();
-                },
-                onTapCancel: () => tapController.reverse(),
-                onTap: () {
-                  tapController.forward();
-                  Future.delayed(Duration(milliseconds: 150),
-                      () => tapController.reverse(from: 1));
-                  Future.delayed(
-                      Duration(milliseconds: 100), () => widget.onTap());
-                },
-                child: Padding(padding: widget.padding, child: widget.child)),
-          ),
-        ));
+                        widget.accent,
+                        0.05 + tapAnimation.value * 0.01,
+                        widget.isFloating ? 1 : 0.75),
+                    offset: Offset(0, 3),
+                  ),
+                ]
+              : [],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+              splashFactory: SlikkerRipple(),
+              splashColor: getColor(
+                  widget.isFloating ? 0.125 : 0.25,
+                  widget.accent,
+                  widget.isFloating ? 0.6 : 0.15,
+                  widget.isFloating ? 1 : 0.85),
+              highlightColor: Colors.transparent,
+              /*highlightColor: getColor(
+										 0.01, 
+										 widget.accent, 
+										 widget.isFloating ? 0.6 : 0.3, 
+										 widget.isFloating ? 1 : 0.75
+									),*/
+              hoverColor: Colors.transparent,
+              onTapDown: (a) {
+                HapticFeedback.lightImpact();
+                tapController.forward();
+              },
+              onTapCancel: () => tapController.reverse(),
+              onTap: () {
+                tapController.forward();
+                Future.delayed(Duration(milliseconds: 150),
+                    () => tapController.reverse(from: 1));
+                Future.delayed(
+                    Duration(milliseconds: 100), () => widget.onTap());
+              },
+              child: Padding(padding: widget.padding, child: widget.child)),
+        ),
+      ),
+    );
   }
 }
