@@ -9,7 +9,7 @@
 ```
 dependencies:
    ...
-   slikker_kit: ^1.0.2
+   slikker_kit: ^1.0.3
 ```
 2. Run command to update the dependencies:
 ```

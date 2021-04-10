@@ -3,25 +3,24 @@ import 'card.dart';
 import 'get_color.dart';
 
 class TopButton extends StatefulWidget {
-  final String title;
-  final IconData icon;
-  final double accent;
-  final Function onTap;
-  final Function refreshFunction;
+  final String? title;
+  final IconData? icon;
+  final double? accent;
+  final Function? onTap;
+  final Function? refreshFunction;
 
-  TopButton(
-      {this.title, this.icon, this.accent, this.onTap, this.refreshFunction});
+  TopButton({this.title, this.icon, this.accent, this.onTap, this.refreshFunction});
 
   @override
   TopButtonState createState() => TopButtonState();
 }
 
 class TopButtonState extends State<TopButton> with TickerProviderStateMixin {
-  AnimationController scrollController;
-  CurvedAnimation scrollAnimation;
+  late AnimationController scrollController;
+  late CurvedAnimation scrollAnimation;
 
   int percent = 0;
-  Color color;
+  Color? color;
 
   void refresh(p) {
     if (percent != p && this.mounted) setState(() => percent = p);
@@ -30,15 +29,14 @@ class TopButtonState extends State<TopButton> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    widget.refreshFunction(refresh);
-    color = getColor(1, widget.accent, 0.4, 0.2);
+    widget.refreshFunction!(refresh);
+    color = getColor(1, widget.accent!, 0.4, 0.2);
     scrollController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 150),
     );
 
-    scrollAnimation =
-        CurvedAnimation(curve: Curves.easeOut, parent: scrollController);
+    scrollAnimation = CurvedAnimation(curve: Curves.easeOut, parent: scrollController);
     scrollAnimation.addListener(() => setState(() {}));
   }
 
@@ -63,8 +61,7 @@ class TopButtonState extends State<TopButton> with TickerProviderStateMixin {
           children: [
             Icon(
               widget.icon,
-              color:
-                  color.withAlpha(255 - (scrollAnimation.value * 255).toInt()),
+              color: color!.withAlpha(255 - (scrollAnimation.value * 255).toInt()),
               size: 22,
             ),
             Padding(
@@ -75,8 +72,7 @@ class TopButtonState extends State<TopButton> with TickerProviderStateMixin {
                   child: CircularProgressIndicator(
                     value: percent / 100,
                     strokeWidth: 3,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        color.withAlpha((scrollAnimation.value * 255).toInt())),
+                    valueColor: AlwaysStoppedAnimation<Color>(color!.withAlpha((scrollAnimation.value * 255).toInt())),
                   ),
                   height: 16,
                   width: 16,
@@ -86,9 +82,7 @@ class TopButtonState extends State<TopButton> with TickerProviderStateMixin {
           ],
         ),
         Container(width: 8, height: 24),
-        Text(widget.title,
-            style: TextStyle(
-                color: color, fontWeight: FontWeight.w600, fontSize: 16))
+        Text(widget.title!, style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 16))
       ]),
     );
   }

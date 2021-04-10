@@ -21,7 +21,7 @@ class SlikkerCard extends StatefulWidget {
   final EdgeInsetsGeometry padding;
 
   /// The `Function` that will be invoked on user's tap.
-  final Function onTap;
+  final Function? onTap;
 
   @override
   _SlikkerCardState createState() => _SlikkerCardState();
@@ -38,10 +38,9 @@ class SlikkerCard extends StatefulWidget {
   });
 }
 
-class _SlikkerCardState extends State<SlikkerCard>
-    with TickerProviderStateMixin {
-  AnimationController tapController;
-  CurvedAnimation tapAnimation;
+class _SlikkerCardState extends State<SlikkerCard> with TickerProviderStateMixin {
+  late AnimationController tapController;
+  late CurvedAnimation tapAnimation;
 
   @override
   void initState() {
@@ -51,8 +50,7 @@ class _SlikkerCardState extends State<SlikkerCard>
       duration: Duration(milliseconds: 150),
     );
 
-    tapAnimation =
-        CurvedAnimation(curve: Curves.easeOut, parent: tapController);
+    tapAnimation = CurvedAnimation(curve: Curves.easeOut, parent: tapController);
 
     tapAnimation.addListener(() => setState(() {}));
   }
@@ -73,8 +71,8 @@ class _SlikkerCardState extends State<SlikkerCard>
           borderRadius: widget.borderRadius,
           color: widget.isFloating
               ? Colors.white
-              : getColor(widget.isFloating ? 1 : 0.075, widget.accent,
-                  widget.isFloating ? 0.6 : 0.3, widget.isFloating ? 1 : 0.75),
+              : getColor(widget.isFloating ? 1 : 0.075, widget.accent, widget.isFloating ? 0.6 : 0.3,
+                  widget.isFloating ? 1 : 0.75),
           boxShadow: widget.isFloating
               ? [
                   BoxShadow(
@@ -88,10 +86,7 @@ class _SlikkerCardState extends State<SlikkerCard>
                     blurRadius: 40 + tapAnimation.value * -10,
                   ),
                   BoxShadow(
-                    color: getColor(
-                        widget.isFloating ? 1 : 0.075,
-                        widget.accent,
-                        0.05 + tapAnimation.value * 0.01,
+                    color: getColor(widget.isFloating ? 1 : 0.075, widget.accent, 0.05 + tapAnimation.value * 0.01,
                         widget.isFloating ? 1 : 0.75),
                     offset: Offset(0, 3),
                   ),
@@ -102,10 +97,7 @@ class _SlikkerCardState extends State<SlikkerCard>
           color: Colors.transparent,
           child: InkWell(
               splashFactory: SlikkerRipple(),
-              splashColor: getColor(
-                  widget.isFloating ? 0.125 : 0.25,
-                  widget.accent,
-                  widget.isFloating ? 0.6 : 0.15,
+              splashColor: getColor(widget.isFloating ? 0.125 : 0.25, widget.accent, widget.isFloating ? 0.6 : 0.15,
                   widget.isFloating ? 1 : 0.85),
               highlightColor: Colors.transparent,
               /*highlightColor: getColor(
@@ -122,10 +114,8 @@ class _SlikkerCardState extends State<SlikkerCard>
               onTapCancel: () => tapController.reverse(),
               onTap: () {
                 tapController.forward();
-                Future.delayed(Duration(milliseconds: 150),
-                    () => tapController.reverse(from: 1));
-                Future.delayed(
-                    Duration(milliseconds: 100), () => widget.onTap());
+                Future.delayed(Duration(milliseconds: 150), () => tapController.reverse(from: 1));
+                Future.delayed(Duration(milliseconds: 100), () => widget.onTap!());
               },
               child: Padding(padding: widget.padding, child: widget.child)),
         ),
