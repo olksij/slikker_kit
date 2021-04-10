@@ -107,11 +107,14 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
                           refreshFunction: (Function topButtonFunction) => refreshTopButton = topButtonFunction,
                         )),
                         Container(height: MediaQuery.of(context).size.height / 3.7),
-                        /*widget.customTitle ??*/ Text(
-                          widget.title!,
-                          style: TextStyle(fontSize: 36.0),
-                          textAlign: TextAlign.center,
-                        ) /*?? Container()*/,
+                        widget.customTitle ??
+                            (widget.title != null
+                                ? Text(
+                                    widget.title!,
+                                    style: TextStyle(fontSize: 36.0),
+                                    textAlign: TextAlign.center,
+                                  )
+                                : Container()),
                         Container(height: 20),
                         widget.header ?? Container(),
                         Padding(
