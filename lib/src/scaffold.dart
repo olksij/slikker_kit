@@ -100,10 +100,10 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
                         Container(height: 52),
                         Center(
                             child: TopButton(
-                          title: widget.topButtonTitle,
-                          icon: widget.topButtonIcon,
+                          title: widget.topButtonTitle ?? "Hello",
+                          icon: widget.topButtonIcon ?? Icons.settings,
                           accent: 240,
-                          onTap: widget.topButtonAction,
+                          onTap: widget.topButtonAction ?? () {},
                           refreshFunction: (Function topButtonFunction) => refreshTopButton = topButtonFunction,
                         )),
                         Container(height: MediaQuery.of(context).size.height / 3.7),
