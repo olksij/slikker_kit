@@ -44,4 +44,4 @@ MIT License
 
 Copyright (c) 2020 Alexey Besida
 
-[Full licence](LICENSE)
+[Full licence](LICENSE.md)

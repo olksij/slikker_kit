@@ -1,3 +1,6 @@
+## [1.0.7] - 18.04.21
+* Improved performance on scroll
+
 ## [1.0.6] - 18.04.21
 * Improved the way of setting `SlikkerScaffold`'s `topButton` properties.
 * Added way to hide `TopButtonWidget` in the top of the screen.
