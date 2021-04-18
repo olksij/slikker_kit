@@ -1,5 +1,10 @@
+## [1.0.6] - 18.04.21
+* Improved the way of setting `SlikkerScaffold`'s `topButton` properties.
+* Added way to hide `TopButtonWidget` in the top of the screen.
+* Improved null safety things in `SlikkerScaffold`
+
 ## [1.0.5] - 11.04.21
-* Imptoved `TopButton` repainting.
+* Improved `TopButton` repainting.
 
 ## [1.0.4] - 10.04.21
 * Fixed `customTitle` in `SlikkerScaffold`.

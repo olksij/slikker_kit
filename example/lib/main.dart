@@ -29,9 +29,11 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return SlikkerScaffold(
       content: Container(),
-      topButtonAction: () => setState(() => count = 0),
-      topButtonIcon: Icons.clear,
-      topButtonTitle: 'Clear',
+      topButton: TopButton(
+        action: () => setState(() => count = 0),
+        icon: Icons.clear,
+        title: 'Clear',
+      ),
       title: 'Example',
       floatingButton: SlikkerCard(
         accent: accent,

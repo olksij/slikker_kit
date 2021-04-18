@@ -2,25 +2,26 @@ import 'package:flutter/material.dart';
 import 'card.dart';
 import 'get_color.dart';
 
-class TopButton extends StatefulWidget {
+class TopButtonWidget extends StatefulWidget {
   final String title;
   final IconData icon;
   final double accent;
   final Function onTap;
   final Function refreshFunction;
 
-  TopButton(
-      {required this.title,
-      required this.icon,
-      required this.accent,
-      required this.onTap,
-      required this.refreshFunction});
+  TopButtonWidget({
+    required this.title,
+    required this.icon,
+    required this.accent,
+    required this.onTap,
+    required this.refreshFunction,
+  });
 
   @override
-  TopButtonState createState() => TopButtonState();
+  _TopButtonState createState() => _TopButtonState();
 }
 
-class TopButtonState extends State<TopButton> with TickerProviderStateMixin {
+class _TopButtonState extends State<TopButtonWidget> with TickerProviderStateMixin {
   late AnimationController scrollController;
   late CurvedAnimation scrollAnimation;
 
