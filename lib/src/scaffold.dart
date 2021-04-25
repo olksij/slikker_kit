@@ -73,7 +73,7 @@ class SlikkerScaffold extends StatefulWidget {
 }
 
 class _SlikkerScaffoldState extends State<SlikkerScaffold> {
-  late final Function refreshTopButton;
+  late Function refreshTopButton;
 
   int _scrollPreviousPercent = 0;
   bool _scrollActionFired = false;
@@ -88,8 +88,10 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
       percent = (percent > 100 ? 100 : percent);
       if (_scrollTopHaptic != (percent == 100)) {
         _scrollTopHaptic = percent == 100;
-        HapticFeedback.lightImpact();
-        if (!_scrollTopHaptic) _scrollActionFired = false;
+        if (!_scrollTopHaptic)
+          _scrollActionFired = false;
+        else
+          HapticFeedback.lightImpact();
       }
     }
 
@@ -121,7 +123,8 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
               onNotification: (scrollInfo) => scrolled(scrollInfo),
               child: ListView(
                 scrollDirection: Axis.vertical,
-                physics: AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                physics: AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics()),
                 children: <Widget>[
                   Container(height: 52),
                   if (!widget.topButton.isHidden)
@@ -131,7 +134,8 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
                         icon: widget.topButton.icon!,
                         accent: 240,
                         onTap: widget.topButton.action!,
-                        refresh: (Function topButtonFunction) => refreshTopButton = topButtonFunction,
+                        refresh: (Function topButtonFunction) =>
+                            refreshTopButton = topButtonFunction,
                       ),
                     ),
                   Container(height: MediaQuery.of(context).size.height / 3.7),
