@@ -1,3 +1,9 @@
 import 'package:flutter/widgets.dart';
 
-Color getColor(double a, double h, double s, double v) => HSVColor.fromAHSV(a, h, s, v).toColor();
+Color getColor({
+  required double a,
+  required double h,
+  required double s,
+  required double v,
+}) =>
+    HSVColor.fromAHSV(a, h, s, v).toColor();

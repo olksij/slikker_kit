@@ -16,7 +16,7 @@ class TopButtonWidget extends StatelessWidget {
     required this.accent,
     required this.onTap,
     required this.refresh,
-  }) : color = getColor(1, accent, 0.4, 0.2);
+  }) : color = getColor(a: 1, h: accent, s: 0.4, v: 0.2);
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,9 @@ class TopButtonWidget extends StatelessWidget {
             refresh: refresh,
           ),
           Container(width: 8, height: 24),
-          Text(title, style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 16)),
+          Text(title,
+              style: TextStyle(
+                  color: color, fontWeight: FontWeight.w600, fontSize: 16)),
         ],
       ),
     );
@@ -57,7 +59,8 @@ class _TopButtonIcon extends StatefulWidget {
   _TopButtonIconState createState() => _TopButtonIconState();
 }
 
-class _TopButtonIconState extends State<_TopButtonIcon> with TickerProviderStateMixin {
+class _TopButtonIconState extends State<_TopButtonIcon>
+    with TickerProviderStateMixin {
   late AnimationController scrollController;
   late CurvedAnimation scrollAnimation;
 
@@ -77,7 +80,8 @@ class _TopButtonIconState extends State<_TopButtonIcon> with TickerProviderState
       duration: Duration(milliseconds: 150),
     );
 
-    scrollAnimation = CurvedAnimation(curve: Curves.easeOut, parent: scrollController);
+    scrollAnimation =
+        CurvedAnimation(curve: Curves.easeOut, parent: scrollController);
     scrollAnimation.addListener(() => setState(() {}));
   }
 
@@ -95,7 +99,8 @@ class _TopButtonIconState extends State<_TopButtonIcon> with TickerProviderState
       children: [
         Icon(
           widget.icon,
-          color: widget.color.withAlpha(255 - (scrollAnimation.value * 255).toInt()),
+          color: widget.color
+              .withAlpha(255 - (scrollAnimation.value * 255).toInt()),
           size: 22,
         ),
         Padding(
@@ -106,8 +111,8 @@ class _TopButtonIconState extends State<_TopButtonIcon> with TickerProviderState
               child: CircularProgressIndicator(
                 value: percent / 100,
                 strokeWidth: 3,
-                valueColor:
-                    AlwaysStoppedAnimation<Color>(widget.color.withAlpha((scrollAnimation.value * 255).toInt())),
+                valueColor: AlwaysStoppedAnimation<Color>(widget.color
+                    .withAlpha((scrollAnimation.value * 255).toInt())),
               ),
               height: 16,
               width: 16,

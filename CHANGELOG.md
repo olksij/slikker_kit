@@ -1,3 +1,6 @@
+## [1.0.9] - 26.04.21
+* Remade animation on SlikkerCard tap.
+
 ## [1.0.8] - 25.04.21
 * Fixed top button error on deep scroll.
 * Fixed haptic feedback.

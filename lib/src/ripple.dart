@@ -5,12 +5,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 const Duration _kUnconfirmedRippleDuration = Duration(seconds: 2);
-const Duration _kFadeInDuration = Duration(milliseconds: 100);
-const Duration _kRadiusDuration = Duration(milliseconds: 550);
+const Duration _kFadeInDuration = Duration(milliseconds: 0);
+const Duration _kRadiusDuration = Duration(milliseconds: 750);
 const Duration _kFadeOutDuration = Duration(milliseconds: 475);
-const Duration _kCancelDuration = Duration(milliseconds: 75);
+const Duration _kCancelDuration = Duration(milliseconds: 100);
 
-RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback) {
+RectCallback? _getClipCallback(
+    RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback) {
   if (rectCallback != null) {
     assert(containedInkWell);
     return rectCallback;
@@ -19,10 +20,13 @@ RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, Re
   return null;
 }
 
-double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback, Offset position) {
-  final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
+double _getTargetRadius(RenderBox referenceBox, bool containedInkWell,
+    RectCallback? rectCallback, Offset position) {
+  final Size size =
+      rectCallback != null ? rectCallback().size : referenceBox.size;
   final double d1 = size.bottomRight(Offset.zero).distance;
-  final double d2 = (size.topRight(Offset.zero) - size.bottomLeft(Offset.zero)).distance;
+  final double d2 =
+      (size.topRight(Offset.zero) - size.bottomLeft(Offset.zero)).distance;
   return math.max(d1, d2) / 2.0;
 }
 
@@ -92,16 +96,33 @@ class SlikkerRippleInk extends InteractiveInkFeature {
         _borderRadius = borderRadius ?? BorderRadius.zero,
         _customBorder = customBorder,
         _textDirection = textDirection,
-        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
-        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
-        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
+        _targetRadius = radius ??
+            _getTargetRadius(
+              referenceBox,
+              containedInkWell,
+              rectCallback,
+              position,
+            ),
+        _clipCallback = _getClipCallback(
+          referenceBox,
+          containedInkWell,
+          rectCallback,
+        ),
+        super(
+          controller: controller,
+          referenceBox: referenceBox,
+          color: color,
+          onRemoved: onRemoved,
+        ) {
     // Immediately begin fading-in the initial splash.
-    _fadeInController = AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
-      ..addListener(controller.markNeedsPaint)
-      ..forward();
+    _fadeInController =
+        AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
+          ..addListener(controller.markNeedsPaint)
+          ..forward();
 
     // Controls the splash radius and its center. Starts upon confirm.
-    _radiusController = AnimationController(duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
+    _radiusController = AnimationController(
+        duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
     // Initial splash diameter is 60% of the target diameter, final
@@ -109,13 +130,14 @@ class SlikkerRippleInk extends InteractiveInkFeature {
     _radius = _radiusController!.drive(
       Tween<double>(
         begin: 0,
-        end: _targetRadius * 2,
+        end: _targetRadius * 3,
       ).chain(_easeCurveTween),
     );
 
     // Controls the splash radius and its center. Starts upon confirm however its
     // Interval delays changes until the radius expansion has completed.
-    _fadeOutController = AnimationController(duration: _kFadeOutDuration, vsync: controller.vsync)
+    _fadeOutController = AnimationController(
+        duration: _kFadeOutDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged);
 
@@ -140,7 +162,8 @@ class SlikkerRippleInk extends InteractiveInkFeature {
   /// or material [Theme].
   static const InteractiveInkFeatureFactory splashFactory = SlikkerRipple();
 
-  static final Animatable<double> _easeCurveTween = CurveTween(curve: Curves.easeOut);
+  static final Animatable<double> _easeCurveTween =
+      CurveTween(curve: Curves.easeOut);
 
   @override
   void confirm() {
@@ -160,7 +183,8 @@ class SlikkerRippleInk extends InteractiveInkFeature {
     // dispose _fadeOutController.
     final double fadeOutValue = 1.0 - _fadeInController.value;
     _fadeOutController.value = fadeOutValue;
-    if (fadeOutValue < 1.0) _fadeOutController.animateTo(1.0, duration: _kCancelDuration);
+    if (fadeOutValue < 1.0)
+      _fadeOutController.animateTo(1.0, duration: _kCancelDuration);
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
@@ -177,11 +201,12 @@ class SlikkerRippleInk extends InteractiveInkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    final int alpha = ((255 - (_radius.value / (_targetRadius * 2.5) * 255)) * (color.alpha / 255)).round();
+    final int alpha =
+        ((1 - _radius.value / (_targetRadius * 3)) * color.alpha).round();
     final Paint paint = Paint()
       ..color = color.withAlpha(alpha)
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, (_radius.value / 3 + 20) / 2 + 10)
-      ..strokeWidth = (_radius.value / 3 + 50) / 2 + 10
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, _radius.value / 40 + 0)
+      ..strokeWidth = _radius.value / 2 + 20
       ..style = PaintingStyle.stroke;
 
     paintInkCircle(
