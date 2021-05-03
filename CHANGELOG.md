@@ -1,5 +1,10 @@
+## [1.0.10] - 00.00.00
+* Added sliver option to `SlikkerScaffold`.
+* Fixed tap action in `SlikkerCard`.
+* Made `SlikkerScaffold` params optional.
+
 ## [1.0.9] - 26.04.21
-* Remade animation on SlikkerCard tap.
+* Remade animation on `SlikkerCard` tap.
 
 ## [1.0.8] - 25.04.21
 * Fixed top button error on deep scroll.

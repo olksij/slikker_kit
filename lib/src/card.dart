@@ -129,7 +129,7 @@ class _SlikkerCardState extends State<SlikkerCard>
                 );
               Future.delayed(
                 Duration(milliseconds: 100),
-                widget.onTap(),
+                () => widget.onTap(),
               );
             },
             child: Padding(

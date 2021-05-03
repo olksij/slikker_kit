@@ -31,7 +31,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return SlikkerScaffold(
-      content: Container(),
       topButton: TopButton(
         action: () => setState(() => count = 0),
         icon: Icons.clear,
@@ -45,26 +44,35 @@ class _HomePageState extends State<HomePage> {
         onTap: () => setState(() => count++),
         padding: EdgeInsets.all(17),
       ),
-      header: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 30),
-        child: SlikkerCard(
-            accent: accent,
-            padding: EdgeInsets.fromLTRB(20, 12, 12, 12),
-            child: Row(children: [
-              Text('Button taps:',
-                  style: TextStyle(
-                      fontSize: 17, color: getColor(1, accent, 0.4, 0.4))),
-              Expanded(child: Container()),
-              SlikkerCard(
-                accent: 240,
-                isFloating: false,
-                borderRadius: BorderRadius.circular(8),
-                padding: EdgeInsets.symmetric(horizontal: 17, vertical: 10),
-                child: Text(count.toString(),
-                    style: TextStyle(
-                        fontSize: 15, color: getColor(1, accent, 0.4, 0.4))),
+      header: SlikkerCard(
+        accent: accent,
+        padding: EdgeInsets.fromLTRB(20, 12, 12, 12),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Button taps:',
+                style: TextStyle(
+                  fontSize: 17,
+                  color: getColor(1, accent, 0.4, 0.4),
+                ),
               ),
-            ])),
+            ),
+            SlikkerCard(
+              accent: 240,
+              isFloating: false,
+              borderRadius: BorderRadius.circular(8),
+              padding: EdgeInsets.symmetric(horizontal: 17, vertical: 10),
+              child: Text(
+                count.toString(),
+                style: TextStyle(
+                  fontSize: 15,
+                  color: getColor(1, accent, 0.4, 0.4),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
