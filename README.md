@@ -1,6 +1,8 @@
 # ***Slikker Kit***
 ### Slikker Kit is a Flutter package which provides Slikker Design System components
 
+![UI Preview](./res/Preview1.png)
+
 <br>
 
 ## **Installation**

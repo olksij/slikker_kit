@@ -48,7 +48,7 @@ class _SlikkerCardState extends State<SlikkerCard>
     super.initState();
     tapController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 150),
+      duration: Duration(milliseconds: 200),
     );
 
     tapController.value = widget.isFloating ? 0 : 1;
@@ -70,7 +70,7 @@ class _SlikkerCardState extends State<SlikkerCard>
     return Transform.translate(
       offset: Offset(0, tapAnimation.value * 3 - 3),
       child: Container(
-        clipBehavior: Clip.hardEdge,
+        clipBehavior: widget.isFloating ? Clip.hardEdge : Clip.none,
         decoration: BoxDecoration(
           borderRadius: widget.borderRadius,
           color: getColor(
@@ -104,7 +104,9 @@ class _SlikkerCardState extends State<SlikkerCard>
         ),
         child: Material(
           color: Colors.transparent,
+          borderRadius: widget.borderRadius,
           child: InkWell(
+            borderRadius: BorderRadius.circular(12),
             splashFactory: SlikkerRipple(),
             splashColor: getColor(
               a: 0.1,

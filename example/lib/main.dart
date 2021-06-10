@@ -46,6 +46,7 @@ class _HomePageState extends State<HomePage> {
       ),
       header: SlikkerCard(
         accent: accent,
+        isFloating: false,
         padding: EdgeInsets.fromLTRB(20, 12, 12, 12),
         child: Row(
           children: [
@@ -60,7 +61,7 @@ class _HomePageState extends State<HomePage> {
             ),
             SlikkerCard(
               accent: 240,
-              isFloating: false,
+              isFloating: true,
               borderRadius: BorderRadius.circular(8),
               padding: EdgeInsets.symmetric(horizontal: 17, vertical: 10),
               child: Text(
