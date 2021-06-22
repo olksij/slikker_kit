@@ -148,8 +148,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
                                   icon: widget.topButton!.icon,
                                   accent: 240,
                                   onTap: widget.topButton!.action,
-                                  refresh: (Function topButtonFunction) =>
-                                      refreshTopButton = topButtonFunction,
+                                  refresh: (Function topButtonFunction) => refreshTopButton = topButtonFunction,
                                 ),
                               ),
                       ),

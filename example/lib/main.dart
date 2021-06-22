@@ -3,8 +3,7 @@ import 'package:slikker_kit/slikker_kit.dart';
 
 void main() => runApp(SlikkerExampleApp());
 
-Color getColor(double a, double h, double s, double v) =>
-    HSVColor.fromAHSV(a, h, s, v).toColor();
+Color getColor(double a, double h, double s, double v) => HSVColor.fromAHSV(a, h, s, v).toColor();
 
 class SlikkerExampleApp extends StatelessWidget {
   @override
