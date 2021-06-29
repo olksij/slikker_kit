@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'card.dart';
-import 'get_color.dart';
+import 'button.dart';
 
 class TopButtonWidget extends StatelessWidget {
   final String title;
@@ -16,29 +15,30 @@ class TopButtonWidget extends StatelessWidget {
     required this.accent,
     required this.onTap,
     required this.refresh,
-  }) : color = getColor(a: 1, h: accent, s: 0.4, v: 0.2);
+  }) : color = HSVColor.fromAHSV(1, accent, 0.4, 0.2).toColor();
 
   @override
   Widget build(BuildContext context) {
-    return SlikkerCard(
+    return SlikkerButton(
       accent: accent,
       borderRadius: BorderRadius.circular(52),
-      isFloating: false,
       onTap: onTap,
-      padding: EdgeInsets.fromLTRB(14, 13, 17, 14),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _TopButtonIcon(
-            icon: icon,
-            color: color,
-            refresh: refresh,
-          ),
-          Container(width: 8, height: 24),
-          Text(title,
-              style: TextStyle(
-                  color: color, fontWeight: FontWeight.w600, fontSize: 16)),
-        ],
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(14, 13, 17, 14),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _TopButtonIcon(
+              icon: icon,
+              color: color,
+              refresh: refresh,
+            ),
+            Container(width: 8, height: 24),
+            Text(title,
+                style: TextStyle(
+                    color: color, fontWeight: FontWeight.w600, fontSize: 16)),
+          ],
+        ),
       ),
     );
   }

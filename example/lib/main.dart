@@ -3,7 +3,8 @@ import 'package:slikker_kit/slikker_kit.dart';
 
 void main() => runApp(SlikkerExampleApp());
 
-Color getColor(double a, double h, double s, double v) => HSVColor.fromAHSV(a, h, s, v).toColor();
+Color getColor(double a, double h, double s, double v) =>
+    HSVColor.fromAHSV(a, h, s, v).toColor();
 
 class SlikkerExampleApp extends StatelessWidget {
   @override
@@ -36,16 +37,15 @@ class _HomePageState extends State<HomePage> {
         title: 'Clear',
       ),
       title: 'Example',
-      floatingButton: SlikkerCard(
+      floatingButton: SlikkerButton(
         accent: accent,
         borderRadius: BorderRadius.circular(50),
         child: Text('Tap!'),
         onTap: () => setState(() => count++),
         padding: EdgeInsets.all(17),
       ),
-      header: SlikkerCard(
+      header: SlikkerContainer(
         accent: accent,
-        isFloating: false,
         padding: EdgeInsets.fromLTRB(20, 12, 12, 12),
         child: Row(
           children: [
@@ -58,9 +58,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            SlikkerCard(
+            SlikkerButton(
               accent: 240,
-              isFloating: true,
               borderRadius: BorderRadius.circular(8),
               padding: EdgeInsets.symmetric(horizontal: 17, vertical: 10),
               child: Text(
