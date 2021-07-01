@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -8,20 +10,16 @@ class SlikkerButton extends StatefulWidget {
   /// The Hue which will be used for your button. Expected value from 0.0 to 360.0
   final double accent;
 
-  static const double defaultAccent = 240;
-
-  /// Elevantes element, makes it more noticable.
+  /// If [minor] is true, element lowers by z axis, becoming less noticable.
   ///
-  /// Attention can be used as hint for user about the next action.
-  final bool attention;
+  /// Can be used to hint user for another suggested action.
+  final bool minor;
 
   /// Whether the button is enabled or disabled.
   final bool disabled;
 
   /// If non-null, the corners of this box are rounded by this [BorderRadiusGeometry] value.
-  final BorderRadius? borderRadius;
-
-  static BorderRadius defaultBorderRadius = BorderRadius.circular(12);
+  final BorderRadius borderRadius;
 
   /// The widget below this widget in the tree.
   final Widget? child;
@@ -39,11 +37,11 @@ class SlikkerButton extends StatefulWidget {
   _SlikkerButtonState createState() => _SlikkerButtonState();
 
   SlikkerButton({
-    this.accent = defaultAccent,
+    this.accent = 240,
+    this.minor = false,
     this.child,
     this.onTap,
-    this.borderRadius,
-    this.attention = true,
+    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
     this.disabled = false,
     this.padding,
     this.margin,
@@ -52,65 +50,61 @@ class SlikkerButton extends StatefulWidget {
 
 class _SlikkerButtonState extends State<SlikkerButton>
     with TickerProviderStateMixin {
-  late AnimationController disabledCtrl, hoverCtrl, attentionCtrl;
-  late CurvedAnimation disabledAnmt, hoverAnmt, attentionAnmt;
+  late AnimationController disabledCtrl, hoverCtrl, minorCtrl;
+  late CurvedAnimation disabledAnmt, hoverAnmt, minorAnmt;
 
   @override
   void initState() {
     super.initState();
 
-    final AnimationController _basicController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 200),
-    );
+    AnimationController _basicController(double value) {
+      return AnimationController(
+        vsync: this,
+        duration: Duration(milliseconds: 600),
+        value: value,
+      );
+    }
 
     CurvedAnimation _basicAnimation(Animation<double> controller) {
       return CurvedAnimation(
         curve: Curves.elasticOut,
         parent: controller,
+        reverseCurve: Curves.elasticIn,
       );
     }
 
-    disabledCtrl = _basicController..value = widget.disabled ? 1 : 0;
-    hoverCtrl = _basicController..value = 0;
-    attentionCtrl = _basicController..value = widget.disabled ? 1 : 0;
+    disabledCtrl = _basicController(widget.disabled ? 1 : 0);
+    hoverCtrl = _basicController(0);
+    minorCtrl = _basicController(widget.disabled ? 1 : 0);
 
     disabledAnmt = _basicAnimation(disabledCtrl);
     hoverAnmt = _basicAnimation(hoverCtrl);
-    attentionAnmt = _basicAnimation(attentionCtrl);
+    minorAnmt = _basicAnimation(minorCtrl);
   }
 
   @override
   void dispose() {
     disabledCtrl.dispose();
     hoverCtrl.dispose();
-    attentionCtrl.dispose();
+    minorCtrl.dispose();
     super.dispose();
   }
 
   /// Helps to interpolate colors, offsets, shadows based on button's state
-  T _composer<T>({
-    required T disabled,
-    required T hover,
-    required T attention,
-    required T regular,
+  HSVColor _composer({
+    required HSVColor enabled,
+    HSVColor? minor,
+    HSVColor? hover,
+    HSVColor? disabled,
   }) {
-    T composeTwo({T? first, T? second, required CurvedAnimation animation}) =>
-        Tween(begin: first, end: second).animate(animation).value;
+    HSVColor result = enabled;
 
-    return composeTwo(
-      first: composeTwo(
-        first: composeTwo(
-          first: regular,
-          second: attention,
-          animation: attentionAnmt,
-        ),
-        second: hover,
-        animation: hoverAnmt,
-      ),
-      second: disabled,
-      animation: disabledAnmt,
-    );
+    if (minor != null) result = HSVColor.lerp(result, minor, minorAnmt.value)!;
+    if (hover != null) result = HSVColor.lerp(result, hover, hoverAnmt.value)!;
+    if (disabled != null)
+      disabled = HSVColor.lerp(result, disabled, disabledAnmt.value)!;
+
+    return result;
   }
 
   Widget buildButton(context, child) {
@@ -121,26 +115,31 @@ class _SlikkerButtonState extends State<SlikkerButton>
 
     button = buildTapable(
       child: button,
-      borderRadius: widget.borderRadius ?? SlikkerButton.defaultBorderRadius,
+      borderRadius: widget.borderRadius,
       splashColor: Colors.white,
       splashFactory: SlikkerRipple(),
-      onHover: (hovered) => hoverCtrl.animateTo(hovered ? 1 : 0),
+      onHover: (hovered) {
+        if (hovered)
+          hoverCtrl.forward();
+        else
+          hoverCtrl.reverse();
+      },
       onTapDown: (a) {
         if (!widget.disabled) {
           HapticFeedback.lightImpact();
-          attentionCtrl.animateTo(0);
+          minorCtrl.reverse();
         }
       },
       onTapCancel: () {
-        if (!widget.disabled && widget.attention) {
-          attentionCtrl.animateTo(1);
+        if (!widget.disabled && !widget.minor) {
+          minorCtrl.reverse();
         }
       },
       onTap: () {
-        if (!widget.disabled && widget.attention) {
+        if (!widget.disabled && !widget.minor) {
           Future.delayed(
             Duration(milliseconds: 250),
-            () => attentionCtrl.animateTo(1),
+            () => minorCtrl.reverse(),
           );
         }
         if (widget.onTap != null) {
@@ -154,13 +153,20 @@ class _SlikkerButtonState extends State<SlikkerButton>
 
     button = Container(
       decoration: BoxDecoration(
-        borderRadius: widget.borderRadius ?? BorderRadius.circular(12),
+        borderRadius: BorderRadius.lerp(
+            widget.borderRadius, BorderRadius.circular(16), hoverAnmt.value),
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            HSVColor.fromAHSV(1, widget.accent, .03, .99).toColor(),
-            HSVColor.fromAHSV(1, widget.accent, .02, .99).toColor(),
+            _composer(
+              enabled: HSVColor.fromAHSV(1, widget.accent, .03, .99),
+              hover: HSVColor.fromAHSV(1, widget.accent, .05, .99),
+            ).toColor(),
+            _composer(
+              enabled: HSVColor.fromAHSV(1, widget.accent, .02, .99),
+              hover: HSVColor.fromAHSV(1, widget.accent, .04, .99),
+            ).toColor(),
           ],
         ),
         boxShadow: [
@@ -174,9 +180,11 @@ class _SlikkerButtonState extends State<SlikkerButton>
       child: button,
     );
 
-    return Transform.translate(
-      //transform: Matrix4.identity()..setEntry(3, 2, 0.001)..rotateX(angle)..rotateY(angle),
-      offset: Offset(0, -3),
+    return Transform(
+      alignment: Alignment.center,
+      transform: Matrix4.identity()
+        /*..setEntry(3, 2, 0.001) ..rotateX(angle)..rotateY(angle)*/
+        ..scale(lerpDouble(1, 1.2, hoverAnmt.value)!),
       child: button,
     );
   }
@@ -187,7 +195,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
       animation: Listenable.merge([
         disabledAnmt,
         hoverAnmt,
-        attentionAnmt,
+        minorAnmt,
       ]),
       child: widget.child,
       builder: buildButton,

@@ -123,7 +123,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Color(0xFFF6F6FC),
+      color: HSVColor.fromAHSV(1, 240, 0.04, 0.98).toColor(),
       child: SafeArea(
         top: true,
         child: Stack(
@@ -148,7 +148,8 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
                                   icon: widget.topButton!.icon,
                                   accent: 240,
                                   onTap: widget.topButton!.action,
-                                  refresh: (Function topButtonFunction) => refreshTopButton = topButtonFunction,
+                                  refresh: (Function topButtonFunction) =>
+                                      refreshTopButton = topButtonFunction,
                                 ),
                               ),
                       ),
