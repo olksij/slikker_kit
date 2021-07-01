@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:slikker_kit/slikker_kit.dart';
 import 'ripple.dart';
 
 class SlikkerButton extends StatefulWidget {
   /// The Hue which will be used for your button. Expected value from 0.0 to 360.0
-  final double? accent;
+  final double accent;
 
   static const double defaultAccent = 240;
 
@@ -20,11 +21,16 @@ class SlikkerButton extends StatefulWidget {
   /// If non-null, the corners of this box are rounded by this [BorderRadiusGeometry] value.
   final BorderRadius? borderRadius;
 
+  static BorderRadius defaultBorderRadius = BorderRadius.circular(12);
+
   /// The widget below this widget in the tree.
   final Widget? child;
 
   /// The empty space that surrounds the card inside.
   final EdgeInsetsGeometry? padding;
+
+  /// The empty space that surrounds the card inside.
+  final EdgeInsetsGeometry? margin;
 
   /// The [Function] that will be invoked on user's tap.
   final Function? onTap;
@@ -40,18 +46,14 @@ class SlikkerButton extends StatefulWidget {
     this.attention = true,
     this.disabled = false,
     this.padding,
+    this.margin,
   });
 }
 
 class _SlikkerButtonState extends State<SlikkerButton>
     with TickerProviderStateMixin {
-  late AnimationController disabledController;
-  late AnimationController hoverController;
-  late AnimationController attentionController;
-
-  late CurvedAnimation disabledAnimation;
-  late CurvedAnimation hoverAnimation;
-  late CurvedAnimation attentionAnimation;
+  late AnimationController disabledCtrl, hoverCtrl, attentionCtrl;
+  late CurvedAnimation disabledAnmt, hoverAnmt, attentionAnmt;
 
   @override
   void initState() {
@@ -69,117 +71,154 @@ class _SlikkerButtonState extends State<SlikkerButton>
       );
     }
 
-    disabledController = _basicController..value = widget.disabled ? 1 : 0;
-    hoverController = _basicController..value = 0;
-    attentionController = _basicController..value = widget.disabled ? 1 : 0;
+    disabledCtrl = _basicController..value = widget.disabled ? 1 : 0;
+    hoverCtrl = _basicController..value = 0;
+    attentionCtrl = _basicController..value = widget.disabled ? 1 : 0;
 
-    disabledAnimation = _basicAnimation(disabledController);
-    hoverAnimation = _basicAnimation(hoverController);
-    attentionAnimation = _basicAnimation(attentionController);
+    disabledAnmt = _basicAnimation(disabledCtrl);
+    hoverAnmt = _basicAnimation(hoverCtrl);
+    attentionAnmt = _basicAnimation(attentionCtrl);
   }
 
   @override
   void dispose() {
-    disabledController.dispose();
-    hoverController.dispose();
-    attentionController.dispose();
+    disabledCtrl.dispose();
+    hoverCtrl.dispose();
+    attentionCtrl.dispose();
     super.dispose();
   }
 
+  /// Helps to interpolate colors, offsets, shadows based on button's state
   T _composer<T>({
     required T disabled,
     required T hover,
     required T attention,
     required T regular,
   }) {
-    T? comp(T? first, T? second, CurvedAnimation animation) {
-      return Tween(begin: first, end: second).animate(animation).value;
-    }
+    T composeTwo({T? first, T? second, required CurvedAnimation animation}) =>
+        Tween(begin: first, end: second).animate(animation).value;
 
-    return comp(
-      comp(comp(regular, attention, attentionAnimation), hover, hoverAnimation),
-      disabled,
-      disabledAnimation,
-    )!;
+    return composeTwo(
+      first: composeTwo(
+        first: composeTwo(
+          first: regular,
+          second: attention,
+          animation: attentionAnmt,
+        ),
+        second: hover,
+        animation: hoverAnmt,
+      ),
+      second: disabled,
+      animation: disabledAnmt,
+    );
+  }
+
+  Widget buildButton(context, child) {
+    Widget button = child;
+
+    if (widget.padding != null)
+      button = Padding(padding: widget.padding!, child: button);
+
+    button = buildTapable(
+      child: button,
+      borderRadius: widget.borderRadius ?? SlikkerButton.defaultBorderRadius,
+      splashColor: Colors.white,
+      splashFactory: SlikkerRipple(),
+      onHover: (hovered) => hoverCtrl.animateTo(hovered ? 1 : 0),
+      onTapDown: (a) {
+        if (!widget.disabled) {
+          HapticFeedback.lightImpact();
+          attentionCtrl.animateTo(0);
+        }
+      },
+      onTapCancel: () {
+        if (!widget.disabled && widget.attention) {
+          attentionCtrl.animateTo(1);
+        }
+      },
+      onTap: () {
+        if (!widget.disabled && widget.attention) {
+          Future.delayed(
+            Duration(milliseconds: 250),
+            () => attentionCtrl.animateTo(1),
+          );
+        }
+        if (widget.onTap != null) {
+          Future.delayed(
+            Duration(milliseconds: 100),
+            widget.onTap!(),
+          );
+        }
+      },
+    );
+
+    button = Container(
+      decoration: BoxDecoration(
+        borderRadius: widget.borderRadius ?? BorderRadius.circular(12),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            HSVColor.fromAHSV(1, widget.accent, .03, .99).toColor(),
+            HSVColor.fromAHSV(1, widget.accent, .02, .99).toColor(),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: HSVColor.fromAHSV(1, widget.accent, .09, .97).toColor(),
+            offset: Offset(0, 4),
+            blurRadius: 24,
+          ),
+        ],
+      ),
+      child: button,
+    );
+
+    return Transform.translate(
+      //transform: Matrix4.identity()..setEntry(3, 2, 0.001)..rotateX(angle)..rotateY(angle),
+      offset: Offset(0, -3),
+      child: button,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: Listenable.merge([
-        disabledAnimation,
-        hoverAnimation,
-        attentionAnimation,
+        disabledAnmt,
+        hoverAnmt,
+        attentionAnmt,
       ]),
       child: widget.child,
-      builder: (context, child) {
-        Widget button =
-            Padding(padding: widget.padding ?? EdgeInsets.zero, child: child);
-
-        button = Material(
-          color: Colors.transparent,
-          borderRadius: widget.borderRadius,
-          child: InkWell(
-            borderRadius: widget.borderRadius ?? BorderRadius.circular(12),
-            highlightColor: Colors.transparent,
-            hoverColor: Colors.transparent,
-            splashFactory: SlikkerRipple(),
-            splashColor: HSVColor.fromAHSV(0.1,
-                    widget.accent ?? SlikkerButton.defaultAccent, 0.15, 0.9)
-                .toColor(),
-            onTapDown: (a) {
-              if (!widget.disabled) {
-                HapticFeedback.lightImpact();
-                attentionController.animateTo(0);
-              }
-            },
-            onTapCancel: () {
-              if (!widget.disabled && widget.attention)
-                attentionController.animateTo(1);
-            },
-            onTap: () {
-              if (!widget.disabled && widget.attention)
-                Future.delayed(
-                  Duration(milliseconds: 250),
-                  () => attentionController.animateTo(1),
-                );
-              Future.delayed(
-                Duration(milliseconds: 100),
-                widget.onTap!(),
-              );
-            },
-            onHover: (hovered) => hoverController.animateTo(hovered ? 1 : 0),
-            child: button,
-          ),
-        );
-
-        List<BoxShadow> boxShadows = [
-          BoxShadow(
-            color: HSVColor.fromAHSV(
-                    0.1, widget.accent ?? SlikkerButton.defaultAccent, 0.6, 1)
-                .toColor(),
-            offset: Offset(0, 7),
-            blurRadius: 40,
-          ),
-        ];
-
-        button = Container(
-          decoration: BoxDecoration(
-            borderRadius: widget.borderRadius ?? BorderRadius.circular(12),
-            color: HSVColor.fromAHSV(
-                    1, widget.accent ?? SlikkerButton.defaultAccent, 0.025, 1)
-                .toColor(),
-            boxShadow: boxShadows,
-          ),
-          child: button,
-        );
-
-        return Transform.translate(
-          //transform: Matrix4.identity()..setEntry(3, 2, 0.001)..rotateX(angle)..rotateY(angle),
-          offset: Offset(0, -3),
-          child: button,
-        );
-      },
+      builder: buildButton,
     );
   }
+}
+
+Widget buildTapable({
+  required Widget child,
+  required BorderRadius borderRadius,
+  required Color splashColor,
+  required InteractiveInkFeatureFactory splashFactory,
+  required Function(TapDownDetails) onTapDown,
+  required Function() onTap,
+  required Function() onTapCancel,
+  required Function(bool) onHover,
+}) {
+  return Material(
+    color: Colors.transparent,
+    borderRadius: borderRadius,
+    child: InkWell(
+      borderRadius: borderRadius,
+      highlightColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      splashFactory: SlikkerRipple(),
+      splashColor: splashColor,
+      onTapDown: onTapDown,
+      onTapCancel: onTapCancel,
+      onTap: onTap,
+      onHover: onHover,
+      child: child,
+    ),
+  );
 }
