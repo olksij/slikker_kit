@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,16 +61,16 @@ class _SlikkerButtonState extends State<SlikkerButton>
     AnimationController _basicController(double value) {
       return AnimationController(
         vsync: this,
-        duration: Duration(milliseconds: 600),
+        duration: Duration(milliseconds: 500),
         value: value,
       );
     }
 
     CurvedAnimation _basicAnimation(Animation<double> controller) {
       return CurvedAnimation(
-        curve: Curves.elasticOut,
+        curve: SlikkerOutCurve(),
         parent: controller,
-        reverseCurve: Curves.elasticIn,
+        reverseCurve: SlikkerInCurve(),
       );
     }
 
@@ -115,14 +116,17 @@ class _SlikkerButtonState extends State<SlikkerButton>
 
     button = buildTapable(
       child: button,
-      borderRadius: widget.borderRadius,
+      borderRadius: BorderRadius.zero,
       splashColor: Colors.white,
       splashFactory: SlikkerRipple(),
       onHover: (hovered) {
-        if (hovered)
-          hoverCtrl.forward();
-        else
-          hoverCtrl.reverse();
+        if (hovered) {
+          hoverAnmt.curve = SlikkerOutCurve();
+          hoverCtrl.forward(from: 0);
+        } else {
+          hoverAnmt.curve = SlikkerInCurve();
+          hoverCtrl.reverse(from: 1);
+        }
       },
       onTapDown: (a) {
         if (!widget.disabled) {
@@ -152,6 +156,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
     );
 
     button = Container(
+      clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.lerp(
             widget.borderRadius, BorderRadius.circular(16), hoverAnmt.value),
@@ -184,7 +189,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
       alignment: Alignment.center,
       transform: Matrix4.identity()
         /*..setEntry(3, 2, 0.001) ..rotateX(angle)..rotateY(angle)*/
-        ..scale(lerpDouble(1, 1.2, hoverAnmt.value)!),
+        ..scale(lerpDouble(1, 1.15, hoverAnmt.value)!),
       child: button,
     );
   }
@@ -229,4 +234,32 @@ Widget buildTapable({
       child: child,
     ),
   );
+}
+
+class SlikkerOutCurve extends ElasticOutCurve {
+  final double period;
+
+  const SlikkerOutCurve([this.period = 0.6]);
+
+  @override
+  double transformInternal(double t) {
+    final double s = period / 4.0;
+    return math.pow(2.0, -8 * t) *
+            math.sin((t - s) * (math.pi * 2.0) / period) +
+        1.0;
+  }
+}
+
+class SlikkerInCurve extends ElasticOutCurve {
+  final double period;
+
+  const SlikkerInCurve([this.period = 0.6]);
+
+  @override
+  double transformInternal(double t) {
+    final double s = period / 4.0;
+    t = t - 1.0;
+    return -math.pow(2.0, 5.0 * t) *
+        math.sin((t - s) * (math.pi * 2.0) / period);
+  }
 }
