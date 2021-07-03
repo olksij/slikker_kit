@@ -76,7 +76,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
 
     disabledCtrl = _basicController(widget.disabled ? 1 : 0);
     hoverCtrl = _basicController(0);
-    minorCtrl = _basicController(widget.disabled ? 1 : 0);
+    minorCtrl = _basicController(widget.minor ? 1 : 0);
 
     disabledAnmt = _basicAnimation(disabledCtrl);
     hoverAnmt = _basicAnimation(hoverCtrl);
@@ -108,6 +108,22 @@ class _SlikkerButtonState extends State<SlikkerButton>
     return result;
   }
 
+  void hover(bool state) {
+    if (widget.disabled) return;
+    hoverAnmt.curve = state ? SlikkerOutCurve() : SlikkerInCurve();
+    if (state)
+      hoverCtrl.forward(from: 0);
+    else
+      hoverCtrl.reverse(from: 1);
+  }
+
+  void press(bool state, [TapDownDetails? details]) {
+    if (!widget.disabled) {
+      hover(state);
+      if (state) HapticFeedback.lightImpact();
+    }
+  }
+
   Widget buildButton(context, child) {
     Widget button = child;
 
@@ -119,39 +135,13 @@ class _SlikkerButtonState extends State<SlikkerButton>
       borderRadius: BorderRadius.zero,
       splashColor: Colors.white,
       splashFactory: SlikkerRipple(),
-      onHover: (hovered) {
-        if (hovered) {
-          hoverAnmt.curve = SlikkerOutCurve();
-          hoverCtrl.forward(from: 0);
-        } else {
-          hoverAnmt.curve = SlikkerInCurve();
-          hoverCtrl.reverse(from: 1);
-        }
-      },
-      onTapDown: (a) {
-        if (!widget.disabled) {
-          HapticFeedback.lightImpact();
-          minorCtrl.reverse();
-        }
-      },
-      onTapCancel: () {
-        if (!widget.disabled && !widget.minor) {
-          minorCtrl.reverse();
-        }
-      },
+      onHover: (state) => hover(state),
+      onTapDown: (details) => press(true, details),
+      onTapCancel: () => press(false),
       onTap: () {
-        if (!widget.disabled && !widget.minor) {
-          Future.delayed(
-            Duration(milliseconds: 250),
-            () => minorCtrl.reverse(),
-          );
-        }
-        if (widget.onTap != null) {
-          Future.delayed(
-            Duration(milliseconds: 100),
-            widget.onTap!(),
-          );
-        }
+        Function? onTap = widget.onTap;
+        if (onTap != null) Future.delayed(Duration(milliseconds: 100), onTap());
+        Future.delayed(Duration(milliseconds: 200), () => press(false));
       },
     );
 
