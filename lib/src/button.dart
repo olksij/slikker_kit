@@ -7,6 +7,13 @@ import 'package:flutter/widgets.dart';
 import 'package:slikker_kit/slikker_kit.dart';
 import 'ripple.dart';
 
+Function lerp = lerpDouble;
+
+class TapPosition {
+  final double dx, dy;
+  const TapPosition(this.dx, this.dy);
+}
+
 class SlikkerButton extends StatefulWidget {
   /// The Hue which will be used for your button. Expected value from 0.0 to 360.0
   final double accent;
@@ -38,6 +45,7 @@ class SlikkerButton extends StatefulWidget {
   _SlikkerButtonState createState() => _SlikkerButtonState();
 
   SlikkerButton({
+    Key? key,
     this.accent = 240,
     this.minor = false,
     this.child,
@@ -46,41 +54,51 @@ class SlikkerButton extends StatefulWidget {
     this.disabled = false,
     this.padding,
     this.margin,
-  });
+  }) : super(key: key);
 }
 
 class _SlikkerButtonState extends State<SlikkerButton>
     with TickerProviderStateMixin {
-  late AnimationController disabledCtrl, hoverCtrl, minorCtrl;
-  late CurvedAnimation disabledAnmt, hoverAnmt, minorAnmt;
+  late AnimationController disabledCtrl, hoverCtrl, minorCtrl, pressCtrl;
+  late CurvedAnimation disabledAnmt, hoverAnmt, minorAnmt, pressAnmt;
+  late GlobalKey _key;
+
+  TapPosition tapPosition = TapPosition(0, 0);
 
   @override
   void initState() {
     super.initState();
+    _key = GlobalKey();
 
-    AnimationController _basicController(double value) {
-      return AnimationController(
-        vsync: this,
-        duration: Duration(milliseconds: 500),
-        value: value,
-      );
-    }
-
-    CurvedAnimation _basicAnimation(Animation<double> controller) {
-      return CurvedAnimation(
-        curve: SlikkerOutCurve(),
-        parent: controller,
-        reverseCurve: SlikkerInCurve(),
-      );
-    }
-
+    // Initialize animation controllers.
     disabledCtrl = _basicController(widget.disabled ? 1 : 0);
     hoverCtrl = _basicController(0);
     minorCtrl = _basicController(widget.minor ? 1 : 0);
+    pressCtrl = _basicController(0);
 
+    // Initialize curved animation.
     disabledAnmt = _basicAnimation(disabledCtrl);
     hoverAnmt = _basicAnimation(hoverCtrl);
     minorAnmt = _basicAnimation(minorCtrl);
+    pressAnmt = _basicAnimation(pressCtrl);
+  }
+
+  // Generic controller required.
+  AnimationController _basicController(double value) {
+    return AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+      value: value,
+    );
+  }
+
+  // Generic curve animation required.
+  CurvedAnimation _basicAnimation(Animation<double> controller) {
+    return CurvedAnimation(
+      curve: SlikkerOutCurve(),
+      parent: controller,
+      reverseCurve: SlikkerInCurve(),
+    );
   }
 
   @override
@@ -89,23 +107,6 @@ class _SlikkerButtonState extends State<SlikkerButton>
     hoverCtrl.dispose();
     minorCtrl.dispose();
     super.dispose();
-  }
-
-  /// Helps to interpolate colors, offsets, shadows based on button's state
-  HSVColor _composer({
-    required HSVColor enabled,
-    HSVColor? minor,
-    HSVColor? hover,
-    HSVColor? disabled,
-  }) {
-    HSVColor result = enabled;
-
-    if (minor != null) result = HSVColor.lerp(result, minor, minorAnmt.value)!;
-    if (hover != null) result = HSVColor.lerp(result, hover, hoverAnmt.value)!;
-    if (disabled != null)
-      disabled = HSVColor.lerp(result, disabled, disabledAnmt.value)!;
-
-    return result;
   }
 
   void hover(bool state) {
@@ -122,17 +123,30 @@ class _SlikkerButtonState extends State<SlikkerButton>
       hover(state);
       if (state) HapticFeedback.lightImpact();
     }
+    /*final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    if (details != null && renderBox != null) {
+      final Size size = renderBox.size;
+      tapPosition = TapPosition(
+        details.localPosition.dx / size.width * -2 + 1,
+        details.localPosition.dy / size.height * 2 - 1,
+      );
+      pressAnmt.curve = SlikkerOutCurve();
+      pressCtrl.forward(from: 0);
+      Future.delayed(Duration(milliseconds: 500), () {
+        pressAnmt.curve = SlikkerInCurve();
+        pressCtrl.reverse(from: 1);
+      });
+    }*/
   }
 
   Widget buildButton(context, child) {
     Widget button = child;
 
     if (widget.padding != null)
-      button = Padding(padding: widget.padding!, child: button);
+      button = Padding(padding: widget.padding!, child: child);
 
     button = buildTapable(
       child: button,
-      borderRadius: BorderRadius.zero,
       splashColor: Colors.white,
       splashFactory: SlikkerRipple(),
       onHover: (state) => hover(state),
@@ -145,23 +159,43 @@ class _SlikkerButtonState extends State<SlikkerButton>
       },
     );
 
+    /*button = GestureDetector(child: button,
+      //: (state) => hover(state),
+      onTapDown: (details) => press(true, details),
+      onTapCancel: () => press(false),
+      onTap: () {
+        Function? onTap = widget.onTap;
+        if (onTap != null) Future.delayed(Duration(milliseconds: 100), onTap());
+        Future.delayed(Duration(milliseconds: 200), () => press(false));
+      },
+    );*/
+
+    /*button = CustomPaint(
+      child: button,
+      painter: SlikkerRipple(),
+    );*/
+
     button = Container(
+      key: _key,
       clipBehavior: Clip.hardEdge,
+      child: button,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.lerp(
-            widget.borderRadius, BorderRadius.circular(16), hoverAnmt.value),
+        /*borderRadius: BorderRadius.lerp(
+          widget.borderRadius,
+          BorderRadius.circular(16),
+          hoverAnmt.value,
+        ),*/
+        borderRadius: widget.borderRadius,
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            _composer(
-              enabled: HSVColor.fromAHSV(1, widget.accent, .03, .99),
-              hover: HSVColor.fromAHSV(1, widget.accent, .05, .99),
-            ).toColor(),
-            _composer(
-              enabled: HSVColor.fromAHSV(1, widget.accent, .02, .99),
-              hover: HSVColor.fromAHSV(1, widget.accent, .04, .99),
-            ).toColor(),
+            HSVColor.fromAHSV(1, widget.accent, .02, .99)
+                .withAlpha(lerp(.9, .75, hoverAnmt.value) ?? 1)
+                .toColor(),
+            HSVColor.fromAHSV(1, widget.accent, .03, .99)
+                .withAlpha(lerp(.9, .75, hoverAnmt.value) ?? 1)
+                .toColor(),
           ],
         ),
         boxShadow: [
@@ -172,14 +206,15 @@ class _SlikkerButtonState extends State<SlikkerButton>
           ),
         ],
       ),
-      child: button,
     );
 
     return Transform(
       alignment: Alignment.center,
       transform: Matrix4.identity()
-        /*..setEntry(3, 2, 0.001) ..rotateX(angle)..rotateY(angle)*/
-        ..scale(lerpDouble(1, 1.15, hoverAnmt.value)!),
+        //..setEntry(3, 2, 0.001)
+        //..rotateY(lerp(0, tapPosition.dx / 2, pressAnmt.value) ?? 0)
+        //..rotateX(lerp(0, tapPosition.dy / 2, pressAnmt.value) ?? 0)
+        ..scale(lerp(1, 1.1, hoverAnmt.value)!),
       child: button,
     );
   }
@@ -200,7 +235,6 @@ class _SlikkerButtonState extends State<SlikkerButton>
 
 Widget buildTapable({
   required Widget child,
-  required BorderRadius borderRadius,
   required Color splashColor,
   required InteractiveInkFeatureFactory splashFactory,
   required Function(TapDownDetails) onTapDown,
@@ -210,9 +244,7 @@ Widget buildTapable({
 }) {
   return Material(
     color: Colors.transparent,
-    borderRadius: borderRadius,
     child: InkWell(
-      borderRadius: borderRadius,
       highlightColor: Colors.transparent,
       hoverColor: Colors.transparent,
       splashFactory: SlikkerRipple(),
@@ -252,4 +284,13 @@ class SlikkerInCurve extends ElasticOutCurve {
     return -math.pow(2.0, 5.0 * t) *
         math.sin((t - s) * (math.pi * 2.0) / period);
   }
+}
+
+class _SlikkerRipple extends CustomPainter {
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+  }
+
+  @override
+  bool shouldRepaint(_SlikkerRipple oldDelegate) => false;
 }
