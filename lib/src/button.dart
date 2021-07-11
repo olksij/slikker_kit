@@ -78,8 +78,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
     return SlikkerAnimationController(
       vsync: this,
       duration: Duration(milliseconds: 500),
-      forwardFields: SlikkerCurveFields(smthns: 8),
-      reverseFields: SlikkerCurveFields(smthns: 5),
+      curve: SlikkerCurve(smthns: 8),
       value: value ? 1 : 0,
     );
   }
@@ -94,12 +93,12 @@ class _SlikkerButtonState extends State<SlikkerButton>
 
   void hover(bool state) {
     if (widget.disabled) return;
-    hoverAnmt.forward(state);
+    hoverAnmt.run(state);
   }
 
   void press(bool state, [TapDownDetails? details]) {
     if (widget.disabled) return;
-    hoverAnmt.forward(state);
+    hoverAnmt.run(state);
     if (state) HapticFeedback.lightImpact();
 
     /*final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
@@ -188,10 +187,10 @@ class _SlikkerButtonState extends State<SlikkerButton>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: Listenable.merge([
-        disabledAnmt.listenable,
-        hoverAnmt.listenable,
-        minorAnmt.listenable,
-        pressAnmt.listenable,
+        disabledAnmt.animation,
+        hoverAnmt.animation,
+        minorAnmt.animation,
+        pressAnmt.animation,
       ]),
       child: widget.child,
       builder: buildButton,
