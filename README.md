@@ -4,7 +4,8 @@
 <br>
 
 ![UI Preview](./res/Preview1.png)
-##### The preview of the future version `1.1.0`.
+#### The preview of the future version `1.1.0`.
+#### [Alpha development changelog](1.1.0-alpha-CHANGELOG.md)
 
 <br>
 
@@ -40,7 +41,7 @@ Widget button = SlikkerButton(
 
 <br>
 
-
+___
 
 <br>
 

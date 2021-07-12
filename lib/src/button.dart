@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'animations.dart';
 
-Function lerp = lerpDouble;
-
 class TapPosition {
   final double dx, dy;
   const TapPosition(this.dx, this.dy);
@@ -99,6 +97,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
   void press(bool state, [TapDownDetails? details]) {
     if (widget.disabled) return;
     hoverAnmt.run(state);
+    pressAnmt.run(state);
     if (state) HapticFeedback.lightImpact();
 
     /*final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
@@ -118,10 +117,11 @@ class _SlikkerButtonState extends State<SlikkerButton>
   }
 
   Widget buildButton(context, child) {
+    //Widget button = Text(((hoverAnmt.value * 10).toInt() / 10).toString());
     Widget button = child;
 
     if (widget.padding != null)
-      button = Padding(padding: widget.padding!, child: child);
+      button = Padding(padding: EdgeInsets.all(15), child: button);
 
     button = CustomPaint(
       painter: _SlikkerRipple(),
@@ -140,9 +140,8 @@ class _SlikkerButtonState extends State<SlikkerButton>
       ),
     );
 
-    button = Container(
+    button = DecoratedBox(
       key: _key,
-      clipBehavior: Clip.hardEdge,
       child: button,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.lerp(
@@ -150,7 +149,10 @@ class _SlikkerButtonState extends State<SlikkerButton>
           BorderRadius.circular(16),
           hoverAnmt.value,
         ),
-        gradient: LinearGradient(
+        color: HSVColor.fromAHSV(1, widget.accent, .02, .99)
+            .withAlpha(lerpDouble(.9, .75, hoverAnmt.value) ?? 1)
+            .toColor(),
+        /*gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
@@ -161,7 +163,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
                 .withAlpha(lerp(.9, .75, hoverAnmt.value) ?? 1)
                 .toColor(),
           ],
-        ),
+        ),*/
         boxShadow: [
           BoxShadow(
             color: HSVColor.fromAHSV(1, widget.accent, .09, .97).toColor(),
@@ -178,7 +180,8 @@ class _SlikkerButtonState extends State<SlikkerButton>
         //..setEntry(3, 2, 0.001)
         //..rotateY(lerp(0, tapPosition.dx / 2, pressAnmt.value) ?? 0)
         //..rotateX(lerp(0, tapPosition.dy / 2, pressAnmt.value) ?? 0)
-        ..scale(lerp(1, 1.1, hoverAnmt.value)!),
+        ..scale(lerpDouble(
+            lerpDouble(1, 1.1, hoverAnmt.value), 1.1, pressAnmt.value)!),
       child: button,
     );
   }

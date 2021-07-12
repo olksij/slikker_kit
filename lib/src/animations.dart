@@ -30,8 +30,13 @@ class SlikkerAnimationController {
   /// Is the length of time this animation should last.
   final Duration duration;
 
-  /// The curve to use in both directions.
+  /// The curve to use in forward direction.
   final Curve curve;
+
+  /// The curve to use in reverse direction.
+  ///
+  /// If null, [curve] is used.
+  final Curve? reverseCurve;
 
   /// A controller for an animation.
   late final AnimationController controller;
@@ -42,8 +47,9 @@ class SlikkerAnimationController {
   SlikkerAnimationController({
     required TickerProvider vsync,
     required this.curve,
-    double value = 0.0,
+    this.reverseCurve,
     this.duration = const Duration(seconds: 0),
+    double value = 0.0,
   }) {
     controller = AnimationController(
       vsync: vsync,
@@ -65,28 +71,24 @@ class SlikkerAnimationController {
   /// Starts running this animation till the end. [forward] decides
   /// direction of the animation.
   ///
-  /// ~If the animation hasn't reached the end (value 0.0 or 1.0)
+  /// If the animation hasn't reached the end (value 0.0 or 1.0)
   /// and this method was called, animation
-  /// quickly gets to the end, and goes to another.~
+  /// quickly gets to the end, and goes to another.
   void run([bool forward = true]) {
-    animation.curve = forward ? curve : curve.flipped;
-    controller.duration = duration;
-    forward ? controller.forward(from: 0) : controller.reverse(from: 1);
-
-    /*controller.duration = Duration(
+    controller.duration = Duration(
       milliseconds: this.duration.inMilliseconds ~/ 1,
     );
 
-    double wait = (forward ? controller.value : 1 - controller.value) *
-        controller.duration!.inMilliseconds;
+    double tillEnd = forward ? controller.value : 1 - controller.value;
+    int wait = tillEnd * controller.duration!.inMilliseconds ~/ 2;
 
     Future.delayed(
-      Duration(milliseconds: wait.toInt() ~/ 5),
+      Duration(milliseconds: wait),
       () {
-        animation.curve = forward ? curve : curve.flipped;
+        animation.curve = forward ? curve : reverseCurve ?? curve.flipped;
         controller.duration = duration;
-        forward ? controller.forward() : controller.reverse();
+        forward ? controller.forward(from: 0) : controller.reverse(from: 1);
       },
-    );*/
+    );
   }
 }
