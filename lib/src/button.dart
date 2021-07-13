@@ -143,7 +143,13 @@ class _SlikkerButtonState extends State<SlikkerButton>
       );
 
     button = CustomPaint(
-      painter: _SlikkerRipple(),
+      painter: _ButtonEffects(
+        borderRadius: BorderRadius.lerp(
+          widget.borderRadius,
+          BorderRadius.circular(16),
+          elevation,
+        )!,
+      ),
       child: button,
     );
 
@@ -157,7 +163,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
           elevation,
         ),
         color: HSVColor.fromAHSV(1, widget.accent, .02, .99)
-            .withAlpha(lerpDouble(.9, .75, elevation) ?? 1)
+            .withAlpha(lerpDouble(.7, .6, elevation) ?? 1)
             .toColor(),
         /*gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -207,11 +213,89 @@ class _SlikkerButtonState extends State<SlikkerButton>
   }
 }
 
-class _SlikkerRipple extends CustomPainter {
+class _ButtonEffects extends CustomPainter {
+  BorderRadius borderRadius;
+
+  _ButtonEffects({required this.borderRadius}) : super();
+
+  @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint();
+    //canvas = paintLight(canvas: canvas, size: size, borderRadius: borderRadius);
+    canvas = clipButton(canvas: canvas, size: size, borderRadius: borderRadius);
+    canvas = paintLight(canvas: canvas, size: size, borderRadius: borderRadius);
+  }
+
+  Canvas clipButton({
+    required Canvas canvas,
+    required Size size,
+    required BorderRadius borderRadius,
+  }) {
+    return canvas
+      ..clipRRect(RRect.fromRectAndCorners(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        topLeft: borderRadius.topLeft,
+        topRight: borderRadius.topRight,
+        bottomLeft: borderRadius.bottomLeft,
+        bottomRight: borderRadius.bottomRight,
+      ));
+  }
+
+  Canvas paintLight({
+    required Canvas canvas,
+    required Size size,
+    required BorderRadius borderRadius,
+  }) {
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 10
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 0)
+      ..color = Color(0x44FFFFFF);
+
+    final double topBorder =
+        max(borderRadius.topLeft.y, borderRadius.topRight.y);
+
+    final light = Path.combine(
+      PathOperation.difference,
+      Path()..addRect(Rect.fromLTWH(-2, 0, size.width + 2, topBorder)),
+      Path()
+        ..addRRect(RRect.fromRectAndCorners(
+          Rect.fromLTWH(0, 2, size.width, topBorder),
+          topLeft: borderRadius.topLeft,
+          topRight: borderRadius.topRight,
+        )),
+    );
+
+    return canvas..drawPath(light, paint);
+  }
+
+  Canvas paintShadow({
+    required Canvas canvas,
+    required Size size,
+    required BorderRadius borderRadius,
+  }) {
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 10
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 0)
+      ..color = Color(0x55FFFFFF);
+
+    final double topBorder =
+        max(borderRadius.topLeft.y, borderRadius.topRight.y);
+
+    final light = Path.combine(
+      PathOperation.difference,
+      Path()..addRect(Rect.fromLTWH(-2, 0, size.width + 2, topBorder)),
+      Path()
+        ..addRRect(RRect.fromRectAndCorners(
+          Rect.fromLTWH(0, 2, size.width, topBorder),
+          topLeft: borderRadius.topLeft,
+          topRight: borderRadius.topRight,
+        )),
+    );
+
+    return canvas..drawPath(light, paint);
   }
 
   @override
-  bool shouldRepaint(_SlikkerRipple oldDelegate) => false;
+  bool shouldRepaint(_ButtonEffects oldDelegate) => false;
 }
