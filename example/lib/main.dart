@@ -39,7 +39,7 @@ class _HomePageState extends State<HomePage> {
       title: 'Example',
       floatingButton: SlikkerButton(
         accent: accent,
-        borderRadius: BorderRadius.circular(50),
+        borderRadius: BorderRadius.circular(26),
         child: Text('Tap!'),
         onTap: () => setState(() => count++),
         padding: EdgeInsets.all(17),

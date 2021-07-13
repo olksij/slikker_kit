@@ -12,16 +12,24 @@ class SlikkerCurve extends ElasticOutCurve {
   /// Decides how smooth animation is. Highes values means bigger amplitude.
   final double smthns;
 
+  final bool forward;
+
   SlikkerCurve({
     this.smthns = 8,
     this.period = 0.6,
-  });
+  }) : forward = true;
+
+  SlikkerCurve.reverse({
+    this.smthns = 8,
+    this.period = 0.6,
+  }) : forward = false;
 
   @override
   double transformInternal(double t) {
+    if (!forward) t = 1 - t;
     final num base = pow(2, -smthns * t);
     final double curve = sin((t - period / 4) * (pi * 2) / period);
-    return base * curve + 1;
+    return forward ? base * curve + 1 : -base * curve;
   }
 }
 
@@ -76,11 +84,11 @@ class SlikkerAnimationController {
   /// quickly gets to the end, and goes to another.
   void run([bool forward = true]) {
     controller.duration = Duration(
-      milliseconds: this.duration.inMilliseconds ~/ 1,
+      milliseconds: this.duration.inMilliseconds ~/ 1.5,
     );
 
     double tillEnd = forward ? controller.value : 1 - controller.value;
-    int wait = tillEnd * controller.duration!.inMilliseconds ~/ 2;
+    int wait = tillEnd * controller.duration!.inMilliseconds ~/ 1;
 
     Future.delayed(
       Duration(milliseconds: wait),

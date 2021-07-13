@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -34,7 +35,9 @@ class SlikkerButton extends StatefulWidget {
   final EdgeInsetsGeometry? margin;
 
   /// The [Function] that will be invoked on user's tap.
-  final Function? onTap;
+  final Function onTap;
+
+  static function() {}
 
   @override
   _SlikkerButtonState createState() => _SlikkerButtonState();
@@ -44,7 +47,7 @@ class SlikkerButton extends StatefulWidget {
     this.accent = 240,
     this.minor = false,
     this.child,
-    this.onTap,
+    this.onTap = function,
     this.borderRadius = const BorderRadius.all(Radius.circular(12)),
     this.disabled = false,
     this.padding,
@@ -76,7 +79,8 @@ class _SlikkerButtonState extends State<SlikkerButton>
     return SlikkerAnimationController(
       vsync: this,
       duration: Duration(milliseconds: 500),
-      curve: SlikkerCurve(smthns: 8),
+      curve: SlikkerCurve(smthns: 10),
+      reverseCurve: SlikkerCurve.reverse(smthns: 6),
       value: value ? 1 : 0,
     );
   }
@@ -96,7 +100,6 @@ class _SlikkerButtonState extends State<SlikkerButton>
 
   void press(bool state, [TapDownDetails? details]) {
     if (widget.disabled) return;
-    hoverAnmt.run(state);
     pressAnmt.run(state);
     if (state) HapticFeedback.lightImpact();
 
@@ -116,28 +119,32 @@ class _SlikkerButtonState extends State<SlikkerButton>
     }*/
   }
 
-  Widget buildButton(context, child) {
-    //Widget button = Text(((hoverAnmt.value * 10).toInt() / 10).toString());
+  Widget _buildButton(context, child) {
     Widget button = child;
+    late double elevation;
+    if (hoverAnmt.controller.isAnimating || hoverAnmt.value > 0)
+      elevation = hoverAnmt.value - pressAnmt.value * hoverAnmt.value * 0.75;
+    else
+      elevation = (1 - hoverAnmt.value) * pressAnmt.value;
 
     if (widget.padding != null)
       button = Padding(padding: EdgeInsets.all(15), child: button);
 
-    button = CustomPaint(
-      painter: _SlikkerRipple(),
-      child: GestureDetector(
+    if (!widget.disabled)
+      button = GestureDetector(
         onTapDown: (details) => press(true, details),
         onTapUp: (details) => press(false),
-        onTap: () {
-          if (widget.onTap != null) widget.onTap!();
-          //Future.delayed(Duration(milliseconds: 200), () => press(false));
-        },
+        onTap: () => widget.onTap(),
         child: MouseRegion(
-          onEnter: (event) => hover(true),
-          onExit: (event) => hover(false),
+          onEnter: (event) => hoverAnmt.run(true),
+          onExit: (event) => hoverAnmt.run(false),
           child: button,
         ),
-      ),
+      );
+
+    button = CustomPaint(
+      painter: _SlikkerRipple(),
+      child: button,
     );
 
     button = DecoratedBox(
@@ -147,10 +154,10 @@ class _SlikkerButtonState extends State<SlikkerButton>
         borderRadius: BorderRadius.lerp(
           widget.borderRadius,
           BorderRadius.circular(16),
-          hoverAnmt.value,
+          elevation,
         ),
         color: HSVColor.fromAHSV(1, widget.accent, .02, .99)
-            .withAlpha(lerpDouble(.9, .75, hoverAnmt.value) ?? 1)
+            .withAlpha(lerpDouble(.9, .75, elevation) ?? 1)
             .toColor(),
         /*gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -180,8 +187,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
         //..setEntry(3, 2, 0.001)
         //..rotateY(lerp(0, tapPosition.dx / 2, pressAnmt.value) ?? 0)
         //..rotateX(lerp(0, tapPosition.dy / 2, pressAnmt.value) ?? 0)
-        ..scale(lerpDouble(
-            lerpDouble(1, 1.1, hoverAnmt.value), 1.1, pressAnmt.value)!),
+        ..scale(lerpDouble(1, 1.15, elevation)!),
       child: button,
     );
   }
@@ -196,7 +202,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
         pressAnmt.animation,
       ]),
       child: widget.child,
-      builder: buildButton,
+      builder: _buildButton,
     );
   }
 }

@@ -21,7 +21,7 @@ class TopButtonWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return SlikkerButton(
       accent: accent,
-      borderRadius: BorderRadius.circular(52),
+      borderRadius: BorderRadius.circular(26),
       onTap: onTap,
       child: Padding(
         padding: EdgeInsets.fromLTRB(14, 13, 17, 14),
