@@ -179,7 +179,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
         ),*/
         boxShadow: [
           BoxShadow(
-            color: HSVColor.fromAHSV(1, widget.accent, .09, .97).toColor(),
+            color: HSVColor.fromAHSV(.75, widget.accent, .09, .97).toColor(),
             offset: Offset(0, 4),
             blurRadius: 24,
           ),
@@ -220,24 +220,9 @@ class _ButtonEffects extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    //canvas = paintLight(canvas: canvas, size: size, borderRadius: borderRadius);
-    canvas = clipButton(canvas: canvas, size: size, borderRadius: borderRadius);
+    canvas =
+        paintShadow(canvas: canvas, size: size, borderRadius: borderRadius);
     canvas = paintLight(canvas: canvas, size: size, borderRadius: borderRadius);
-  }
-
-  Canvas clipButton({
-    required Canvas canvas,
-    required Size size,
-    required BorderRadius borderRadius,
-  }) {
-    return canvas
-      ..clipRRect(RRect.fromRectAndCorners(
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        topLeft: borderRadius.topLeft,
-        topRight: borderRadius.topRight,
-        bottomLeft: borderRadius.bottomLeft,
-        bottomRight: borderRadius.bottomRight,
-      ));
   }
 
   Canvas paintLight({
@@ -245,18 +230,21 @@ class _ButtonEffects extends CustomPainter {
     required Size size,
     required BorderRadius borderRadius,
   }) {
-    final paint = Paint()
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 10
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 0)
-      ..color = Color(0x44FFFFFF);
+    final paint = Paint()..color = Color(0x33FFFFFF);
 
-    final double topBorder =
-        max(borderRadius.topLeft.y, borderRadius.topRight.y);
+    final double topBorder = max(
+      borderRadius.topLeft.y,
+      borderRadius.topRight.y,
+    );
 
     final light = Path.combine(
       PathOperation.difference,
-      Path()..addRect(Rect.fromLTWH(-2, 0, size.width + 2, topBorder)),
+      Path()
+        ..addRRect(RRect.fromRectAndCorners(
+          Rect.fromLTWH(0, 0, size.width, topBorder),
+          topLeft: borderRadius.topLeft,
+          topRight: borderRadius.topRight,
+        )),
       Path()
         ..addRRect(RRect.fromRectAndCorners(
           Rect.fromLTWH(0, 2, size.width, topBorder),
@@ -273,27 +261,34 @@ class _ButtonEffects extends CustomPainter {
     required Size size,
     required BorderRadius borderRadius,
   }) {
-    final paint = Paint()
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 10
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 0)
-      ..color = Color(0x55FFFFFF);
+    final keyPaint = Paint()
+      ..color = Color(0x1100000)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 4);
 
-    final double topBorder =
-        max(borderRadius.topLeft.y, borderRadius.topRight.y);
+    final double bottomBorder = max(
+      borderRadius.bottomLeft.y,
+      borderRadius.bottomRight.y,
+    );
 
-    final light = Path.combine(
+    final keyShadow = Path.combine(
       PathOperation.difference,
-      Path()..addRect(Rect.fromLTWH(-2, 0, size.width + 2, topBorder)),
       Path()
         ..addRRect(RRect.fromRectAndCorners(
-          Rect.fromLTWH(0, 2, size.width, topBorder),
-          topLeft: borderRadius.topLeft,
-          topRight: borderRadius.topRight,
+          Rect.fromLTWH(
+              0, size.height - bottomBorder, size.width, bottomBorder + 2),
+          bottomLeft: borderRadius.bottomLeft,
+          bottomRight: borderRadius.bottomRight,
+        )),
+      Path()
+        ..addRRect(RRect.fromRectAndCorners(
+          Rect.fromLTWH(
+              0, size.height - bottomBorder, size.width, bottomBorder),
+          bottomLeft: borderRadius.bottomLeft,
+          bottomRight: borderRadius.bottomRight,
         )),
     );
 
-    return canvas..drawPath(light, paint);
+    return canvas..drawPath(keyShadow, keyPaint);
   }
 
   @override
