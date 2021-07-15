@@ -33,27 +33,9 @@ class SlikkerCurve extends ElasticOutCurve {
   }
 }
 
-enum _Direction { forward, reverse }
-
 /// A controller with an applied curve for an animation
 class SlikkerAnimationController {
-  /// Is the length of time this animation should last.
-  final Duration duration;
-
-  /// The curve to use in forward direction.
-  final Curve curve;
-
-  /// The curve to use in reverse direction.
-  ///
-  /// If null, [curve] is used.
-  final Curve? reverseCurve;
-
-  /// A controller for an animation.
-  late final AnimationController controller;
-
-  /// An animation that applies a curve to [controller].
-  late final CurvedAnimation animation;
-
+  /// A controller with an applied curve for an animation
   SlikkerAnimationController({
     required TickerProvider vsync,
     required this.curve,
@@ -72,13 +54,32 @@ class SlikkerAnimationController {
     );
   }
 
+  /// Is the length of time this animation should last.
+  final Duration duration;
+
+  /// The curve to use in forward direction.
+  final Curve curve;
+
+  /// The curve to use in reverse direction.
+  ///
+  /// If null, [curve] is used.
+  final Curve? reverseCurve;
+
+  /// A controller for an animation.
+  late final AnimationController controller;
+
+  /// An animation that applies a curve to [controller].
+  late final CurvedAnimation animation;
+
+  bool _forward = true;
+
+  bool _called = false;
+
   /// The current value of the animation.
   double get value => animation.value;
 
   /// Release the resources used by this object.
   void dispose() => controller.dispose();
-
-  _Direction _direction = _Direction.forward;
 
   /// Starts running this animation till the end. [forward] decides
   /// direction of the animation.
@@ -94,13 +95,16 @@ class SlikkerAnimationController {
     double tillEnd = forward ? controller.value : 1 - controller.value;
     int wait = tillEnd * controller.duration!.inMilliseconds ~/ 1;
 
-    _direction = forward ? _Direction.forward : _Direction.reverse;
+    if (_forward != forward) {
+      _forward = forward;
+      _called = false;
+    }
 
     Future.delayed(
       Duration(milliseconds: wait),
       () {
-        if ((this._direction == _Direction.forward && !forward) ||
-            (this._direction == _Direction.reverse && forward)) return;
+        if (this._forward != forward && _called) return;
+        _called = true;
         animation.curve = forward ? curve : reverseCurve ?? curve.flipped;
         controller.duration = duration;
         forward ? controller.forward(from: 0) : controller.reverse(from: 1);
