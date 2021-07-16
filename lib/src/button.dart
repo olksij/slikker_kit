@@ -58,14 +58,12 @@ class SlikkerButton extends StatefulWidget {
 class _SlikkerButtonState extends State<SlikkerButton>
     with TickerProviderStateMixin {
   late SlikkerAnimationController disabledAnmt, hoverAnmt, minorAnmt, pressAnmt;
-  late GlobalKey _key;
 
   TapPosition tapPosition = TapPosition(0, 0);
 
   @override
   void initState() {
     super.initState();
-    _key = GlobalKey();
 
     // Initialize slikker animation.
     disabledAnmt = _initSlikkerAnimation(widget.disabled);
@@ -98,30 +96,23 @@ class _SlikkerButtonState extends State<SlikkerButton>
     hoverAnmt.run(state);
   }
 
-  void press(bool state, [TapDownDetails? details]) {
+  void touchEvent({TapDownDetails? tapDown, TapUpDetails? tapUp}) {
     if (widget.disabled) return;
-    pressAnmt.run(state);
-    if (state) HapticFeedback.lightImpact();
 
-    /*final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-    if (details != null && renderBox != null) {
-      final Size size = renderBox.size;
-      tapPosition = TapPosition(
-        details.localPosition.dx / size.width * -2 + 1,
-        details.localPosition.dy / size.height * 2 - 1,
-      );
-      pressAnmt.curve = SlikkerOutCurve();
-      pressCtrl.forward(from: 0);
-      Future.delayed(Duration(milliseconds: 500), () {
-        pressAnmt.curve = SlikkerInCurve();
-        pressCtrl.reverse(from: 1);
-      });
-    }*/
+    if (tapDown != null) HapticFeedback.lightImpact();
+
+    pressAnmt.run(tapDown != null);
+
+    tapPosition = TapPosition(
+      tapDown?.localPosition.dx ?? tapUp!.localPosition.dx,
+      tapDown?.localPosition.dy ?? tapUp!.localPosition.dy,
+    );
   }
 
   Widget _buildButton(context, child) {
     Widget button = child;
     late double elevation;
+
     if (hoverAnmt.controller.isAnimating || hoverAnmt.value > 0)
       elevation = hoverAnmt.value - pressAnmt.value * hoverAnmt.value * 0.75;
     else
@@ -132,8 +123,8 @@ class _SlikkerButtonState extends State<SlikkerButton>
 
     if (!widget.disabled)
       button = GestureDetector(
-        onTapDown: (details) => press(true, details),
-        onTapUp: (details) => press(false),
+        onTapDown: (details) => touchEvent(tapDown: details),
+        onTapUp: (details) => touchEvent(tapUp: details),
         onTap: () => widget.onTap(),
         child: MouseRegion(
           onEnter: (event) => hoverAnmt.run(true),
@@ -144,47 +135,17 @@ class _SlikkerButtonState extends State<SlikkerButton>
 
     button = CustomPaint(
       painter: _ButtonEffects(
+        accent: widget.accent,
+        tapPosition: tapPosition,
+        pressCtrl: pressAnmt,
         borderRadius: BorderRadius.lerp(
           widget.borderRadius,
           BorderRadius.circular(16),
           elevation,
         )!,
+        elevation: elevation,
       ),
       child: button,
-    );
-
-    button = DecoratedBox(
-      key: _key,
-      child: button,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.lerp(
-          widget.borderRadius,
-          BorderRadius.circular(16),
-          elevation,
-        ),
-        color: HSVColor.fromAHSV(1, widget.accent, .02, .99)
-            .withAlpha(lerpDouble(.7, .6, elevation) ?? 1)
-            .toColor(),
-        /*gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            HSVColor.fromAHSV(1, widget.accent, .02, .99)
-                .withAlpha(lerp(.9, .75, hoverAnmt.value) ?? 1)
-                .toColor(),
-            HSVColor.fromAHSV(1, widget.accent, .03, .99)
-                .withAlpha(lerp(.9, .75, hoverAnmt.value) ?? 1)
-                .toColor(),
-          ],
-        ),*/
-        boxShadow: [
-          BoxShadow(
-            color: HSVColor.fromAHSV(.75, widget.accent, .09, .97).toColor(),
-            offset: Offset(0, 4),
-            blurRadius: 24,
-          ),
-        ],
-      ),
     );
 
     return Transform(
@@ -214,81 +175,81 @@ class _SlikkerButtonState extends State<SlikkerButton>
 }
 
 class _ButtonEffects extends CustomPainter {
+  double accent;
   BorderRadius borderRadius;
+  TapPosition? tapPosition;
+  SlikkerAnimationController pressCtrl;
+  double elevation;
 
-  _ButtonEffects({required this.borderRadius}) : super();
+  _ButtonEffects({
+    required this.accent,
+    required this.borderRadius,
+    required this.tapPosition,
+    required this.pressCtrl,
+    required this.elevation,
+  }) : super();
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas =
-        paintShadow(canvas: canvas, size: size, borderRadius: borderRadius);
-    canvas = paintLight(canvas: canvas, size: size, borderRadius: borderRadius);
+    canvas = paintBox(canvas: canvas, size: size, borderRadius: borderRadius);
   }
 
-  Canvas paintLight({
+  Canvas paintBox({
     required Canvas canvas,
     required Size size,
     required BorderRadius borderRadius,
   }) {
-    final paint = Paint()..color = Color(0x33FFFFFF);
+    final Paint paintLight = Paint()..color = Color(0x22FFFFFF);
+
+    final paintBoxShadow = lerpDouble(.75, .65, elevation) ?? .6;
+    final Paint paintBox = Paint()
+      ..color = HSVColor.fromAHSV(paintBoxShadow, accent, .02, .99).toColor();
+
+    final paintKeyShadow = Paint()
+      ..color = HSVColor.fromAHSV(.25, accent, .05, .95).toColor();
+
+    final paintAmbientShadow = Paint()
+      ..color = HSVColor.fromAHSV(.5, accent, .1, .97).toColor()
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 16);
 
     final double topBorder = max(
       borderRadius.topLeft.y,
       borderRadius.topRight.y,
     );
 
-    final light = Path.combine(
-      PathOperation.difference,
-      Path()
-        ..addRRect(RRect.fromRectAndCorners(
-          Rect.fromLTWH(0, 0, size.width, topBorder),
-          topLeft: borderRadius.topLeft,
-          topRight: borderRadius.topRight,
-        )),
-      Path()
-        ..addRRect(RRect.fromRectAndCorners(
-          Rect.fromLTWH(0, 2, size.width, topBorder),
-          topLeft: borderRadius.topLeft,
-          topRight: borderRadius.topRight,
-        )),
-    );
-
-    return canvas..drawPath(light, paint);
-  }
-
-  Canvas paintShadow({
-    required Canvas canvas,
-    required Size size,
-    required BorderRadius borderRadius,
-  }) {
-    final keyPaint = Paint()
-      ..color = Color(0x1100000)
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 4);
-
     final double bottomBorder = max(
       borderRadius.bottomLeft.y,
       borderRadius.bottomRight.y,
     );
 
-    final keyShadow = Path.combine(
+    RRect boxBase(double top, double height, bool light, [bool all = false]) {
+      return RRect.fromRectAndCorners(
+        Rect.fromLTWH(0, top, size.width, height),
+        topLeft: light || all ? borderRadius.topLeft : Radius.zero,
+        topRight: light || all ? borderRadius.topRight : Radius.zero,
+        bottomLeft: !light || all ? borderRadius.bottomLeft : Radius.zero,
+        bottomRight: !light || all ? borderRadius.bottomRight : Radius.zero,
+      );
+    }
+
+    final lightPath = Path.combine(
       PathOperation.difference,
-      Path()
-        ..addRRect(RRect.fromRectAndCorners(
-          Rect.fromLTWH(
-              0, size.height - bottomBorder, size.width, bottomBorder + 2),
-          bottomLeft: borderRadius.bottomLeft,
-          bottomRight: borderRadius.bottomRight,
-        )),
-      Path()
-        ..addRRect(RRect.fromRectAndCorners(
-          Rect.fromLTWH(
-              0, size.height - bottomBorder, size.width, bottomBorder),
-          bottomLeft: borderRadius.bottomLeft,
-          bottomRight: borderRadius.bottomRight,
-        )),
+      Path()..addRRect(boxBase(0, topBorder, true)),
+      Path()..addRRect(boxBase(2, topBorder, true)),
     );
 
-    return canvas..drawPath(keyShadow, keyPaint);
+    final _heightDelta = size.height - bottomBorder;
+    final keyShadowPath = Path.combine(
+      PathOperation.difference,
+      Path()..addRRect(boxBase(_heightDelta + 3, bottomBorder, false)),
+      Path()..addRRect(boxBase(_heightDelta, bottomBorder, false)),
+    );
+
+    return canvas
+      ..drawRRect(boxBase(4, size.height, true, true), paintAmbientShadow)
+      ..drawPath(keyShadowPath, paintKeyShadow)
+      ..drawRRect(boxBase(0, size.height, true, true), paintBox)
+      ..drawPath(lightPath, paintLight);
   }
 
   @override

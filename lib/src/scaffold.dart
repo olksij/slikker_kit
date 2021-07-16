@@ -188,8 +188,8 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
                     begin: Alignment.topCenter,
                     end: Alignment(0, 0.25),
                     colors: [
-                      Color(0x00F6F6FC),
-                      Color(0xFFF6F6FC),
+                      HSVColor.fromAHSV(0, 240, 0.04, 0.98).toColor(),
+                      HSVColor.fromAHSV(1, 240, 0.04, 0.98).toColor(),
                     ],
                   ),
                 ),

@@ -88,6 +88,8 @@ class SlikkerAnimationController {
   /// and this method was called, animation
   /// quickly gets to the end, and goes to another.
   void run([bool forward = true]) {
+    if (this._forward == forward) return;
+
     controller.duration = Duration(
       milliseconds: this.duration.inMilliseconds ~/ 1.5,
     );
@@ -95,15 +97,13 @@ class SlikkerAnimationController {
     double tillEnd = forward ? controller.value : 1 - controller.value;
     int wait = tillEnd * controller.duration!.inMilliseconds ~/ 1;
 
-    if (_forward != forward) {
-      _forward = forward;
-      _called = false;
-    }
+    this._forward = forward;
+    this._called = false;
 
     Future.delayed(
       Duration(milliseconds: wait),
       () {
-        if (this._forward != forward && _called) return;
+        if (this._forward != forward && this._called) return;
         _called = true;
         animation.curve = forward ? curve : reverseCurve ?? curve.flipped;
         controller.duration = duration;
