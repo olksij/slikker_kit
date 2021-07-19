@@ -1,16 +1,32 @@
 import 'dart:ui';
 import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+
 import 'animations.dart';
 
-class TapPosition {
-  final double dx, dy;
-  const TapPosition(this.dx, this.dy);
-}
+const Duration _lightFadeInDuration = Duration(milliseconds: 100);
+const Duration _lightFadeOutDuration = Duration(milliseconds: 500);
+const Duration _lightPressDuration = Duration(milliseconds: 2000);
+const Duration _lightRadiusDuration = Duration(milliseconds: 800);
 
 class SlikkerButton extends StatefulWidget {
+  SlikkerButton({
+    Key? key,
+    this.accent = 240,
+    this.minor = false,
+    this.child,
+    this.onTap,
+    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
+    this.disabled = false,
+    this.padding,
+  }) : super(key: key);
+
+  @override
+  _SlikkerButtonState createState() => _SlikkerButtonState();
+
   /// The Hue which will be used for your button. Expected value from 0.0 to 360.0
   final double accent;
 
@@ -33,117 +49,140 @@ class SlikkerButton extends StatefulWidget {
 
   /// The [Function] that will be invoked on user's tap.
   final Function? onTap;
-
-  @override
-  _SlikkerButtonState createState() => _SlikkerButtonState();
-
-  SlikkerButton({
-    Key? key,
-    this.accent = 240,
-    this.minor = false,
-    this.child,
-    this.onTap,
-    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
-    this.disabled = false,
-    this.padding,
-  }) : super(key: key);
 }
 
 class _SlikkerButtonState extends State<SlikkerButton>
     with TickerProviderStateMixin {
-  late SlikkerAnimationController disabledAnmt, hoverAnmt, minorAnmt, pressAnmt;
+  /// Represents state of the button.
+  late SlikkerAnimationController disabled, hover, minor, press;
+  late SlikkerAnimationController lightFade, lightRadius;
 
-  TapPosition tapPosition = TapPosition(0, 0);
+  /// Keeps the position where user have tapped.
+  Offset tapPosition = Offset(0, 0);
 
   @override
   void initState() {
     super.initState();
 
     // Initialize slikker animation.
-    disabledAnmt = _initSlikkerAnimation(widget.disabled);
-    minorAnmt = _initSlikkerAnimation(widget.minor);
-    hoverAnmt = _initSlikkerAnimation(false);
-    pressAnmt = _initSlikkerAnimation(false);
+    disabled = _initSlikkerAnimation(value: widget.disabled);
+    minor = _initSlikkerAnimation(value: widget.minor);
+    hover = _initSlikkerAnimation();
+    press = _initSlikkerAnimation();
+    lightFade = _initSlikkerAnimation(
+      curve: Curves.easeInOut,
+      reverseCurve: Curves.easeInOut,
+    );
+    lightRadius = _initSlikkerAnimation(
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeOut,
+    );
   }
 
-  // Generic slikker animation controller required.
-  SlikkerAnimationController _initSlikkerAnimation(bool value) {
+  /// Generic slikker animation controller required.
+  SlikkerAnimationController _initSlikkerAnimation({
+    bool value = false,
+    Curve? curve,
+    Curve? reverseCurve,
+  }) {
     return SlikkerAnimationController(
-      vsync: this,
       duration: Duration(milliseconds: 500),
-      curve: SlikkerCurve(smthns: 10),
-      reverseCurve: SlikkerCurve.reverse(smthns: 6),
+      curve: curve ?? SlikkerCurve(smthns: 10),
+      reverseCurve: reverseCurve ?? SlikkerCurve.reverse(smthns: 6),
       value: value ? 1 : 0,
+      vsync: this,
     );
   }
 
   @override
   void dispose() {
-    disabledAnmt.dispose();
-    hoverAnmt.dispose();
-    minorAnmt.dispose();
-    pressAnmt.dispose();
+    disabled.dispose();
+    hover.dispose();
+    minor.dispose();
+    press.dispose();
+    lightFade.dispose();
+    lightRadius.dispose();
     super.dispose();
   }
 
   /// Number ranging from 0.0 to 1.0, where 1.0 means that element is elevated.
   /// Elevation represents button's state.
   double get elevation {
-    if (hoverAnmt.controller.isAnimating || hoverAnmt.value > 0)
-      return hoverAnmt.value - pressAnmt.value * hoverAnmt.value * 0.75;
-    return (1 - hoverAnmt.value) * pressAnmt.value;
+    if (hover.controller.isAnimating || hover.value > 0)
+      return hover.value - press.value * hover.value * 0.75;
+    return (1 - hover.value) * press.value;
   }
 
   /// Button's [BorderRadius] based on [elevation].
   BorderRadius get borderRadius => BorderRadius.lerp(
       widget.borderRadius, BorderRadius.circular(16), elevation)!;
 
+  // Fired when user touch or press on button
   void _touchEvent({TapDownDetails? tapDown, TapUpDetails? tapUp}) {
     if (widget.disabled) return;
-    if (tapDown != null) HapticFeedback.lightImpact();
-    pressAnmt.run(tapDown != null);
-    tapPosition = TapPosition(
-      tapDown?.localPosition.dx ?? tapUp!.localPosition.dx,
-      tapDown?.localPosition.dy ?? tapUp!.localPosition.dy,
-    );
-  }
 
-  Widget _buildButton(context, child) {
-    Widget button =
-        Padding(padding: widget.padding ?? EdgeInsets.zero, child: child);
+    if (tapDown != null) {
+      // Tap down event.
+      HapticFeedback.lightImpact();
 
-    if (!widget.disabled && widget.onTap != null)
-      button = GestureDetector(
-        onTapDown: (details) => _touchEvent(tapDown: details),
-        onTapUp: (details) => _touchEvent(tapUp: details),
-        onTap: () => widget.onTap!(),
-        child: MouseRegion(
-          onEnter: (event) => hoverAnmt.run(true),
-          onExit: (event) => hoverAnmt.run(false),
-          child: button,
-        ),
+      // Save current tap position.
+      tapPosition = Offset(
+        tapDown.localPosition.dx,
+        tapDown.localPosition.dy,
       );
 
-    return Transform(
-      alignment: Alignment.center,
-      transform: Matrix4.identity()..scale(1 + .15 * elevation),
-      child: CustomPaint(
-        painter: _ButtonEffects(this),
-        child: button,
-      ),
-    );
+      // Run animations.
+      press.run(true);
+      lightFade.run(true, duration: _lightFadeInDuration, end: true);
+      lightRadius.run(true, duration: _lightPressDuration, end: true);
+    } else {
+      // Tap up event.
+      press.run(false);
+      lightRadius.duration = _lightRadiusDuration;
+      lightFade.run(false, duration: _lightFadeOutDuration);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       child: widget.child,
-      builder: _buildButton,
+      builder: (context, child) {
+        // Give button padding if available
+        Widget button = Padding(
+          padding: widget.padding ?? EdgeInsets.zero,
+          child: child,
+        );
+
+        // Add gesture listeners if not disabled
+        if (!widget.disabled && widget.onTap != null)
+          button = GestureDetector(
+            onTapDown: (details) => _touchEvent(tapDown: details),
+            onTapUp: (details) => _touchEvent(tapUp: details),
+            onTap: () => widget.onTap!(),
+            child: MouseRegion(
+              onEnter: (event) => hover.run(true),
+              onExit: (event) => hover.run(false),
+              child: button,
+            ),
+          );
+
+        return Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()..scale(1 + .15 * elevation),
+          child: CustomPaint(
+            painter: _ButtonEffects(this),
+            child: button,
+          ),
+        );
+      },
       animation: Listenable.merge([
-        disabledAnmt.animation,
-        hoverAnmt.animation,
-        minorAnmt.animation,
-        pressAnmt.animation,
+        disabled.animation,
+        hover.animation,
+        minor.animation,
+        press.animation,
+        lightFade.animation,
+        lightRadius.animation,
       ]),
     );
   }
@@ -151,24 +190,24 @@ class _SlikkerButtonState extends State<SlikkerButton>
 
 class _ButtonEffects extends CustomPainter {
   _SlikkerButtonState button;
-  SlikkerButton widget;
 
-  _ButtonEffects(this.button)
-      : widget = button.widget,
-        super();
+  _ButtonEffects(this.button) : super();
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas = paintBox(canvas, size);
+    canvas = paintRipple(canvas, size);
   }
 
+  /// Paints shadows, light paths, and button itself.
   Canvas paintBox(Canvas canvas, Size size) {
-    double accent = widget.accent;
+    // Extract variables.
+    double accent = button.widget.accent;
     BorderRadius borderRadius = button.borderRadius;
 
     // Initializing Paint objects.
 
-    final paintLight = Paint()..color = Color(0x22FFFFFF);
+    final paintLight = Paint()..color = Color(0x33FFFFFF);
 
     final paintBoxA = lerpDouble(.75, .65, button.elevation)!;
     final paintBox = Paint()
@@ -229,6 +268,39 @@ class _ButtonEffects extends CustomPainter {
       ..drawPath(lightPath, paintLight);
   }
 
+  Canvas paintRipple(Canvas canvas, Size size) {
+    // Extract variables.
+    BorderRadius borderRadius = button.borderRadius;
+    Offset tapPosition = button.tapPosition;
+    int fade = button.lightFade.value * 255 ~/ 1;
+    double radius = button.lightRadius.value *
+        sqrt(pow(size.width, 2) + pow(size.height, 2));
+
+    final colors = [
+      Color(0xFFFFFF).withAlpha(fade ~/ 2),
+      Color(0xFFFFFF).withAlpha(fade),
+    ];
+
+    final paintRipple = Paint()
+      ..shader = RadialGradient(colors: colors).createShader(Rect.fromCircle(
+        radius: radius,
+        center: tapPosition,
+      ));
+
+    // Clip canvas, so ripple doesnt overflow.
+    canvas.clipRRect(RRect.fromRectAndCorners(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      topLeft: borderRadius.topLeft,
+      topRight: borderRadius.topRight,
+      bottomLeft: borderRadius.bottomLeft,
+      bottomRight: borderRadius.bottomRight,
+    ));
+
+    final rect = Rect.fromCircle(center: tapPosition, radius: radius);
+
+    return canvas..drawOval(rect, paintRipple);
+  }
+
   @override
-  bool shouldRepaint(_ButtonEffects oldDelegate) => false;
+  bool shouldRepaint(_ButtonEffects oldDelegate) => true;
 }

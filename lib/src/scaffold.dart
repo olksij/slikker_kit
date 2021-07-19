@@ -25,13 +25,6 @@ class TopButton {
     required this.icon,
     required this.action,
   }) : isHidden = false;
-
-  /// That function allows to hide the button.
-  /*TopButton.hidden()
-      : isHidden = true,
-        title = null,
-        icon = null,
-        action = null;*/
 }
 
 /// Widget that helps to build a page.
