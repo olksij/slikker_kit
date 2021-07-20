@@ -103,7 +103,7 @@ class SlikkerAnimationController {
   void run(bool forward, {Duration? duration, bool? end}) {
     //if (this._forward == forward) return;
 
-    duration ??= controller.duration ?? this._duration;
+    duration ??= this._duration;
 
     controller.duration = Duration(
       milliseconds: duration.inMilliseconds ~/ 1.5,

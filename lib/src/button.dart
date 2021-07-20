@@ -159,6 +159,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
           button = GestureDetector(
             onTapDown: (details) => _touchEvent(tapDown: details),
             onTapUp: (details) => _touchEvent(tapUp: details),
+            onTapCancel: () => _touchEvent(),
             onTap: () => widget.onTap!(),
             child: MouseRegion(
               onEnter: (event) => hover.run(true),

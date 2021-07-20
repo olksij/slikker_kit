@@ -39,7 +39,7 @@ class SlikkerContainer extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: borderRadius ?? BorderRadius.circular(12),
         color: HSVColor.fromAHSV(
-                0.5, accent ?? SlikkerContainer.defaultAccent, 0.025, 0.95)
+                0.75, accent ?? SlikkerContainer.defaultAccent, 0.04, 0.96)
             .toColor(),
         boxShadow: [],
       ),
@@ -47,3 +47,4 @@ class SlikkerContainer extends StatelessWidget {
     );
   }
 }
+//HSVColor.fromAHSV(1, 240, 0.04, 0.98).toColor()
