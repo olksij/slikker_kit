@@ -35,11 +35,11 @@ class SlikkerContainer extends StatelessWidget {
     return Container(
       margin: margin,
       padding: padding,
-      clipBehavior: Clip.hardEdge,
+      //clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         borderRadius: borderRadius ?? BorderRadius.circular(12),
         color: HSVColor.fromAHSV(
-                0.75, accent ?? SlikkerContainer.defaultAccent, 0.04, 0.96)
+                0.5, accent ?? SlikkerContainer.defaultAccent, 0.05, 0.95)
             .toColor(),
         boxShadow: [],
       ),

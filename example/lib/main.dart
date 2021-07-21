@@ -46,26 +46,28 @@ class _HomePageState extends State<HomePage> {
       ),
       header: SlikkerContainer(
         accent: accent,
-        padding: EdgeInsets.fromLTRB(20, 12, 12, 12),
         child: Row(
           children: [
             Expanded(
-              child: Text(
-                'Button taps:',
-                style: TextStyle(
-                  fontSize: 17,
-                  color: getColor(1, accent, 0.4, 0.4),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 17),
+                child: Text(
+                  'Button taps:',
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: getColor(1, accent, 0.4, 0.4),
+                  ),
                 ),
               ),
             ),
             SlikkerButton(
               accent: 240,
-              borderRadius: BorderRadius.circular(8),
-              padding: EdgeInsets.symmetric(horizontal: 17, vertical: 10),
+              borderRadius: BorderRadius.horizontal(right: Radius.circular(12)),
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 17),
               child: Text(
                 count.toString(),
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 17,
                   color: getColor(1, accent, 0.4, 0.4),
                 ),
               ),

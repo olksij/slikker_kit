@@ -116,7 +116,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: HSVColor.fromAHSV(1, 240, 0.04, 0.98).toColor(),
+      color: HSVColor.fromAHSV(1, 240, 0.05, 0.98).toColor(),
       child: SafeArea(
         top: true,
         child: Stack(

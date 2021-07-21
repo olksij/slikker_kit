@@ -9,8 +9,8 @@ import 'animations.dart';
 
 const Duration _lightFadeInDuration = Duration(milliseconds: 100);
 const Duration _lightFadeOutDuration = Duration(milliseconds: 500);
-const Duration _lightPressDuration = Duration(milliseconds: 2000);
-const Duration _lightRadiusDuration = Duration(milliseconds: 800);
+const Duration _lightPressDuration = Duration(milliseconds: 1000);
+const Duration _lightRadiusDuration = Duration(milliseconds: 500);
 
 class SlikkerButton extends StatefulWidget {
   SlikkerButton({
@@ -273,12 +273,12 @@ class _ButtonEffects extends CustomPainter {
     // Extract variables.
     BorderRadius borderRadius = button.borderRadius;
     Offset tapPosition = button.tapPosition;
-    int fade = button.lightFade.value * 255 ~/ 1;
+    int fade = button.lightFade.value * 255 ~/ 1.5;
     double radius = button.lightRadius.value *
         sqrt(pow(size.width, 2) + pow(size.height, 2));
 
     final colors = [
-      Color(0xFFFFFF).withAlpha(fade ~/ 2),
+      Color(0xFFFFFF).withAlpha(fade ~/ 1.5),
       Color(0xFFFFFF).withAlpha(fade),
     ];
 
