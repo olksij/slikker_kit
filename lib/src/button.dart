@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'animations.dart';
 
-const Duration _lightFadeInDuration = Duration(milliseconds: 100);
+const Duration _lightFadeInDuration = Duration(milliseconds: 200);
 const Duration _lightFadeOutDuration = Duration(milliseconds: 500);
 const Duration _lightPressDuration = Duration(milliseconds: 1000);
 const Duration _lightRadiusDuration = Duration(milliseconds: 500);
@@ -86,7 +86,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
     Curve? reverseCurve,
   }) {
     return SlikkerAnimationController(
-      duration: Duration(milliseconds: 500),
+      duration: Duration(milliseconds: 600),
       curve: curve ?? SlikkerCurve(smthns: 10),
       reverseCurve: reverseCurve ?? SlikkerCurve.reverse(smthns: 6),
       vsync: this,

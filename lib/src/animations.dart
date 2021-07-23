@@ -121,8 +121,8 @@ class SlikkerAnimationController {
 
     final Function() animate = () {
       if (forward != this.forward) return;
-      if (forward) forwardAnmt.forward(from: 0);
-      if (!forward) reverseAnmt.reverse(from: 1);
+      if (forward) forwardAnmt.forward(from: 0, duration: duration);
+      if (!forward) reverseAnmt.reverse(from: 1, duration: duration);
     };
 
     if (!isAnimating) {
@@ -140,58 +140,6 @@ class SlikkerAnimationController {
       });
     }
   }
-  /*void run(
-    bool forward, {
-    Duration? duration,
-    bool end = true,
-    bool wait = true,
-  }) {
-    if (!end) wait = false;
-
-    duration ??= this._duration;
-
-    // Speed up the animation to reach end faster.
-    controller.duration = Duration(
-      milliseconds: duration.inMilliseconds ~/ 1.5,
-    );
-
-    // Calculate wait time till animation reaches the end.
-    double _tillEnd = forward ? controller.value : 1 - controller.value;
-    int _wait = _tillEnd * controller.duration!.inMilliseconds ~/ 1;
-
-    // Set global variables
-    this._forward = forward;
-    this._called = false;
-
-    // Declare animation event.
-    Function() animate = () {
-      String wow = end ? "TRUE" : "FALSE";
-      if (this._forward != forward && this._called) return;
-      _called = true;
-
-      if (end)
-        controller.value = forward ? 0 : 1;
-      else {
-        controller.value = _tillEnd >= 0.75
-            ? 1 - controller.value
-            : forward
-                ? 0
-                : 1;
-        print(wow + ' + ' + end.toString());
-      }
-
-      // Modify animations.
-      animation.curve = forward ? curve : reverseCurve ?? curve.flipped;
-      controller.duration = duration;
-      forward ? controller.forward() : controller.reverse();
-    };
-
-    // If [wait] is false, skip waiting.
-    if (wait)
-      Future.delayed(Duration(milliseconds: _wait), animate);
-    else
-      animate();
-  }*/
 }
 
 /// A controller with an applied curve for an animation
@@ -234,10 +182,16 @@ class _AnimationController {
   set value(double value) => controller.value = value;
 
   /// Starts running this animation forwards (towards the end).
-  void forward({double? from}) => controller.forward(from: from);
+  void forward({double? from, Duration? duration}) {
+    controller.duration = duration ?? this.duration;
+    controller.forward(from: from);
+  }
 
   /// Starts running this animation in reverse (towards the beginning).
-  void reverse({double? from}) => controller.reverse(from: from);
+  void reverse({double? from, Duration? duration}) {
+    controller.duration = duration ?? this.duration;
+    controller.reverse(from: from);
+  }
 
   /// Drives the animation from its current value to target.
   void animateTo(double value) => controller.animateTo(value);
