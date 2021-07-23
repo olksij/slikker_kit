@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 
@@ -40,19 +41,15 @@ class SlikkerAnimationController {
     required TickerProvider vsync,
     required this.curve,
     this.reverseCurve,
-    Duration duration = const Duration(seconds: 0),
-    double value = 0.0,
+    this.duration = const Duration(seconds: 1),
   }) {
-    this._duration = duration;
-    controller = AnimationController(
-      vsync: vsync,
-      duration: duration,
-      value: value,
-    );
-    animation = CurvedAnimation(
-      parent: controller,
-      curve: curve,
-    );
+    _AnimationController _init(Curve curve) => _AnimationController(
+        vsync: vsync, curve: curve, duration: duration, value: 0);
+
+    forwardAnmt = _init(curve);
+    reverseAnmt = _init(reverseCurve ?? curve.flipped);
+    switchAnmt = _init(Curves.easeInOutCubic)
+      ..duration = Duration(milliseconds: duration.inMilliseconds ~/ 10);
   }
 
   /// The curve to use in forward direction.
@@ -63,69 +60,188 @@ class SlikkerAnimationController {
   /// If null, [curve.flipped] is used.
   final Curve? reverseCurve;
 
-  /// A controller for an animation.
-  late final AnimationController controller;
+  /// An animation controller for an forward animation.
+  late final _AnimationController forwardAnmt;
 
-  /// An animation that applies a curve to [controller].
-  late final CurvedAnimation animation;
+  /// An animation controller for an reverse animation.
+  late final _AnimationController reverseAnmt;
+
+  /// An animation controller for an smooth animation switch between
+  /// [forwardAnmt] and [reverseAnmt].
+  late final _AnimationController switchAnmt;
 
   /// Is the length of time this animation should last.
-  late Duration _duration;
+  late Duration duration;
 
-  /// Direction of the animation.
+  /// Direction of the animation
+  bool forward = true;
+
+  /* /// Direction of the animation.
   bool _forward = true;
 
   /// Represents was animation called already or not.
   ///
   /// If [_called] is `false`, it does mean that animation is waiting till
   /// [value] reached `1.0` or `0.0`, so animation can go to another
-  bool _called = false;
+  bool _called = false; */
 
   /// The current value of the animation.
-  double get value => animation.value;
+  double get value =>
+      lerpDouble(forwardAnmt.value, reverseAnmt.value, switchAnmt.value)!;
 
-  set duration(Duration duration) {
-    controller.duration = duration;
-    this._duration = duration;
-    if (controller.isAnimating)
-      _forward ? controller.forward() : controller.reverse();
-  }
+  Listenable get listenable => Listenable.merge(
+      [forwardAnmt.animation, reverseAnmt.animation, switchAnmt.animation]);
+
+  bool get isAnimating =>
+      forwardAnmt.isAnimating ||
+      reverseAnmt.isAnimating ||
+      switchAnmt.isAnimating;
 
   /// Release the resources used by this object.
-  void dispose() => controller.dispose();
+  void dispose() {
+    forwardAnmt.dispose();
+    reverseAnmt.dispose();
+    switchAnmt.dispose();
+  }
 
-  /// Starts running this animation till the end. [forward] decides
-  /// direction of the animation.
+  /// Starts running this animation till the end.
   ///
-  /// If the animation hasn't reached the end (value 0.0 or 1.0)
-  /// and this method was called, animation
-  /// quickly gets to the end, and goes to another.
-  void run(bool forward, {Duration? duration, bool? end}) {
-    //if (this._forward == forward) return;
+  /// - [forward] decides direction of the animation.
+  /// - [duration] sets the duration of animation, you wanna call.
+  /// - [end] decides if animation will animate from the end. If `false`, it
+  ///   will animate from the current value and [wait] will be set to `false` too.
+  /// - [wait] tell animation should it wait till it reach end or not.
+  ///
+  /// __Note:__ If the animation hasn't reached the end (value `0.0` or `1.0`)
+  /// and this method was called, animation quickly gets to the end, and
+  /// goes to another.
+  void run(bool forward, {Duration? duration}) {
+    duration ??= this.duration;
+    this.forward = forward;
+
+    final Function() animate = () {
+      if (forward != this.forward) return;
+      if (forward) forwardAnmt.forward(from: 0);
+      if (!forward) reverseAnmt.reverse(from: 1);
+    };
+
+    if (!isAnimating) {
+      switchAnmt.value = forward ? 0 : 1;
+      animate();
+    } else {
+      double _tillEnd = forward ? value : 1 - value;
+      int _wait = _tillEnd * duration.inMilliseconds ~/ 1.5;
+      // TODO: Fix [_wait] on forward -> forward.
+      Future.delayed(Duration(milliseconds: _wait), () {
+        switchAnmt.animateTo(forward ? 0 : 1);
+        //switchAnmt.value = forward ? 0 : 1;
+
+        animate();
+      });
+    }
+  }
+  /*void run(
+    bool forward, {
+    Duration? duration,
+    bool end = true,
+    bool wait = true,
+  }) {
+    if (!end) wait = false;
 
     duration ??= this._duration;
 
+    // Speed up the animation to reach end faster.
     controller.duration = Duration(
       milliseconds: duration.inMilliseconds ~/ 1.5,
     );
 
-    double tillEnd = forward ? controller.value : 1 - controller.value;
-    int wait = tillEnd * controller.duration!.inMilliseconds ~/ 1;
+    // Calculate wait time till animation reaches the end.
+    double _tillEnd = forward ? controller.value : 1 - controller.value;
+    int _wait = _tillEnd * controller.duration!.inMilliseconds ~/ 1;
 
-    if (end == true) wait = 0;
-
+    // Set global variables
     this._forward = forward;
     this._called = false;
 
+    // Declare animation event.
     Function() animate = () {
+      String wow = end ? "TRUE" : "FALSE";
       if (this._forward != forward && this._called) return;
       _called = true;
+
+      if (end)
+        controller.value = forward ? 0 : 1;
+      else {
+        controller.value = _tillEnd >= 0.75
+            ? 1 - controller.value
+            : forward
+                ? 0
+                : 1;
+        print(wow + ' + ' + end.toString());
+      }
+
+      // Modify animations.
       animation.curve = forward ? curve : reverseCurve ?? curve.flipped;
       controller.duration = duration;
-      forward ? controller.forward(from: 0) : controller.reverse(from: 1);
+      forward ? controller.forward() : controller.reverse();
     };
 
-    if (wait == 0) animate();
-    if (wait > 0) Future.delayed(Duration(milliseconds: wait), animate);
+    // If [wait] is false, skip waiting.
+    if (wait)
+      Future.delayed(Duration(milliseconds: _wait), animate);
+    else
+      animate();
+  }*/
+}
+
+/// A controller with an applied curve for an animation
+class _AnimationController {
+  /// A controller with an applied curve for an animation
+  _AnimationController({
+    required TickerProvider vsync,
+    required this.curve,
+    required this.duration,
+    double value = 0.0,
+  }) {
+    controller =
+        AnimationController(vsync: vsync, duration: duration, value: value);
+    animation = CurvedAnimation(
+      curve: curve,
+      parent: controller,
+    );
   }
+
+  /// The curve to use in forward direction.
+  final Curve curve;
+
+  /// Is the length of time this animation should last.
+  final Duration duration;
+
+  set duration(Duration duration) => controller.duration = duration;
+
+  /// A controller for an animation.
+  late final AnimationController controller;
+
+  /// An animation that applies a curve to [controller].
+  late final CurvedAnimation animation;
+
+  /// The current value of the animation.
+  double get value => animation.value;
+
+  bool get isAnimating => controller.isAnimating;
+
+  /// Sets the current value of the animation.
+  set value(double value) => controller.value = value;
+
+  /// Starts running this animation forwards (towards the end).
+  void forward({double? from}) => controller.forward(from: from);
+
+  /// Starts running this animation in reverse (towards the beginning).
+  void reverse({double? from}) => controller.reverse(from: from);
+
+  /// Drives the animation from its current value to target.
+  void animateTo(double value) => controller.animateTo(value);
+
+  /// Release the resources used by this object.
+  void dispose() => controller.dispose();
 }

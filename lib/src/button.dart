@@ -54,8 +54,8 @@ class SlikkerButton extends StatefulWidget {
 class _SlikkerButtonState extends State<SlikkerButton>
     with TickerProviderStateMixin {
   /// Represents state of the button.
-  late SlikkerAnimationController disabled, hover, minor, press;
-  late SlikkerAnimationController lightFade, lightRadius;
+  late final SlikkerAnimationController disabled, hover, minor, press;
+  late final SlikkerAnimationController lightFade, lightRadius;
 
   /// Keeps the position where user have tapped.
   Offset tapPosition = Offset(0, 0);
@@ -89,7 +89,6 @@ class _SlikkerButtonState extends State<SlikkerButton>
       duration: Duration(milliseconds: 500),
       curve: curve ?? SlikkerCurve(smthns: 10),
       reverseCurve: reverseCurve ?? SlikkerCurve.reverse(smthns: 6),
-      value: value ? 1 : 0,
       vsync: this,
     );
   }
@@ -108,7 +107,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
   /// Number ranging from 0.0 to 1.0, where 1.0 means that element is elevated.
   /// Elevation represents button's state.
   double get elevation {
-    if (hover.controller.isAnimating || hover.value > 0)
+    if (hover.isAnimating || hover.value > 0)
       return hover.value - press.value * hover.value * 0.75;
     return (1 - hover.value) * press.value;
   }
@@ -133,12 +132,12 @@ class _SlikkerButtonState extends State<SlikkerButton>
 
       // Run animations.
       press.run(true);
-      lightFade.run(true, duration: _lightFadeInDuration, end: true);
-      lightRadius.run(true, duration: _lightPressDuration, end: true);
+      lightFade.run(true, duration: _lightFadeInDuration);
+      lightRadius.run(true, duration: _lightRadiusDuration);
     } else {
       // Tap up event.
       press.run(false);
-      lightRadius.duration = _lightRadiusDuration;
+      //lightRadius.duration = _lightRadiusDuration;
       lightFade.run(false, duration: _lightFadeOutDuration);
     }
   }
@@ -178,12 +177,12 @@ class _SlikkerButtonState extends State<SlikkerButton>
         );
       },
       animation: Listenable.merge([
-        disabled.animation,
-        hover.animation,
-        minor.animation,
-        press.animation,
-        lightFade.animation,
-        lightRadius.animation,
+        disabled.listenable,
+        hover.listenable,
+        minor.listenable,
+        press.listenable,
+        lightFade.listenable,
+        lightRadius.listenable,
       ]),
     );
   }
