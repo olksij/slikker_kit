@@ -7,6 +7,11 @@ import 'package:flutter/widgets.dart';
 
 import 'animations.dart';
 
+// TODO: Implement disabled state.
+// TODO: Implement minor state.
+// TODO: Rename to material.
+// TODO: Dark theme.
+
 const Duration _lightFadeInDuration = Duration(milliseconds: 200);
 const Duration _lightFadeOutDuration = Duration(milliseconds: 500);
 const Duration _lightPressDuration = Duration(milliseconds: 1000);
@@ -106,11 +111,8 @@ class _SlikkerButtonState extends State<SlikkerButton>
 
   /// Number ranging from 0.0 to 1.0, where 1.0 means that element is elevated.
   /// Elevation represents button's state.
-  double get elevation {
-    if (hover.isAnimating || hover.value > 0)
-      return hover.value - press.value * hover.value * 0.75;
-    return (1 - hover.value) * press.value;
-  }
+  double get elevation => lerpDouble((1 - hover.value) * press.value,
+      hover.value - press.value * hover.value * 0.75, hover.value)!;
 
   /// Button's [BorderRadius] based on [elevation].
   BorderRadius get borderRadius => BorderRadius.lerp(

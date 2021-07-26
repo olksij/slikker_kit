@@ -1,4 +1,8 @@
-## [1.0.10] - 00.00.00
+#### [Alpha development changelog](1.1.0-alpha-CHANGELOG.md)
+
+___
+
+## [1.0.10] - 10.06.21
 * Added sliver option to `SlikkerScaffold`.
 * Fixed tap action in `SlikkerCard`.
 * Made `SlikkerScaffold` params optional.

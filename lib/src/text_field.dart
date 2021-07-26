@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+// TODO: [SlikkerTextField] extends [SlikkerButton].
+// TODO: Remaster [SlikkerTextField] structure.
+
 class SlikkerTextField extends StatelessWidget {
   final TextEditingController? controller;
   final String hintText;

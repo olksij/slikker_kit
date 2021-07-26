@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'top_button.dart';
 
+// TODO: Dark theme.
+// TODO: Fix [SlikkerScaffold] structure.
+// TODO: Dark theme.
+
 /// Constructor, which creates `TopButtonWidget`. The widget will be displayed
 /// in the top of the page. When user pulls the page or taps the widget,
 /// `TopButton.action` will be fired.

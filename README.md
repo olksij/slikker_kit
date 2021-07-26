@@ -13,23 +13,34 @@ ___
 
 <br>
 
-## Usage
+### Table of contents.
+1. [Installing package](#installing-package)
+2. [Running example](#running-example)
+3. [License](#license)
 
-1. In your `pubspec.yaml` file add the following dependency:
+<br>
+
+___
+
+<br>
+
+## Installing package
+
+1. Run the command to add dependency and update dependencies:
+```shell
+$ flutter pub add slikker_kit
+```
+This will add a line like this to your package's pubspec.yaml (and run an implicit `dart pub get`): 
 ```yaml
 dependencies:
-   ...
-   slikker_kit: ^1.0.10
+   slikker_kit: ^1.1.0-alpha.22
 ```
-2. Run the command to update dependencies:
-```shell
-$ flutter pub get
-```
-3. Import `slikker_kit` to your dart file:
+
+2. Import `slikker_kit` to your dart file:
 ```dart
 import 'package:slikker_kit/slikker_kit.dart';
 ```
-4. Now you can use Slikker components! Example:
+3. Now you can use Slikker components! Example:
 
 ```dart
 Widget button = SlikkerButton(
@@ -37,6 +48,30 @@ Widget button = SlikkerButton(
    child: Text('Hello World!'),
    onTap: () => print('Yayyy'),
 );
+```
+
+<br>
+
+___
+
+
+<br>
+
+## Running example
+
+1. Clone the repository.
+```shell
+$ git clone https://github.com/AlexBesida/slikker_kit.git
+```
+
+2. Move to the example directory
+```shell
+$ cd slikker_kit/example
+```
+
+3. Run `flutter pub get`, and then run the app!
+```shell
+$ flutter run
 ```
 
 <br>

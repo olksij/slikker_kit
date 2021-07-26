@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'button.dart';
 
+// TODO: Extend [SlikkerButton].
+// TODO: Remaster [TopButtonWidget] structure.
+// TODO: Move to scaffold.dart.
+
 class TopButtonWidget extends StatelessWidget {
   final String title;
   final IconData icon;

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+// TODO: [SlikkerContainer] extends [SlikkerButton].
+
 class SlikkerContainer extends StatelessWidget {
   /// The Hue which will be used for your card. Expected value from 0.0 to 360.0
   final double? accent;
