@@ -165,13 +165,14 @@ class _SlikkerButtonState extends State<SlikkerButton>
             child: MouseRegion(
               onEnter: (event) => hover.run(true),
               onExit: (event) => hover.run(false),
+              cursor: SystemMouseCursors.click,
               child: button,
             ),
           );
 
         return Transform(
           alignment: Alignment.center,
-          transform: Matrix4.identity()..scale(1 + .15 * elevation),
+          transform: Matrix4.identity()..scale(1 + .1 * elevation),
           child: CustomPaint(
             painter: _ButtonEffects(this),
             child: button,
