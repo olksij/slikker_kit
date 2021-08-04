@@ -76,15 +76,6 @@ class SlikkerAnimationController {
   /// Direction of the animation
   bool forward = true;
 
-  /* /// Direction of the animation.
-  bool _forward = true;
-
-  /// Represents was animation called already or not.
-  ///
-  /// If [_called] is `false`, it does mean that animation is waiting till
-  /// [value] reached `1.0` or `0.0`, so animation can go to another
-  bool _called = false; */
-
   /// The current value of the animation.
   double get value =>
       lerpDouble(forwardAnmt.value, reverseAnmt.value, switchAnmt.value)!;
@@ -119,26 +110,18 @@ class SlikkerAnimationController {
     duration ??= this.duration;
     this.forward = forward;
 
-    final Function() animate = () {
+    final int start = forward ? 0 : 1;
+
+    final double tillEnd = start - value;
+    final int wait = tillEnd * duration.inMilliseconds ~/ 1.5;
+    Future.delayed(Duration(milliseconds: wait), () {
+      switchAnmt.animateTo(forward ? 0 : 1);
+      //switchAnmt.value = forward ? 0 : 1;
+
       if (forward != this.forward) return;
       if (forward) forwardAnmt.forward(from: 0, duration: duration);
       if (!forward) reverseAnmt.reverse(from: 1, duration: duration);
-    };
-
-    if (!isAnimating) {
-      switchAnmt.value = forward ? 0 : 1;
-      animate();
-    } else {
-      double _tillEnd = forward ? value : 1 - value;
-      int _wait = _tillEnd * duration.inMilliseconds ~/ 1.5;
-      // TODO: Fix [_wait] on forward -> forward.
-      Future.delayed(Duration(milliseconds: _wait), () {
-        switchAnmt.animateTo(forward ? 0 : 1);
-        //switchAnmt.value = forward ? 0 : 1;
-
-        animate();
-      });
-    }
+    });
   }
 }
 
