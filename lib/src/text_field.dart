@@ -50,6 +50,7 @@ class SlikkerTextField extends StatelessWidget {
     );
 
     return SlikkerButton(
+      disabled: true,
       borderRadius: borderRadius,
       padding: padding,
       child: editableText,

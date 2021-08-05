@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'top_button.dart';
 
-// TODO: Dark theme.
 // TODO: Fix [SlikkerScaffold] structure.
-// TODO: Dark theme.
 
 /// Constructor, which creates `TopButtonWidget`. The widget will be displayed
 /// in the top of the page. When user pulls the page or taps the widget,
@@ -119,7 +117,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return Container(
       color: HSVColor.fromAHSV(1, 240, 0.05, 0.98).toColor(),
       child: SafeArea(
         top: true,

@@ -7,9 +7,12 @@ import 'package:flutter/widgets.dart';
 import 'animations.dart';
 
 // TODO: Implement disabled state.
+
 // TODO: Implement minor state.
-// TODO: Rename to material.
-// TODO: Dark theme.
+
+// TODO: Rename.
+
+// TODO: Depend on [SlikkerTheme].
 
 const Duration _lightFadeInDuration = Duration(milliseconds: 200);
 const Duration _lightFadeOutDuration = Duration(milliseconds: 500);
@@ -110,8 +113,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
 
   /// Number ranging from 0.0 to 1.0, where 1.0 means that element is elevated.
   /// Elevation represents button's state.
-  double get elevation => lerpDouble((1 - hover.value) * press.value,
-      hover.value - press.value * hover.value * 0.75, hover.value)!;
+  double get elevation => hover.value - press.value * 1.5;
 
   /// Button's [BorderRadius] based on [elevation].
   BorderRadius get borderRadius => BorderRadius.lerp(
@@ -149,9 +151,13 @@ class _SlikkerButtonState extends State<SlikkerButton>
       child: widget.child,
       builder: (context, child) {
         // Give button padding if available
-        Widget button = Padding(
-          padding: widget.padding ?? EdgeInsets.zero,
-          child: child,
+        Widget button = Transform.scale(
+          scale: 1 + elevation * .1,
+          alignment: Alignment.center,
+          child: Padding(
+            padding: widget.padding ?? EdgeInsets.zero,
+            child: child,
+          ),
         );
 
         // Add gesture listeners if not disabled
@@ -169,9 +175,9 @@ class _SlikkerButtonState extends State<SlikkerButton>
             ),
           );
 
-        return Transform(
+        return Transform.scale(
+          scale: 1 + elevation * .05,
           alignment: Alignment.center,
-          transform: Matrix4.identity()..scale(1 + .1 * elevation),
           child: CustomPaint(
             painter: _ButtonEffects(this),
             child: button,

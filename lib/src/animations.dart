@@ -15,12 +15,12 @@ class SlikkerCurve extends ElasticOutCurve {
 
   final bool _forward;
 
-  SlikkerCurve({
+  const SlikkerCurve({
     this.smthns = 8,
     this.period = 0.6,
   }) : _forward = true;
 
-  SlikkerCurve.reverse({
+  const SlikkerCurve.reverse({
     this.smthns = 8,
     this.period = 0.6,
   }) : _forward = false;
@@ -112,16 +112,20 @@ class SlikkerAnimationController {
 
     final int start = forward ? 0 : 1;
 
-    final double tillEnd = start - value;
-    final int wait = tillEnd * duration.inMilliseconds ~/ 1.5;
-    Future.delayed(Duration(milliseconds: wait), () {
-      switchAnmt.animateTo(forward ? 0 : 1);
-      //switchAnmt.value = forward ? 0 : 1;
+    final double tillEnd = (start - value).abs();
+    final double wait = tillEnd * duration.inMilliseconds;
 
-      if (forward != this.forward) return;
-      if (forward) forwardAnmt.forward(from: 0, duration: duration);
-      if (!forward) reverseAnmt.reverse(from: 1, duration: duration);
-    });
+    //Future.delayed(Duration(milliseconds: wait), () {
+    switchAnmt.animateTo(
+      start.toDouble(),
+      duration: Duration(milliseconds: wait ~/ 5),
+    );
+    //switchAnmt.value = forward ? 0 : 1;
+
+    //if (forward != this.forward) return;
+    if (forward) forwardAnmt.forward(from: 0, duration: duration);
+    if (!forward) reverseAnmt.reverse(from: 1, duration: duration);
+    //});
   }
 }
 
@@ -177,7 +181,8 @@ class _AnimationController {
   }
 
   /// Drives the animation from its current value to target.
-  void animateTo(double value) => controller.animateTo(value);
+  void animateTo(double value, {Duration? duration}) =>
+      controller.animateTo(value, duration: duration);
 
   /// Release the resources used by this object.
   void dispose() => controller.dispose();
