@@ -117,7 +117,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
 
   /// Button's [BorderRadius] based on [elevation].
   BorderRadius get borderRadius => BorderRadius.lerp(
-      widget.borderRadius, BorderRadius.circular(16), elevation)!;
+      widget.borderRadius, BorderRadius.circular(20), elevation)!;
 
   // Fired when user touch or press on button
   void _touchEvent({TapDownDetails? tapDown, TapUpDetails? tapUp}) {
@@ -152,7 +152,7 @@ class _SlikkerButtonState extends State<SlikkerButton>
       builder: (context, child) {
         // Give button padding if available
         Widget button = Transform.scale(
-          scale: 1 + elevation * .1,
+          scale: 1 + elevation * .05,
           alignment: Alignment.center,
           child: Padding(
             padding: widget.padding ?? EdgeInsets.zero,
@@ -217,12 +217,12 @@ class _ButtonEffects extends CustomPainter {
 
     final paintLight = Paint()..color = Color(0x33FFFFFF);
 
-    final paintBoxA = lerpDouble(.75, .65, button.elevation)!;
+    final paintBoxA = lerpDouble(.7, .6, button.elevation)!;
     final paintBox = Paint()
       ..color = HSVColor.fromAHSV(paintBoxA, accent, .02, .99).toColor();
 
     final paintKeyShadow = Paint()
-      ..color = HSVColor.fromAHSV(.25, accent, .05, .95).toColor();
+      ..color = HSVColor.fromAHSV(.2, accent, .05, .95).toColor();
 
     final paintAmbientShadow = Paint()
       ..color = HSVColor.fromAHSV(.5, accent, .1, .97).toColor()
@@ -242,9 +242,10 @@ class _ButtonEffects extends CustomPainter {
 
     // Box Base
 
-    RRect boxBase(double top, double height, bool light, [bool all = false]) {
+    RRect boxBase(double top, double height, bool light,
+        [bool all = false, int wd = 0]) {
       return RRect.fromRectAndCorners(
-        Rect.fromLTWH(0, top, size.width, height),
+        Rect.fromLTWH(-wd / 2, top, size.width + wd, height),
         topLeft: light || all ? borderRadius.topLeft : Radius.zero,
         topRight: light || all ? borderRadius.topRight : Radius.zero,
         bottomLeft: !light || all ? borderRadius.bottomLeft : Radius.zero,
@@ -257,7 +258,7 @@ class _ButtonEffects extends CustomPainter {
     final lightPath = Path.combine(
       PathOperation.difference,
       Path()..addRRect(boxBase(0, topBorder, true)),
-      Path()..addRRect(boxBase(2, topBorder, true)),
+      Path()..addRRect(boxBase(2, topBorder, true, false, 2)),
     );
 
     final _heightDelta = size.height - bottomBorder;
@@ -280,7 +281,7 @@ class _ButtonEffects extends CustomPainter {
     // Extract variables.
     BorderRadius borderRadius = button.borderRadius;
     Offset tapPosition = button.tapPosition;
-    int fade = button.lightFade.value * 255 ~/ 1.5;
+    int fade = button.lightFade.value * 255 ~/ 2;
     double radius = button.lightRadius.value *
         sqrt(pow(size.width, 2) + pow(size.height, 2));
 
