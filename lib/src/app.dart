@@ -26,16 +26,16 @@ class SlikkerApp extends StatefulWidget {
 class _SlikkerAppState extends State<SlikkerApp> {
   @override
   Widget build(BuildContext context) {
-    final SlikkerThemeData theme = widget.theme ?? SlikkerThemeData.light();
+    final SlikkerThemeData theme = widget.theme ?? SlikkerThemeData();
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarIconBrightness: Brightness.dark,
-      statusBarColor: HSVColor.fromAHSV(.05, 240, .2, .2).toColor(),
-      systemNavigationBarColor: HSVColor.fromAHSV(1, 240, 0.06, 0.97).toColor(),
+      statusBarColor: theme.statusBarColor,
+      systemNavigationBarColor: theme.navigationBarColor,
     ));
 
     return SlikkerTheme(
-      data: theme,
+      theme: theme,
       child: WidgetsApp(
         initialRoute: widget.initialRoute,
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
@@ -43,8 +43,11 @@ class _SlikkerAppState extends State<SlikkerApp> {
         routes: widget.routes,
         color: widget.color,
         title: widget.title,
-        textStyle:
-            TextStyle(fontFamily: theme.fontFamily, color: Color(0xFF000000)),
+        textStyle: TextStyle(
+          fontFamily: theme.fontFamily,
+          color: theme.fontColor,
+          fontWeight: theme.fontWeight,
+        ),
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'button.dart';
+
+import './button.dart';
+import './theme.dart';
 
 // TODO: Extend [SlikkerButton].
 // TODO: Remaster [TopButtonWidget] structure.
@@ -9,27 +11,26 @@ import 'button.dart';
 class TopButtonWidget extends StatelessWidget {
   final String title;
   final IconData icon;
-  final double accent;
   final Function onTap;
   final Function refresh;
-  final Color color;
 
   TopButtonWidget({
     required this.title,
     required this.icon,
-    required this.accent,
     required this.onTap,
     required this.refresh,
-  }) : color = HSVColor.fromAHSV(1, accent, 0.4, 0.2).toColor();
+  });
 
   @override
   Widget build(BuildContext context) {
+    final theme = SlikkerTheme.of(context);
+    final color = HSVColor.fromAHSV(1, theme.accent, 0.4, 0.2).toColor();
+
     return SlikkerButton(
-      accent: accent,
       borderRadius: BorderRadius.circular(26),
       onTap: onTap,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(14, 13, 17, 14),
+        padding: theme.padding,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -38,10 +39,16 @@ class TopButtonWidget extends StatelessWidget {
               color: color,
               refresh: refresh,
             ),
-            Container(width: 8, height: 24),
-            Text(title,
-                style: TextStyle(
-                    color: color, fontWeight: FontWeight.w600, fontSize: 16)),
+            SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(width: 2),
           ],
         ),
       ),

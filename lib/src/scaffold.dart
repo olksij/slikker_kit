@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'top_button.dart';
+
+import './theme.dart';
+import './top_button.dart';
 
 // TODO: Fix [SlikkerScaffold] structure.
 
@@ -117,8 +119,10 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = SlikkerTheme.of(context);
+
     return Container(
-      color: HSVColor.fromAHSV(1, 240, 0.05, 0.98).toColor(),
+      color: theme.backgroundColor,
       child: SafeArea(
         top: true,
         child: Stack(
@@ -141,7 +145,6 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
                                 child: TopButtonWidget(
                                   title: widget.topButton!.title,
                                   icon: widget.topButton!.icon,
-                                  accent: 240,
                                   onTap: widget.topButton!.action,
                                   refresh: (Function topButtonFunction) =>
                                       refreshTopButton = topButtonFunction,
@@ -183,8 +186,8 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
                     begin: Alignment.topCenter,
                     end: Alignment(0, 0.25),
                     colors: [
-                      HSVColor.fromAHSV(0, 240, 0.04, 0.98).toColor(),
-                      HSVColor.fromAHSV(1, 240, 0.04, 0.98).toColor(),
+                      theme.backgroundColor.withAlpha(0),
+                      theme.backgroundColor,
                     ],
                   ),
                 ),

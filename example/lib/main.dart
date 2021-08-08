@@ -9,12 +9,13 @@ Color getColor(double a, double h, double s, double v) =>
 class SlikkerExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return SlikkerApp(
       //showPerformanceOverlay: true,
       //checkerboardOffscreenLayers: true,
       title: 'Slikker App Example',
-      theme: ThemeData(fontFamily: 'Manrope'),
-      home: HomePage(),
+      theme: SlikkerThemeData(fontFamily: 'Manrope'),
+      initialRoute: '',
+      routes: {'/': (context) => HomePage()},
     );
   }
 }
@@ -25,7 +26,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final double accent = 240;
   int count = 0;
 
   @override
@@ -38,14 +38,12 @@ class _HomePageState extends State<HomePage> {
       ),
       title: 'Example',
       floatingButton: SlikkerButton(
-        accent: accent,
         borderRadius: BorderRadius.circular(26),
         child: Text('Tap!'),
         onTap: () => setState(() => count++),
         padding: EdgeInsets.all(17),
       ),
       header: SlikkerContainer(
-        accent: accent,
         child: Row(
           children: [
             Expanded(
@@ -53,23 +51,16 @@ class _HomePageState extends State<HomePage> {
                 padding: EdgeInsets.symmetric(horizontal: 17),
                 child: Text(
                   'Button taps:',
-                  style: TextStyle(
-                    fontSize: 17,
-                    color: getColor(1, accent, 0.4, 0.4),
-                  ),
+                  style: TextStyle(fontSize: 17),
                 ),
               ),
             ),
             SlikkerButton(
-              accent: 240,
               borderRadius: BorderRadius.horizontal(right: Radius.circular(12)),
               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 17),
               child: Text(
                 count.toString(),
-                style: TextStyle(
-                  fontSize: 17,
-                  color: getColor(1, accent, 0.4, 0.4),
-                ),
+                style: TextStyle(fontSize: 17),
               ),
             ),
           ],

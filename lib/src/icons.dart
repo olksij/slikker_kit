@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:slikker_kit/slikker_kit.dart';
 
 class SlikkerIcons {
   SlikkerIcons._();
@@ -101,6 +102,8 @@ class IconExtended extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = SlikkerTheme.of(context);
+
     IconData backgroundIcon = IconData(
       icon.codePoint + 1,
       fontFamily: icon.fontFamily,
@@ -108,10 +111,16 @@ class IconExtended extends StatelessWidget {
       matchTextDirection: icon.matchTextDirection,
     );
 
+    HSVColor? _tmp;
+    if (color != null)
+      _tmp = HSVColor.fromAHSV(1, HSVColor.fromColor(color!).hue, .1, .89);
+
+    final background = _tmp?.toColor() ?? theme.iconBackgroundColor;
+
     return Stack(
       children: [
-        _genIcon(backgroundIcon, backgroundColor ?? color),
-        _genIcon(icon, color),
+        _genIcon(backgroundIcon, backgroundColor ?? background),
+        _genIcon(icon, color ?? theme.iconColor),
       ],
     );
   }

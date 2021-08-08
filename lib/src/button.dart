@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:slikker_kit/slikker_kit.dart';
 
 import 'animations.dart';
 
@@ -22,20 +23,16 @@ const Duration _lightRadiusDuration = Duration(milliseconds: 500);
 class SlikkerButton extends StatefulWidget {
   SlikkerButton({
     Key? key,
-    this.accent = 240,
     this.minor = false,
     this.child,
     this.onTap,
-    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
+    this.borderRadius,
     this.disabled = false,
     this.padding,
   }) : super(key: key);
 
   @override
   _SlikkerButtonState createState() => _SlikkerButtonState();
-
-  /// The Hue which will be used for your button. Expected value from 0.0 to 360.0
-  final double accent;
 
   /// If [minor] is true, element lowers by z axis, becoming less noticable.
   ///
@@ -63,6 +60,8 @@ class _SlikkerButtonState extends State<SlikkerButton>
   /// Represents state of the button.
   late final SlikkerAnimationController disabled, hover, minor, press;
   late final SlikkerAnimationController lightFade, lightRadius;
+
+  late SlikkerThemeData theme;
 
   /// Keeps the position where user have tapped.
   Offset tapPosition = Offset(0, 0);
@@ -150,12 +149,13 @@ class _SlikkerButtonState extends State<SlikkerButton>
     return AnimatedBuilder(
       child: widget.child,
       builder: (context, child) {
+        theme = SlikkerTheme.of(context);
         // Give button padding if available
         Widget button = Transform.scale(
           scale: 1 + elevation * .05,
           alignment: Alignment.center,
           child: Padding(
-            padding: widget.padding ?? EdgeInsets.zero,
+            padding: widget.padding ?? theme.padding,
             child: child,
           ),
         );
@@ -210,7 +210,7 @@ class _ButtonEffects extends CustomPainter {
   /// Paints shadows, light paths, and button itself.
   Canvas paintBox(Canvas canvas, Size size) {
     // Extract variables.
-    double accent = button.widget.accent;
+    double accent = button.theme.accent;
     BorderRadius borderRadius = button.borderRadius;
 
     // Initializing Paint objects.
@@ -311,5 +311,5 @@ class _ButtonEffects extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_ButtonEffects oldDelegate) => true;
+  bool shouldRepaint(_ButtonEffects old) => old.button != button;
 }

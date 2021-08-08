@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
 import './button.dart';
+import './theme.dart';
 
 // TODO: [SlikkerTextField] extends [SlikkerButton].
 // TODO: Remaster [SlikkerTextField] structure.
@@ -9,7 +10,6 @@ import './button.dart';
 class SlikkerTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
-  final double accent;
   final int? minLines;
   final int? maxLines;
   final Widget? prefixWidget;
@@ -21,7 +21,6 @@ class SlikkerTextField extends StatelessWidget {
   SlikkerTextField({
     required this.controller,
     this.hintText = '',
-    this.accent = 240.0,
     this.minLines,
     this.maxLines,
     this.padding,
@@ -32,15 +31,19 @@ class SlikkerTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = SlikkerTheme.of(context);
+
     final EditableText editableText = EditableText(
       controller: controller,
       focusNode: focusNode,
       style: TextStyle(
         fontSize: 17,
-        color: HSVColor.fromAHSV(1, accent, .4, .4).toColor(),
+        color: theme.fontColor,
+        fontFamily: theme.fontFamily,
+        fontWeight: theme.fontWeight,
       ),
-      cursorColor: HSVColor.fromAHSV(1, accent, .6, 1).toColor(),
-      backgroundCursorColor: HSVColor.fromAHSV(.5, accent, .6, 1).toColor(),
+      cursorColor: theme.accentColor,
+      backgroundCursorColor: theme.accentColor,
       maxLines: maxLines,
       minLines: minLines,
     );
@@ -48,7 +51,7 @@ class SlikkerTextField extends StatelessWidget {
     return SlikkerButton(
       disabled: true,
       borderRadius: borderRadius,
-      padding: padding,
+      padding: EdgeInsets.zero,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
