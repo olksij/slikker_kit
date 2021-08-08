@@ -12,12 +12,10 @@ class SlikkerTextField extends StatelessWidget {
   final double accent;
   final int? minLines;
   final int? maxLines;
-  final IconData? prefixIcon;
-  final EdgeInsetsGeometry padding;
-  final EdgeInsetsGeometry? prefixIconPadding;
-  final double prefixIconSize;
-  final bool isTransperent;
-  final BorderRadius borderRadius;
+  final Widget? prefixWidget;
+  final Widget? suffixWidget;
+  final EdgeInsetsGeometry? padding;
+  final BorderRadius? borderRadius;
   final FocusNode focusNode;
 
   SlikkerTextField({
@@ -26,12 +24,10 @@ class SlikkerTextField extends StatelessWidget {
     this.accent = 240.0,
     this.minLines,
     this.maxLines,
-    this.prefixIcon,
-    this.padding = const EdgeInsets.all(15),
-    this.isTransperent = false,
-    this.prefixIconPadding,
-    this.prefixIconSize = 24.0,
-    this.borderRadius = const BorderRadius.all(Radius.circular(12.0)),
+    this.padding,
+    this.borderRadius,
+    this.prefixWidget,
+    this.suffixWidget,
   }) : focusNode = FocusNode();
 
   @override
@@ -53,7 +49,14 @@ class SlikkerTextField extends StatelessWidget {
       disabled: true,
       borderRadius: borderRadius,
       padding: padding,
-      child: editableText,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          prefixWidget ?? SizedBox(),
+          Expanded(child: editableText),
+          suffixWidget ?? SizedBox(),
+        ],
+      ),
     );
 
     /*TextField(

@@ -16,6 +16,8 @@ class SlikkerIcons {
       IconData(0xe906, fontFamily: _fontFamily, fontPackage: _fontPackage);
   static const IconData settings =
       IconData(0xe908, fontFamily: _fontFamily, fontPackage: _fontPackage);
+  static const IconData search =
+      IconData(0xe90A, fontFamily: _fontFamily, fontPackage: _fontPackage);
 }
 
 class IconExtended extends StatelessWidget {

@@ -26,27 +26,26 @@ ___
 
 ## Installing package
 
-1. Run the command to add dependency and update dependencies:
+### 1. Run the command to add dependency and update dependencies:
 ```shell
 $ flutter pub add slikker_kit
 ```
 This will add a line like this to your package's pubspec.yaml (and run an implicit `dart pub get`): 
 ```yaml
 dependencies:
-   slikker_kit: ^1.1.0-alpha.22
+   slikker_kit: any
 ```
 
-2. Import `slikker_kit` to your dart file:
+### 2. Import `slikker_kit` to your dart file:
 ```dart
 import 'package:slikker_kit/slikker_kit.dart';
 ```
-3. Now you can use Slikker components! Example:
+### 3. Now you can use Slikker components! Example:
 
 ```dart
 Widget button = SlikkerButton(
    padding: EdgeInsets.all(15),
    child: Text('Hello World!'),
-   onTap: () => print('Yayyy'),
 );
 ```
 
