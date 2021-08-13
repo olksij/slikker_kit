@@ -34,6 +34,7 @@ class SlikkerThemeData {
     Color? navigationBarColor,
     double? iconSize,
     EdgeInsets? padding,
+    BorderRadius? borderRadius,
   }) {
     accentColor ??= HSVColor.fromAHSV(1, accent ?? 240, .6, 1).toColor();
     accent ??= HSVColor.fromColor(accentColor).hue;
@@ -47,6 +48,7 @@ class SlikkerThemeData {
     statusBarColor ??= HSVColor.fromAHSV(.05, accent, .2, .2).toColor();
     navigationBarColor ??= HSVColor.fromAHSV(1, accent, 0.06, 0.97).toColor();
     padding ??= EdgeInsets.all(16);
+    borderRadius ??= BorderRadius.circular(12);
 
     return SlikkerThemeData.raw(
       accent: accent,
@@ -61,6 +63,7 @@ class SlikkerThemeData {
       statusBarColor: statusBarColor,
       navigationBarColor: navigationBarColor,
       padding: padding,
+      borderRadius: borderRadius,
     );
   }
 
@@ -77,6 +80,7 @@ class SlikkerThemeData {
     required this.statusBarColor,
     required this.navigationBarColor,
     required this.padding,
+    required this.borderRadius,
   });
 
   /// The Hue which will be used for your button. Expected value from 0.0 to 360.0
@@ -103,4 +107,6 @@ class SlikkerThemeData {
   final Color navigationBarColor;
 
   final EdgeInsets padding;
+
+  final BorderRadius borderRadius;
 }

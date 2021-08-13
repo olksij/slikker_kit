@@ -44,6 +44,7 @@ class _SlikkerAppState extends State<SlikkerApp> {
         color: widget.color,
         title: widget.title,
         textStyle: TextStyle(
+          fontSize: 16,
           fontFamily: theme.fontFamily,
           color: theme.fontColor,
           fontWeight: theme.fontWeight,

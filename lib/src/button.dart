@@ -13,6 +13,8 @@ class SlikkerButton extends StatelessWidget {
     this.minor = false,
     this.onTap,
     this.mainAxisSize = MainAxisSize.min,
+    this.center,
+    this.spacing,
   }) : super(key: key);
 
   final BorderRadius? borderRadius;
@@ -23,17 +25,26 @@ class SlikkerButton extends StatelessWidget {
   final bool minor;
   final Function? onTap;
   final MainAxisSize mainAxisSize;
+  final bool? center;
+  final double? spacing;
 
   @override
   Widget build(BuildContext context) {
+    late Widget result;
+
+    if (icon != null && child != null)
+      result = Row(
+        mainAxisSize: mainAxisSize,
+        children: [icon!, SizedBox(width: spacing ?? 8), child!],
+      );
+    else
+      result = icon ?? child ?? SizedBox();
+
+    if (center == true) result = Center(child: result);
+
     return SlikkerMaterial(
       borderRadius: borderRadius,
-      child: icon != null && child != null
-          ? Row(
-              mainAxisSize: mainAxisSize,
-              children: [icon!, SizedBox(width: 8), child!],
-            )
-          : icon ?? child ?? SizedBox(),
+      child: result,
       padding: padding,
       disabled: disabled,
       minor: minor,

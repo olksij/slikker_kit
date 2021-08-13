@@ -112,7 +112,9 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
 
   /// Material's [BorderRadius] based on [elevation].
   BorderRadius get borderRadius => BorderRadius.lerp(
-      widget.borderRadius, BorderRadius.circular(20), elevation)!;
+      widget.borderRadius ?? theme.borderRadius,
+      BorderRadius.circular(20),
+      elevation)!;
 
   // Fired when user touch or press on button
   void _touchEvent({TapDownDetails? tapDown, TapUpDetails? tapUp}) {
@@ -146,6 +148,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
       child: widget.child,
       builder: (context, child) {
         theme = SlikkerTheme.of(context);
+
         // Give button padding if available
         Widget button = Transform.scale(
           scale: 1 + elevation * .05,
@@ -185,8 +188,6 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
         hover.listenable,
         minor.listenable,
         press.listenable,
-        lightFade.listenable,
-        lightRadius.listenable,
       ]),
     );
   }
