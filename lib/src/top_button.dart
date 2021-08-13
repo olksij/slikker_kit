@@ -29,27 +29,17 @@ class TopButtonWidget extends StatelessWidget {
     return SlikkerButton(
       borderRadius: BorderRadius.circular(26),
       onTap: onTap,
-      child: Padding(
-        padding: theme.padding,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _TopButtonIcon(
-              icon: icon,
-              color: color,
-              refresh: refresh,
-            ),
-            SizedBox(width: 8),
-            Text(
-              title,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-              ),
-            ),
-            SizedBox(width: 2),
-          ],
+      icon: _TopButtonIcon(
+        icon: icon,
+        color: color,
+        refresh: refresh,
+      ),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
         ),
       ),
     );
