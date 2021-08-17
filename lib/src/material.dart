@@ -36,7 +36,7 @@ class SlikkerMaterial extends StatefulWidget {
   /// Can be used to hint user for another suggested action.
   final bool minor;
 
-  /// Whether the button is enabled or disabled.
+  /// Whether the material is enabled or disabled.
   final bool disabled;
 
   /// If non-null, the corners of this box are rounded by this [BorderRadiusGeometry] value.
@@ -56,72 +56,73 @@ class SlikkerMaterial extends StatefulWidget {
 
 class _SlikkerMaterialState extends State<SlikkerMaterial>
     with TickerProviderStateMixin {
-  /// Represents state of the button.
+  /// Represents state of the material.
   late final SlikkerAnimationController disabled, hover, minor, press;
   late final SlikkerAnimationController lightFade, lightRadius;
+
+  final _key = GlobalKey();
 
   late SlikkerThemeData theme;
 
   /// Keeps the position where user have tapped.
   Offset tapPosition = Offset(0, 0);
 
+  double? factor;
+
   @override
   void initState() {
     super.initState();
-
     // Initialize slikker animation.
-    disabled = _initSlikkerAnimation(value: widget.disabled);
-    minor = _initSlikkerAnimation(value: widget.minor);
-    hover = _initSlikkerAnimation();
-    press = _initSlikkerAnimation();
-    lightFade = _initSlikkerAnimation(
-      curve: Curves.easeInOut,
-      reverseCurve: Curves.easeInOut,
-    );
-    lightRadius = _initSlikkerAnimation(
-      curve: Curves.easeOut,
-      reverseCurve: Curves.easeOut,
-    );
+    disabled = _initAnimation(value: widget.disabled);
+    minor = _initAnimation(value: widget.minor);
+    lightFade = _initAnimation(curve: Curves.easeInOut);
+    lightRadius = _initAnimation(curve: Curves.easeOut);
+    hover = _initAnimation();
+    press = _initAnimation();
   }
 
   /// Generic slikker animation controller required.
-  SlikkerAnimationController _initSlikkerAnimation({
+  SlikkerAnimationController _initAnimation({
     bool value = false,
     Curve? curve,
-    Curve? reverseCurve,
   }) {
     return SlikkerAnimationController(
       duration: Duration(milliseconds: 600),
       curve: curve ?? SlikkerCurve(smthns: 10),
-      reverseCurve: reverseCurve ?? SlikkerCurve.reverse(smthns: 6),
+      reverseCurve: curve ?? SlikkerCurve.reverse(smthns: 6),
       vsync: this,
     );
   }
 
   @override
   void dispose() {
-    disabled.dispose();
-    hover.dispose();
-    minor.dispose();
-    press.dispose();
-    lightFade.dispose();
-    lightRadius.dispose();
+    for (var anim in [disabled, hover, minor, press, lightFade, lightRadius])
+      anim.dispose();
     super.dispose();
   }
 
-  /// Number ranging from 0.0 to 1.0, where 1.0 means that element is elevated.
-  /// Elevation represents button's state.
-  double get elevation => hover.value - press.value * 1.5;
+  /// Number ranging from -1/1.6 to 1.0, where 1.0 means that element is
+  /// demoted (pressed or clicked).
+  ///
+  /// Depth represents material's state.
+  double get depth => press.value - hover.value / 1.6;
 
-  /// Material's [BorderRadius] based on [elevation].
-  BorderRadius get borderRadius => BorderRadius.lerp(
-      widget.borderRadius ?? theme.borderRadius,
-      BorderRadius.circular(20),
-      elevation)!;
+  double? calcFactor() {
+    final size = context.size;
+    if (size != null) return (size.height + size.width) / 2 / 56;
+  }
 
-  // Fired when user touch or press on button
-  void _touchEvent({TapDownDetails? tapDown, TapUpDetails? tapUp}) {
+  // Fired when user hover material
+  void hoverEvent(bool state) {
+    factor = context.size?.height;
+    if (!widget.disabled) hover.run(state);
+  }
+
+  // Fired when user touch or press on material
+  void touchEvent({TapDownDetails? tapDown, TapUpDetails? tapUp}) {
     if (widget.disabled) return;
+
+    factor = calcFactor();
 
     if (tapDown != null) {
       // Tap down event.
@@ -147,14 +148,20 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
 
   @override
   Widget build(BuildContext context) {
+    disabled.run(widget.disabled);
+    minor.run(widget.minor);
+
     return AnimatedBuilder(
+      key: _key,
       child: widget.child,
       builder: (context, child) {
         theme = SlikkerTheme.of(context);
 
-        // Give button padding if available
-        Widget button = Transform.scale(
-          scale: 1 + elevation * .05,
+        final factor = this.factor ?? 1;
+
+        // Give material padding if available
+        Widget material = Transform.scale(
+          scale: 1 - depth * .1 / factor,
           alignment: Alignment.center,
           child: Padding(
             padding: widget.padding ?? theme.padding,
@@ -164,25 +171,25 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
 
         // Add gesture listeners if not disabled
         if (!widget.disabled && widget.onTap != null)
-          button = GestureDetector(
-            onTapDown: (details) => _touchEvent(tapDown: details),
-            onTapUp: (details) => _touchEvent(tapUp: details),
-            onTapCancel: () => _touchEvent(),
+          material = GestureDetector(
+            onTapDown: (details) => touchEvent(tapDown: details),
+            onTapUp: (details) => touchEvent(tapUp: details),
+            onTapCancel: () => touchEvent(),
             onTap: () => widget.onTap!(),
             child: MouseRegion(
-              onEnter: (event) => hover.run(true),
-              onExit: (event) => hover.run(false),
+              onEnter: (event) => hoverEvent(true),
+              onExit: (event) => hoverEvent(false),
               cursor: SystemMouseCursors.click,
-              child: button,
+              child: material,
             ),
           );
 
         return Transform.scale(
-          scale: 1 + elevation * .05,
+          scale: 1 - depth * .1 / factor,
           alignment: Alignment.center,
           child: CustomPaint(
             painter: _MaterialEffects(this),
-            child: button,
+            child: material,
           ),
         );
       },
