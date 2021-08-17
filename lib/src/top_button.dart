@@ -27,6 +27,7 @@ class TopButtonWidget extends StatelessWidget {
     final color = HSVColor.fromAHSV(1, theme.accent, 0.4, 0.2).toColor();
 
     return SlikkerButton(
+      shape: BoxShape.circle,
       borderRadius: BorderRadius.circular(26),
       onTap: onTap,
       icon: _TopButtonIcon(

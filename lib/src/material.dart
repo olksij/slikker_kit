@@ -25,6 +25,7 @@ class SlikkerMaterial extends StatefulWidget {
     this.borderRadius,
     this.disabled = false,
     this.padding,
+    this.shape,
   }) : super(key: key);
 
   @override
@@ -49,6 +50,8 @@ class SlikkerMaterial extends StatefulWidget {
 
   /// The [Function] that will be invoked on user's tap.
   final Function? onTap;
+
+  final BoxShape? shape;
 }
 
 class _SlikkerMaterialState extends State<SlikkerMaterial>
@@ -194,9 +197,9 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
 }
 
 class _MaterialEffects extends CustomPainter {
-  _SlikkerMaterialState button;
+  _SlikkerMaterialState material;
 
-  _MaterialEffects(this.button) : super();
+  _MaterialEffects(this.material) : super();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -204,33 +207,46 @@ class _MaterialEffects extends CustomPainter {
     canvas = paintRipple(canvas, size);
   }
 
-  /// Paints shadows, light paths, and button itself.
+  BorderRadius materialBorderRadius(Size size) {
+    final circle = material.widget.shape == BoxShape.circle;
+
+    final base = circle
+        ? BorderRadius.circular(size.shortestSide / 2)
+        : material.widget.borderRadius ?? material.theme.borderRadius;
+
+    final sum =
+        base.bottomRight + base.bottomLeft + base.bottomRight + base.bottomLeft;
+
+    final elevated = BorderRadius.all(sum * .64 / 4);
+
+    final demoted = BorderRadius.all(sum / .64 / 4);
+
+    final elevationResult =
+        BorderRadius.lerp(base, elevated, material.hover.value);
+
+    return BorderRadius.lerp(elevationResult, demoted, material.press.value)!;
+  }
+
+  /// Paints shadows, light paths, and material itself.
   Canvas paintBox(Canvas canvas, Size size) {
     // Extract variables.
-    double accent = button.theme.accent;
-    BorderRadius borderRadius = button.borderRadius;
+    final double accent = material.theme.accent;
+    final BorderRadius borderRadius = materialBorderRadius(size);
 
     // Initializing Paint objects.
 
-    final paintLight = Paint()..color = Color(0x33FFFFFF);
+    final Paint paintLight = Paint()..color = Color(0x33FFFFFF);
 
-    final paintBoxA = lerpDouble(.7, .6, button.elevation)!;
-    final paintBox = Paint()
-      ..color = HSVColor.fromAHSV(paintBoxA, accent, .02, .99).toColor();
+    final double paintBoxAlpha = lerpDouble(.7, .6, material.depth)!;
+    final Paint paintBox = Paint()
+      ..color = HSVColor.fromAHSV(paintBoxAlpha, accent, .02, .99).toColor();
 
-    final paintKeyShadow = Paint()
+    final Paint paintKeyShadow = Paint()
       ..color = HSVColor.fromAHSV(.2, accent, .05, .95).toColor();
 
-    final paintAmbientShadow = Paint()
+    final Paint paintAmbientShadow = Paint()
       ..color = HSVColor.fromAHSV(.5, accent, .1, .97).toColor()
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, 16);
-
-    // Top borders
-
-    final double topBorder = max(
-      borderRadius.topLeft.y,
-      borderRadius.topRight.y,
-    );
 
     final double bottomBorder = max(
       borderRadius.bottomLeft.y,
@@ -239,74 +255,63 @@ class _MaterialEffects extends CustomPainter {
 
     // Box Base
 
-    RRect boxBase(double top, double height, bool light,
-        [bool all = false, int wd = 0]) {
-      return RRect.fromRectAndCorners(
-        Rect.fromLTWH(-wd / 2, top, size.width + wd, height),
-        topLeft: light || all ? borderRadius.topLeft : Radius.zero,
-        topRight: light || all ? borderRadius.topRight : Radius.zero,
-        bottomLeft: !light || all ? borderRadius.bottomLeft : Radius.zero,
-        bottomRight: !light || all ? borderRadius.bottomRight : Radius.zero,
-      );
+    RRect boxBase(double top, double height, [int wd = 0]) {
+      final rect = Rect.fromLTWH(-wd / 2, top, size.width + wd, height);
+      return borderRadius.toRRect(rect);
     }
 
     // Generate required paths
 
     final lightPath = Path.combine(
       PathOperation.difference,
-      Path()..addRRect(boxBase(0, topBorder, true)),
-      Path()..addRRect(boxBase(2, topBorder, true, false, 2)),
+      Path()..addRRect(boxBase(0, size.height)),
+      Path()..addRRect(boxBase(2, size.height, 2)),
     );
 
-    final _heightDelta = size.height - bottomBorder;
+    final heightDelta = size.height - bottomBorder;
     final keyShadowPath = Path.combine(
       PathOperation.difference,
-      Path()..addRRect(boxBase(_heightDelta + 3, bottomBorder, false)),
-      Path()..addRRect(boxBase(_heightDelta, bottomBorder, false)),
+      Path()..addRRect(boxBase(heightDelta + 3, bottomBorder)),
+      Path()..addRRect(boxBase(heightDelta, bottomBorder)),
     );
 
     // Draw into canvas
 
     return canvas
-      ..drawRRect(boxBase(4, size.height, true, true), paintAmbientShadow)
+      ..drawRRect(boxBase(4, size.height), paintAmbientShadow)
       ..drawPath(keyShadowPath, paintKeyShadow)
-      ..drawRRect(boxBase(0, size.height, true, true), paintBox)
+      ..drawRRect(boxBase(0, size.height), paintBox)
       ..drawPath(lightPath, paintLight);
   }
 
   Canvas paintRipple(Canvas canvas, Size size) {
     // Extract variables.
-    BorderRadius borderRadius = button.borderRadius;
-    Offset tapPosition = button.tapPosition;
-    int fade = button.lightFade.value * 255 ~/ 2;
-    double radius = button.lightRadius.value *
+    final BorderRadius borderRadius = materialBorderRadius(size);
+    final Offset tapPosition = material.tapPosition;
+    final int fade = material.lightFade.value * 255 ~/ 2;
+    final double radius = material.lightRadius.value *
         sqrt(pow(size.width, 2) + pow(size.height, 2));
 
-    final colors = [
+    final List<Color> colors = [
       Color(0xFFFFFF).withAlpha(fade ~/ 1.5),
       Color(0xFFFFFF).withAlpha(fade),
     ];
 
-    final paintRipple = Paint()
-      ..shader = RadialGradient(colors: colors).createShader(Rect.fromCircle(
-        radius: radius,
-        center: tapPosition,
-      ));
+    final rect = Rect.fromCircle(center: tapPosition, radius: radius);
+
+    final Paint paintRipple = Paint()
+      ..shader = RadialGradient(colors: colors).createShader(rect);
 
     // Clip canvas, so ripple doesnt overflow.
-    canvas.clipRRect(RRect.fromRectAndCorners(
+    canvas.clipRRect(borderRadius.toRRect(
       Rect.fromLTWH(0, 0, size.width, size.height),
-      topLeft: borderRadius.topLeft,
-      topRight: borderRadius.topRight,
-      bottomLeft: borderRadius.bottomLeft,
-      bottomRight: borderRadius.bottomRight,
     ));
-
-    final rect = Rect.fromCircle(center: tapPosition, radius: radius);
 
     return canvas..drawOval(rect, paintRipple);
   }
 
   @override
-  bool shouldRepaint(_MaterialEffects old) => old.button != button;
+  bool shouldRepaint(_MaterialEffects old) =>
+      old.material.lightFade != material.lightFade ||
+      old.material.lightRadius != material.lightRadius;
 }

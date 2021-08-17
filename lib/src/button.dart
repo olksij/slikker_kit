@@ -15,6 +15,7 @@ class SlikkerButton extends StatelessWidget {
     this.mainAxisSize = MainAxisSize.min,
     this.center,
     this.spacing,
+    this.shape,
   }) : super(key: key);
 
   final BorderRadius? borderRadius;
@@ -27,6 +28,7 @@ class SlikkerButton extends StatelessWidget {
   final MainAxisSize mainAxisSize;
   final bool? center;
   final double? spacing;
+  final BoxShape? shape;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +51,7 @@ class SlikkerButton extends StatelessWidget {
       disabled: disabled,
       minor: minor,
       onTap: onTap,
+      shape: shape,
     );
   }
 }
