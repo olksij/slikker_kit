@@ -107,18 +107,20 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
   /// Depth represents material's state.
   double get depth => press.value - hover.value / 1.6;
 
+  /// Calculates the strength of the animation of interactions.
+  /// Lower value means more sensetive.
   double? calcFactor() {
     final size = context.size;
     if (size != null) return (size.height + size.width) / 2 / 56;
   }
 
-  // Fired when user hover material
+  /// Fired when user hover material
   void hoverEvent(bool state) {
-    factor = context.size?.height;
+    factor = calcFactor();
     if (!widget.disabled) hover.run(state);
   }
 
-  // Fired when user touch or press on material
+  /// Fired when user touch or press on material
   void touchEvent({TapDownDetails? tapDown, TapUpDetails? tapUp}) {
     if (widget.disabled) return;
 
@@ -194,9 +196,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
         );
       },
       animation: Listenable.merge([
-        disabled.listenable,
         hover.listenable,
-        minor.listenable,
         press.listenable,
       ]),
     );
@@ -237,16 +237,15 @@ class _MaterialEffects extends CustomPainter {
   /// Paints shadows, light paths, and material itself.
   Canvas paintBox(Canvas canvas, Size size) {
     // Extract variables.
-    final double accent = material.theme.accent;
+    final double accent = material.theme.hue;
     final BorderRadius borderRadius = materialBorderRadius(size);
 
     // Initializing Paint objects.
 
     final Paint paintLight = Paint()..color = Color(0x33FFFFFF);
 
-    final double paintBoxAlpha = lerpDouble(.7, .6, material.depth)!;
     final Paint paintBox = Paint()
-      ..color = HSVColor.fromAHSV(paintBoxAlpha, accent, .02, .99).toColor();
+      ..color = HSVColor.fromAHSV(.65, accent, .02, .99).toColor();
 
     final Paint paintKeyShadow = Paint()
       ..color = HSVColor.fromAHSV(.2, accent, .05, .95).toColor();
@@ -319,6 +318,31 @@ class _MaterialEffects extends CustomPainter {
 
   @override
   bool shouldRepaint(_MaterialEffects old) =>
-      old.material.lightFade != material.lightFade ||
-      old.material.lightRadius != material.lightRadius;
+      old.material.lightFade.value != material.lightFade.value ||
+      old.material.lightRadius.value != material.lightRadius.value ||
+      old.material.minor.value != material.minor.value ||
+      old.material.disabled.value != material.disabled.value;
+}
+
+class SlikkerMaterialTheme {
+  factory SlikkerMaterialTheme({
+    SlikkerMaterialTheme? theme,
+    double? hue,
+  }) {
+    theme ??= SlikkerMaterialTheme.light();
+
+    return SlikkerMaterialTheme.raw(
+      hue: hue ?? theme.hue,
+    );
+  }
+
+  const SlikkerMaterialTheme.light() : hue = 240;
+
+  const SlikkerMaterialTheme.dark() : hue = 240;
+
+  const SlikkerMaterialTheme.raw({
+    required this.hue,
+  });
+
+  final double hue;
 }

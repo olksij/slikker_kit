@@ -24,7 +24,7 @@ class TopButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = SlikkerTheme.of(context);
-    final color = HSVColor.fromAHSV(1, theme.accent, 0.4, 0.2).toColor();
+    final color = HSVColor.fromAHSV(1, theme.hue, 0.4, 0.2).toColor();
 
     return SlikkerButton(
       shape: BoxShape.circle,

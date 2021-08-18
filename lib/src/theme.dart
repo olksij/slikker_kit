@@ -1,6 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
+Color _hsvColor(double a, double h, double s, double v) =>
+    HSVColor.fromAHSV(a, h, s, v).toColor();
+
 class SlikkerTheme extends InheritedWidget {
   const SlikkerTheme({
     required Widget child,
@@ -22,7 +25,8 @@ class SlikkerTheme extends InheritedWidget {
 
 class SlikkerThemeData {
   factory SlikkerThemeData({
-    double? accent,
+    SlikkerThemeData? theme,
+    double? hue,
     Color? accentColor,
     Color? backgroundColor,
     Color? fontColor,
@@ -36,39 +40,57 @@ class SlikkerThemeData {
     EdgeInsets? padding,
     BorderRadius? borderRadius,
   }) {
-    accentColor ??= HSVColor.fromAHSV(1, accent ?? 240, .6, 1).toColor();
-    accent ??= HSVColor.fromColor(accentColor).hue;
-    backgroundColor ??= HSVColor.fromAHSV(1, accent, 0.05, 0.98).toColor();
-    fontFamily ??= '';
-    fontWeight ??= FontWeight.w600;
-    iconColor ??= HSVColor.fromAHSV(1, accent, .22, .56).toColor();
-    iconBackgroundColor ??= HSVColor.fromAHSV(1, accent, .1, .89).toColor();
-    iconSize ??= 28;
-    fontColor ??= HSVColor.fromAHSV(1, accent, .24, .4).toColor();
-    statusBarColor ??= HSVColor.fromAHSV(.05, accent, .2, .2).toColor();
-    navigationBarColor ??= HSVColor.fromAHSV(1, accent, 0.06, 0.97).toColor();
-    padding ??= EdgeInsets.all(16);
-    borderRadius ??= BorderRadius.circular(12);
+    theme ??= SlikkerThemeData.light();
 
     return SlikkerThemeData.raw(
-      accent: accent,
-      accentColor: accentColor,
-      backgroundColor: backgroundColor,
-      fontFamily: fontFamily,
-      fontWeight: fontWeight,
-      iconColor: iconColor,
-      iconBackgroundColor: iconBackgroundColor,
-      iconSize: iconSize,
-      fontColor: fontColor,
-      statusBarColor: statusBarColor,
-      navigationBarColor: navigationBarColor,
-      padding: padding,
-      borderRadius: borderRadius,
+      hue: hue ?? theme.hue,
+      accentColor: accentColor ?? theme.accentColor,
+      backgroundColor: backgroundColor ?? theme.backgroundColor,
+      fontFamily: fontFamily ?? theme.fontFamily,
+      fontWeight: fontWeight ?? theme.fontWeight,
+      iconColor: iconColor ?? theme.iconColor,
+      iconBackgroundColor: iconBackgroundColor ?? theme.iconBackgroundColor,
+      iconSize: iconSize ?? theme.iconSize,
+      fontColor: fontColor ?? theme.fontColor,
+      statusBarColor: statusBarColor ?? theme.statusBarColor,
+      navigationBarColor: navigationBarColor ?? theme.navigationBarColor,
+      padding: padding ?? theme.padding,
+      borderRadius: borderRadius ?? theme.borderRadius,
     );
   }
 
+  SlikkerThemeData.light({double hue = 240})
+      : this.accentColor = _hsvColor(1, hue, .6, 1),
+        this.hue = hue,
+        this.backgroundColor = _hsvColor(1, hue, .05, .98),
+        this.fontFamily = '',
+        this.fontWeight = FontWeight.w600,
+        this.iconColor = _hsvColor(1, hue, .22, .56),
+        this.iconBackgroundColor = _hsvColor(1, hue, .1, .89),
+        this.iconSize = 28,
+        this.fontColor = _hsvColor(1, hue, .24, .4),
+        this.statusBarColor = _hsvColor(.05, hue, .2, .2),
+        this.navigationBarColor = _hsvColor(1, hue, .06, .97),
+        this.padding = EdgeInsets.all(16),
+        this.borderRadius = BorderRadius.circular(12);
+
+  SlikkerThemeData.dark({double hue = 240})
+      : this.accentColor = _hsvColor(1, hue, .6, 1),
+        this.hue = hue,
+        this.backgroundColor = _hsvColor(1, hue, .05, .98),
+        this.fontFamily = '',
+        this.fontWeight = FontWeight.w600,
+        this.iconColor = _hsvColor(1, hue, .22, .56),
+        this.iconBackgroundColor = _hsvColor(1, hue, .1, .89),
+        this.iconSize = 28,
+        this.fontColor = _hsvColor(1, hue, .24, .4),
+        this.statusBarColor = _hsvColor(.05, hue, .2, .2),
+        this.navigationBarColor = _hsvColor(1, hue, .06, .97),
+        this.padding = EdgeInsets.all(16),
+        this.borderRadius = BorderRadius.circular(12);
+
   const SlikkerThemeData.raw({
-    required this.accent,
+    required this.hue,
     required this.accentColor,
     required this.backgroundColor,
     required this.fontFamily,
@@ -84,7 +106,7 @@ class SlikkerThemeData {
   });
 
   /// The Hue which will be used for your button. Expected value from 0.0 to 360.0
-  final double accent;
+  final double hue;
 
   final Color accentColor;
 
