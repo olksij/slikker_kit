@@ -1,13 +1,13 @@
 name: slikker_kit
 description: Slikker Kit is a Flutter package which provides Slikker Design System components.
 
-version: 1.1.0-alpha.33
+version: 1.1.0-alpha.34
 
 homepage: https://github.com/AlexBesida/slikker_kit#readme
 repository: https://github.com/AlexBesida/slikker_kit
 
 environment:
-  sdk: '>=2.13.0 <3.0.0'
+  sdk: '>=2.15.0 <3.0.0'
   flutter: ">=2.0.4"
 
 dependencies:

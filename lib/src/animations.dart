@@ -80,8 +80,8 @@ class SlikkerAnimationController {
   double get value =>
       lerpDouble(forwardAnmt.value, reverseAnmt.value, switchAnmt.value)!;
 
-  Listenable get listenable => Listenable.merge(
-      [forwardAnmt.animation, reverseAnmt.animation, switchAnmt.animation]);
+  Listenable get listenable =>
+      Listenable.merge([forwardAnmt, reverseAnmt, switchAnmt]);
 
   bool get isAnimating =>
       forwardAnmt.isAnimating ||
@@ -130,60 +130,46 @@ class SlikkerAnimationController {
 }
 
 /// A controller with an applied curve for an animation
-class _AnimationController {
+class _AnimationController extends AnimationController {
   /// A controller with an applied curve for an animation
   _AnimationController({
     required TickerProvider vsync,
+    required Duration duration,
     required this.curve,
-    required this.duration,
     double value = 0.0,
-  }) {
-    controller =
-        AnimationController(vsync: vsync, duration: duration, value: value);
-    animation = CurvedAnimation(
-      curve: curve,
-      parent: controller,
-    );
-  }
+  }) : super(vsync: vsync, duration: duration, value: value);
 
   /// The curve to use in forward direction.
   final Curve curve;
 
-  /// Is the length of time this animation should last.
-  final Duration duration;
-
-  set duration(Duration duration) => controller.duration = duration;
-
-  /// A controller for an animation.
-  late final AnimationController controller;
-
-  /// An animation that applies a curve to [controller].
-  late final CurvedAnimation animation;
+  // Sets duration for [AnimationController].
+  set duration(Duration? duration) => super.duration ??= duration;
 
   /// The current value of the animation.
-  double get value => animation.value;
+  double get value => curve.transform(super.value);
 
-  bool get isAnimating => controller.isAnimating;
+  // Returns `true`, if animation currently runs.
+  bool get isAnimating => super.isAnimating;
 
   /// Sets the current value of the animation.
-  set value(double value) => controller.value = value;
+  set value(double value) => super.value = value;
 
   /// Starts running this animation forwards (towards the end).
-  void forward({double? from, Duration? duration}) {
-    controller.duration = duration ?? this.duration;
-    controller.forward(from: from);
+  TickerFuture forward({double? from, Duration? duration}) {
+    super.duration = duration ?? this.duration;
+    return super.forward(from: from);
   }
 
   /// Starts running this animation in reverse (towards the beginning).
-  void reverse({double? from, Duration? duration}) {
-    controller.duration = duration ?? this.duration;
-    controller.reverse(from: from);
+  TickerFuture reverse({double? from, Duration? duration}) {
+    super.duration = duration ?? this.duration;
+    return super.reverse(from: from);
   }
 
   /// Drives the animation from its current value to target.
-  void animateTo(double value, {Duration? duration}) =>
-      controller.animateTo(value, duration: duration);
+  TickerFuture animateTo(double value, {Duration? duration, Curve? curve}) =>
+      super.animateTo(value, duration: duration);
 
   /// Release the resources used by this object.
-  void dispose() => controller.dispose();
+  void dispose() => super.dispose();
 }
