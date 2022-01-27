@@ -1,11 +1,10 @@
-import 'dart:ui';
 import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:slikker_kit/slikker_kit.dart';
 
 import 'animations.dart';
+import 'theme.dart';
 
 // TODO: Implement disabled state.
 
@@ -13,11 +12,11 @@ import 'animations.dart';
 
 const Duration _lightFadeInDuration = Duration(milliseconds: 200);
 const Duration _lightFadeOutDuration = Duration(milliseconds: 500);
-const Duration _lightPressDuration = Duration(milliseconds: 1000);
+//const Duration _lightPressDuration = Duration(milliseconds: 1000);
 const Duration _lightRadiusDuration = Duration(milliseconds: 500);
 
 class SlikkerMaterial extends StatefulWidget {
-  SlikkerMaterial({
+  const SlikkerMaterial({
     Key? key,
     this.minor = false,
     this.child,
@@ -65,7 +64,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
   late SlikkerThemeData theme;
 
   /// Keeps the position where user have tapped.
-  Offset tapPosition = Offset(0, 0);
+  Offset tapPosition = const Offset(0, 0);
 
   double? factor;
 
@@ -87,17 +86,18 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
     Curve? curve,
   }) {
     return SlikkerAnimationController(
-      duration: Duration(milliseconds: 600),
-      curve: curve ?? SlikkerCurve(smthns: 10),
-      reverseCurve: curve ?? SlikkerCurve.reverse(smthns: 6),
+      duration: const Duration(milliseconds: 600),
+      curve: curve ?? const SlikkerCurve(smthns: 10),
+      reverseCurve: curve ?? const SlikkerCurve.reverse(smthns: 6),
       vsync: this,
     );
   }
 
   @override
   void dispose() {
-    for (var anim in [disabled, hover, minor, press, lightFade, lightRadius])
+    for (var anim in [disabled, hover, minor, press, lightFade, lightRadius]) {
       anim.dispose();
+    }
     super.dispose();
   }
 
@@ -112,6 +112,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
   double? calcFactor() {
     final size = context.size;
     if (size != null) return (size.height + size.width) / 2 / 56;
+    return null;
   }
 
   /// Fired when user hover material
@@ -172,7 +173,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
         );
 
         // Add gesture listeners if not disabled
-        if (!widget.disabled && widget.onTap != null)
+        if (!widget.disabled && widget.onTap != null) {
           material = GestureDetector(
             onTapDown: (details) => touchEvent(tapDown: details),
             onTapUp: (details) => touchEvent(tapUp: details),
@@ -185,6 +186,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
               child: material,
             ),
           );
+        }
 
         return Transform.scale(
           scale: 1 - depth * .1 / factor,
@@ -242,7 +244,7 @@ class _MaterialEffects extends CustomPainter {
 
     // Initializing Paint objects.
 
-    final Paint paintLight = Paint()..color = Color(0x33FFFFFF);
+    final Paint paintLight = Paint()..color = const Color(0x33FFFFFF);
 
     final Paint paintBox = Paint()
       ..color = HSVColor.fromAHSV(.65, accent, .02, .99).toColor();
@@ -252,7 +254,7 @@ class _MaterialEffects extends CustomPainter {
 
     final Paint paintAmbientShadow = Paint()
       ..color = HSVColor.fromAHSV(.5, accent, .1, .97).toColor()
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 16);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16);
 
     final double bottomBorder = max(
       borderRadius.bottomLeft.y,
@@ -299,8 +301,8 @@ class _MaterialEffects extends CustomPainter {
         sqrt(pow(size.width, 2) + pow(size.height, 2));
 
     final List<Color> colors = [
-      Color(0xFFFFFF).withAlpha(fade ~/ 1.5),
-      Color(0xFFFFFF).withAlpha(fade),
+      const Color(0xFFFFFFFF).withAlpha(fade ~/ 1.5),
+      const Color(0xFFFFFFFF).withAlpha(fade),
     ];
 
     final rect = Rect.fromCircle(center: tapPosition, radius: radius);
@@ -329,7 +331,7 @@ class SlikkerMaterialTheme {
     SlikkerMaterialTheme? theme,
     double? hue,
   }) {
-    theme ??= SlikkerMaterialTheme.light();
+    theme ??= const SlikkerMaterialTheme.light();
 
     return SlikkerMaterialTheme.raw(
       hue: hue ?? theme.hue,

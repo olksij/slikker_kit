@@ -4,11 +4,20 @@ description: Demonstrates how to use the slikker_kit plugin
 environment:
   sdk: '>=2.12.0 <3.0.0'
 
+
 dependencies:
   flutter:
     sdk: flutter
   slikker_kit: 
     path: '../'
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^1.0.0
+
   
 flutter:
   uses-material-design: true

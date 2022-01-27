@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show MaterialPageRoute;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import './theme.dart';
 
 class SlikkerApp extends StatefulWidget {
-  SlikkerApp({
+  const SlikkerApp({
     Key? key,
     this.initialRoute,
     this.routes = const <String, WidgetBuilder>{},

@@ -20,6 +20,7 @@ class SlikkerTextField extends StatelessWidget {
 
   SlikkerTextField({
     required this.controller,
+    Key? key,
     this.hintText = '',
     this.minLines,
     this.maxLines,
@@ -27,7 +28,8 @@ class SlikkerTextField extends StatelessWidget {
     this.borderRadius,
     this.prefixWidget,
     this.suffixWidget,
-  }) : focusNode = FocusNode();
+  })  : focusNode = FocusNode(),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -55,9 +57,9 @@ class SlikkerTextField extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          prefixWidget ?? SizedBox(),
+          prefixWidget ?? const SizedBox(),
           Expanded(child: editableText),
-          suffixWidget ?? SizedBox(),
+          suffixWidget ?? const SizedBox(),
         ],
       ),
     );

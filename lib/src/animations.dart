@@ -3,6 +3,8 @@ import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 
+// TODO: DurationlessAnimations
+
 /// Elastic-based curve.
 /// - [period] is the duration of the oscillation.
 /// - [smthns] decides how smooth animation is. Highes values means bigger amplitude.
@@ -33,6 +35,8 @@ class SlikkerCurve extends ElasticOutCurve {
     return _forward ? base * curve + 1 : -base * curve;
   }
 }
+
+// TODO: DurationlessAnimations
 
 /// A controller with an applied curve for an animation
 class SlikkerAnimationController {
@@ -143,33 +147,37 @@ class _AnimationController extends AnimationController {
   final Curve curve;
 
   // Sets duration for [AnimationController].
+  @override
   set duration(Duration? duration) => super.duration ??= duration;
 
   /// The current value of the animation.
+  @override
   double get value => curve.transform(super.value);
 
-  // Returns `true`, if animation currently runs.
-  bool get isAnimating => super.isAnimating;
-
   /// Sets the current value of the animation.
+  @override
   set value(double value) => super.value = value;
 
   /// Starts running this animation forwards (towards the end).
+  @override
   TickerFuture forward({double? from, Duration? duration}) {
     super.duration = duration ?? this.duration;
     return super.forward(from: from);
   }
 
   /// Starts running this animation in reverse (towards the beginning).
+  @override
   TickerFuture reverse({double? from, Duration? duration}) {
     super.duration = duration ?? this.duration;
     return super.reverse(from: from);
   }
 
   /// Drives the animation from its current value to target.
+  @override
   TickerFuture animateTo(double value, {Duration? duration, Curve? curve}) =>
       super.animateTo(value, duration: duration);
 
   /// Release the resources used by this object.
+  @override
   void dispose() => super.dispose();
 }

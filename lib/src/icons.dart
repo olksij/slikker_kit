@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:slikker_kit/slikker_kit.dart';
 
 class SlikkerIcons {
@@ -112,8 +111,9 @@ class IconExtended extends StatelessWidget {
     );
 
     HSVColor? _tmp;
-    if (color != null)
+    if (color != null) {
       _tmp = HSVColor.fromAHSV(1, HSVColor.fromColor(color!).hue, .1, .89);
+    }
 
     final background = _tmp?.toColor() ?? theme.iconBackgroundColor;
 

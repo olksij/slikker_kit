@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+//import 'package:flutter/widgets.dart';
 
 import './button.dart';
 import './theme.dart';
@@ -14,12 +14,13 @@ class TopButtonWidget extends StatelessWidget {
   final Function onTap;
   final Function refresh;
 
-  TopButtonWidget({
+  const TopButtonWidget({
+    Key? key,
     required this.title,
     required this.icon,
     required this.onTap,
     required this.refresh,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,7 @@ class _TopButtonIcon extends StatefulWidget {
   final Color color;
   final Function refresh;
 
-  _TopButtonIcon({
+  const _TopButtonIcon({
     required this.icon,
     required this.color,
     required this.refresh,
@@ -70,7 +71,7 @@ class _TopButtonIconState extends State<_TopButtonIcon>
   int percent = 0;
 
   void refresh(p) {
-    if (this.mounted) setState(() => percent = p);
+    if (mounted) setState(() => percent = p);
   }
 
   @override
@@ -80,7 +81,7 @@ class _TopButtonIconState extends State<_TopButtonIcon>
 
     scrollController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 150),
+      duration: const Duration(milliseconds: 150),
     );
 
     scrollAnimation =
@@ -107,7 +108,7 @@ class _TopButtonIconState extends State<_TopButtonIcon>
           size: 22,
         ),
         Padding(
-          padding: EdgeInsets.all(3),
+          padding: const EdgeInsets.all(3),
           child: Transform.rotate(
             angle: 2.8 + percent / 100 * 3.55,
             child: SizedBox(

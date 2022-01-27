@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import './theme.dart';
 import './top_button.dart';
 
-// TODO: Fix [SlikkerScaffold] structure.
+// TODO: SikkerScaffold for any size
 
 /// Constructor, which creates `TopButtonWidget`. The widget will be displayed
 /// in the top of the page. When user pulls the page or taps the widget,
@@ -57,22 +57,26 @@ class SlikkerScaffold extends StatefulWidget {
 
   final bool sliver;
 
-  SlikkerScaffold({
+  const SlikkerScaffold({
+    Key? key,
     this.topButton,
     this.title,
     this.header,
     this.content,
     this.floatingButton,
-  }) : sliver = false;
+  })  : sliver = false,
+        super(key: key);
 
   /// Content of the page must be **Sliver** widget.
-  SlikkerScaffold.sliver({
+  const SlikkerScaffold.sliver({
+    Key? key,
     this.topButton,
     this.title,
     this.header,
     this.content,
     this.floatingButton,
-  }) : sliver = true;
+  })  : sliver = true,
+        super(key: key);
 
   @override
   _SlikkerScaffoldState createState() => _SlikkerScaffoldState();
@@ -88,16 +92,17 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
   bool scrolled(ScrollNotification info) {
     int percent = -info.metrics.pixels.round();
 
-    if (percent < 0)
+    if (percent < 0) {
       percent = 0;
-    else {
+    } else {
       percent = (percent > 100 ? 100 : percent);
       if (_scrollTopHaptic != (percent == 100)) {
         _scrollTopHaptic = percent == 100;
-        if (!_scrollTopHaptic)
+        if (!_scrollTopHaptic) {
           _scrollActionFired = false;
-        else
+        } else {
           HapticFeedback.lightImpact();
+        }
       }
     }
 
@@ -131,14 +136,14 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
               onNotification: (scrollInfo) => scrolled(scrollInfo),
               child: CustomScrollView(
                 scrollDirection: Axis.vertical,
-                physics: AlwaysScrollableScrollPhysics(
+                physics: const AlwaysScrollableScrollPhysics(
                   parent: BouncingScrollPhysics(),
                 ),
                 slivers: <Widget>[
                   SliverList(
                     delegate: SliverChildListDelegate([
                       Padding(
-                        padding: EdgeInsets.symmetric(vertical: 50),
+                        padding: const EdgeInsets.symmetric(vertical: 50),
                         child: (widget.topButton == null)
                             ? Container(height: 38)
                             : Center(
@@ -158,11 +163,11 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
                       ),
                       Text(
                         widget.title ?? '',
-                        style: TextStyle(fontSize: 36.0),
+                        style: const TextStyle(fontSize: 36.0),
                         textAlign: TextAlign.center,
                       ),
                       Padding(
-                        padding: EdgeInsets.all(30),
+                        padding: const EdgeInsets.all(30),
                         child: widget.header,
                       ),
                     ]),
@@ -173,7 +178,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
                         : SliverToBoxAdapter(
                             child: widget.content,
                           ),
-                    padding: EdgeInsets.fromLTRB(30, 0, 30, 30),
+                    padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
                   ),
                 ],
               ),
@@ -184,7 +189,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
-                    end: Alignment(0, 0.25),
+                    end: const Alignment(0, 0.25),
                     colors: [
                       theme.backgroundColor.withAlpha(0),
                       theme.backgroundColor,
@@ -198,7 +203,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
               alignment: Alignment.bottomCenter,
               child: Container(
                 child: widget.floatingButton,
-                margin: EdgeInsets.only(bottom: 30),
+                margin: const EdgeInsets.only(bottom: 30),
               ),
             ),
           ],

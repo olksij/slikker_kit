@@ -23,14 +23,15 @@ class SlikkerContainer extends StatelessWidget {
   /// The [Function] that will be invoked on user's tap.
   final Function? onTap;
 
-  SlikkerContainer({
+  const SlikkerContainer({
+    Key? key,
     this.child,
     this.accent,
     this.onTap,
     this.borderRadius,
     this.margin,
     this.padding,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,7 @@ class SlikkerContainer extends StatelessWidget {
         color: HSVColor.fromAHSV(
                 0.5, accent ?? SlikkerContainer.defaultAccent, 0.05, 0.95)
             .toColor(),
-        boxShadow: [],
+        boxShadow: const [],
       ),
       child: child,
     );

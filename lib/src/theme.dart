@@ -20,7 +20,7 @@ class SlikkerTheme extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(SlikkerTheme old) => theme != old.theme;
+  bool updateShouldNotify(SlikkerTheme oldWidget) => theme != oldWidget.theme;
 }
 
 class SlikkerThemeData {
@@ -59,35 +59,33 @@ class SlikkerThemeData {
     );
   }
 
-  SlikkerThemeData.light({double hue = 240})
-      : this.accentColor = _hsvColor(1, hue, .6, 1),
-        this.hue = hue,
-        this.backgroundColor = _hsvColor(1, hue, .05, .98),
-        this.fontFamily = '',
-        this.fontWeight = FontWeight.w600,
-        this.iconColor = _hsvColor(1, hue, .22, .56),
-        this.iconBackgroundColor = _hsvColor(1, hue, .1, .89),
-        this.iconSize = 28,
-        this.fontColor = _hsvColor(1, hue, .24, .4),
-        this.statusBarColor = _hsvColor(.05, hue, .2, .2),
-        this.navigationBarColor = _hsvColor(1, hue, .06, .97),
-        this.padding = EdgeInsets.all(16),
-        this.borderRadius = BorderRadius.circular(12);
+  SlikkerThemeData.light({this.hue = 240})
+      : accentColor = _hsvColor(1, hue, .6, 1),
+        backgroundColor = _hsvColor(1, hue, .05, .98),
+        fontFamily = '',
+        fontWeight = FontWeight.w600,
+        iconColor = _hsvColor(1, hue, .22, .56),
+        iconBackgroundColor = _hsvColor(1, hue, .1, .89),
+        iconSize = 28,
+        fontColor = _hsvColor(1, hue, .24, .4),
+        statusBarColor = _hsvColor(.05, hue, .2, .2),
+        navigationBarColor = _hsvColor(1, hue, .06, .97),
+        padding = const EdgeInsets.all(16),
+        borderRadius = BorderRadius.circular(12);
 
-  SlikkerThemeData.dark({double hue = 240})
-      : this.accentColor = _hsvColor(1, hue, .6, 1),
-        this.hue = hue,
-        this.backgroundColor = _hsvColor(1, hue, .05, .98),
-        this.fontFamily = '',
-        this.fontWeight = FontWeight.w600,
-        this.iconColor = _hsvColor(1, hue, .22, .56),
-        this.iconBackgroundColor = _hsvColor(1, hue, .1, .89),
-        this.iconSize = 28,
-        this.fontColor = _hsvColor(1, hue, .24, .4),
-        this.statusBarColor = _hsvColor(.05, hue, .2, .2),
-        this.navigationBarColor = _hsvColor(1, hue, .06, .97),
-        this.padding = EdgeInsets.all(16),
-        this.borderRadius = BorderRadius.circular(12);
+  SlikkerThemeData.dark({this.hue = 240})
+      : accentColor = _hsvColor(1, hue, .6, 1),
+        backgroundColor = _hsvColor(1, hue, .05, .98),
+        fontFamily = '',
+        fontWeight = FontWeight.w600,
+        iconColor = _hsvColor(1, hue, .22, .56),
+        iconBackgroundColor = _hsvColor(1, hue, .1, .89),
+        iconSize = 28,
+        fontColor = _hsvColor(1, hue, .24, .4),
+        statusBarColor = _hsvColor(.05, hue, .2, .2),
+        navigationBarColor = _hsvColor(1, hue, .06, .97),
+        padding = const EdgeInsets.all(16),
+        borderRadius = BorderRadius.circular(12);
 
   const SlikkerThemeData.raw({
     required this.hue,

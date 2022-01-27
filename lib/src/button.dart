@@ -34,13 +34,14 @@ class SlikkerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     late Widget result;
 
-    if (icon != null && child != null)
+    if (icon != null && child != null) {
       result = Row(
         mainAxisSize: mainAxisSize,
         children: [icon!, SizedBox(width: spacing ?? 8), child!],
       );
-    else
-      result = icon ?? child ?? SizedBox();
+    } else {
+      result = icon ?? child ?? const SizedBox();
+    }
 
     if (center == true) result = Center(child: result);
 
