@@ -4,8 +4,14 @@
 <br>
 
 ![UI Preview](./res/Preview.png)
-#### The preview of the future version `1.1.0`.
-#### [Alpha development changelog](1.1.0-alpha-CHANGELOG.md)
+#### The preview of the planned version `1.1.0`, which was designed in summer 2021.
+> #### The new batch of research is coming later.
+
+<br>
+
+### [Alpha development changelog](1.1.0-alpha-CHANGELOG.md)
+#### For accessing **working code**, navigate into **dev branch**, with relative stable commits.
+
 
 <br>
 
