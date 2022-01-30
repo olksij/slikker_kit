@@ -6,7 +6,9 @@ import 'package:slikker_kit/slikker_kit.dart';
 import './theme.dart';
 import './top_button.dart';
 
-enum _Comps { navigation, actionButton, topButton, content, title, header, fab }
+enum NavComponents { navigation, scrollview }
+
+enum AppBarComponents { actionButton, topButton, title, header }
 
 /// Widget that helps to build a page.
 /// Full documentation will be later
@@ -43,74 +45,118 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
   Widget build(BuildContext context) {
     final theme = SlikkerTheme.of(context);
 
-    Map<_Comps, Widget?> relation = {
-      _Comps.navigation: const Text('nav'),
-      _Comps.actionButton: widget.actionButton,
-      _Comps.topButton: const Text('topButton'),
-      _Comps.content: widget.content,
-      _Comps.title: Text(widget.title ?? 'title'),
-      _Comps.header: widget.header,
-      _Comps.fab: widget.actionButton,
+    // Declare shell widgets.
+
+    Widget navigation = const ColoredBox(
+      color: Color(0xFFFFFFFF),
+      child: Text('nav'),
+    );
+
+    // TODO: topButton
+    Widget topButton = const Text('topButton');
+
+    // TODO: scrollView
+    Widget scrollView = const SizedBox();
+
+    // Building id-widget relations for CustomMultiChildLayout  widgets.
+
+    // topRelation supposed to control navigation and scroll view
+    Map<NavComponents, Widget?> navRelation = {
+      NavComponents.navigation: navigation,
+      NavComponents.scrollview: scrollView,
     };
 
-    List<Widget> children = [];
+    // appBarRelation supposed to control elements on top of the screen,
+    // which are inserted into scrollview
+    Map<AppBarComponents, Widget?> appBarRelation = {
+      AppBarComponents.actionButton: widget.actionButton,
+      AppBarComponents.topButton: topButton,
+      AppBarComponents.header: widget.header,
+      AppBarComponents.title: Text(widget.title ?? ''),
+    };
 
-    relation.forEach((id, child) {
-      if (child != null) children.add(LayoutId(id: id, child: child));
+    // Wrap widgets with LayoutIds
+
+    Map<Map<Enum, Widget?>, List<Widget>> layouts = {
+      navRelation: [],
+      appBarRelation: [],
+    };
+
+    layouts.forEach((key, value) {
+      key.forEach((id, child) {
+        if (child != null) value.add(LayoutId(id: id, child: child));
+      });
     });
 
-    return CustomMultiChildLayout(
-      delegate: _ScaffolderDelegate(),
-      children: children,
+    // TODO: wallaper adaptation
+    return ColoredBox(
+      color: theme.backgroundColor,
+      child: CustomMultiChildLayout(
+        delegate: _NavScaffoldDelegate(),
+        children: layouts[navRelation]!,
+      ),
     );
   }
 }
 
-class _ScaffolderDelegate extends MultiChildLayoutDelegate {
+class _NavScaffoldDelegate extends MultiChildLayoutDelegate {
+  Size setChild(Object childId, Offset offset, BoxConstraints constraints) {
+    positionChild(childId, offset);
+    return layoutChild(childId, constraints);
+  }
+
   @override
   void performLayout(Size size) {
-    // TODO: Detect low reachability interface
-    const bool highReach = true;
-
     bool wideInterface = size.width > 480;
 
     Size navSize = Size.zero;
     Size titleSize = Size.zero;
 
-    if (hasChild(_Comps.navigation)) {
-      navSize = layoutChild(_Comps.navigation, BoxConstraints.loose(size));
-      positionChild(
-        _Comps.navigation,
-        Offset(
-          wideInterface ? 0 : 0 - navSize.width,
-          titleSize.height,
-        ),
-      );
-    }
+    // LAYOUT NAVIGATION
 
-    if (hasChild(_Comps.actionButton)) {
-      positionChild(_Comps.actionButton, Offset.zero);
-      layoutChild(_Comps.actionButton, BoxConstraints.loose(size));
+    BoxConstraints constraints = BoxConstraints.tightFor(
+      height: size.height - titleSize.height,
+    );
+
+    Offset offset = Offset(
+      wideInterface ? 0 : 0 - navSize.width,
+      titleSize.height + 100,
+    );
+
+    navSize = setChild(NavComponents.navigation, offset, constraints);
+
+    return;
+  }
+
+  @override
+  bool shouldRelayout(covariant MultiChildLayoutDelegate oldDelegate) {
+    return false;
+  }
+}
+
+class _AppBarScaffoldDelegate extends MultiChildLayoutDelegate {
+  Size setChild(Object childId, Offset offset, BoxConstraints constraints) {
+    positionChild(childId, offset);
+    return layoutChild(childId, constraints);
+  }
+
+  @override
+  void performLayout(Size size) {
+    if (hasChild(AppBarComponents.actionButton)) {
+      positionChild(AppBarComponents.actionButton, Offset.zero);
+      layoutChild(AppBarComponents.actionButton, BoxConstraints.loose(size));
     }
-    if (hasChild(_Comps.content)) {
-      positionChild(_Comps.content, Offset.zero);
-      layoutChild(_Comps.content, BoxConstraints.loose(size));
+    if (hasChild(AppBarComponents.header)) {
+      positionChild(AppBarComponents.header, Offset.zero);
+      layoutChild(AppBarComponents.header, BoxConstraints.loose(size));
     }
-    if (hasChild(_Comps.fab)) {
-      positionChild(_Comps.fab, Offset.zero);
-      layoutChild(_Comps.fab, BoxConstraints.loose(size));
+    if (hasChild(AppBarComponents.title)) {
+      positionChild(AppBarComponents.title, Offset.zero);
+      layoutChild(AppBarComponents.title, BoxConstraints.loose(size));
     }
-    if (hasChild(_Comps.header)) {
-      positionChild(_Comps.header, Offset.zero);
-      layoutChild(_Comps.header, BoxConstraints.loose(size));
-    }
-    if (hasChild(_Comps.title)) {
-      positionChild(_Comps.title, Offset.zero);
-      layoutChild(_Comps.title, BoxConstraints.loose(size));
-    }
-    if (hasChild(_Comps.topButton)) {
-      positionChild(_Comps.topButton, Offset.zero);
-      layoutChild(_Comps.topButton, BoxConstraints.loose(size));
+    if (hasChild(AppBarComponents.topButton)) {
+      positionChild(AppBarComponents.topButton, Offset.zero);
+      layoutChild(AppBarComponents.topButton, BoxConstraints.loose(size));
     }
 
     return;
