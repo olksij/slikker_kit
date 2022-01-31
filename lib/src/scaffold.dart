@@ -45,26 +45,10 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
   Widget build(BuildContext context) {
     final theme = SlikkerTheme.of(context);
 
-    // Declare shell widgets.
-
-    Widget navigation = const ColoredBox(
-      color: Color(0xFFFFFFFF),
-      child: Text('nav'),
-    );
+    // Declare inner shell widgets.
 
     // TODO: topButton
     Widget topButton = const Text('topButton');
-
-    // TODO: scrollView
-    Widget scrollView = const SizedBox();
-
-    // Building id-widget relations for CustomMultiChildLayout  widgets.
-
-    // topRelation supposed to control navigation and scroll view
-    Map<NavComponents, Widget?> navRelation = {
-      NavComponents.navigation: navigation,
-      NavComponents.scrollview: scrollView,
-    };
 
     // appBarRelation supposed to control elements on top of the screen,
     // which are inserted into scrollview
@@ -75,17 +59,34 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
       AppBarComponents.title: Text(widget.title ?? ''),
     };
 
-    // Wrap widgets with LayoutIds
+    List<Widget> appBarLayout = [];
 
-    Map<Map<Enum, Widget?>, List<Widget>> layouts = {
-      navRelation: [],
-      appBarRelation: [],
+    appBarRelation.forEach((id, child) {
+      if (child != null) appBarLayout.add(LayoutId(id: id, child: child));
+    });
+
+    // Declare top shell widgets.
+
+    Widget navigation = const ColoredBox(
+      color: Color(0xFFFFFFFF),
+      child: Text('nav'),
+    );
+
+    // TODO: scrollView :: connect iwth InnerShell
+    Widget scrollView = const SizedBox();
+
+    // navRelation supposed to control navigation and scroll view
+    Map<NavComponents, Widget?> navRelation = {
+      NavComponents.navigation: navigation,
+      NavComponents.scrollview: scrollView,
     };
 
-    layouts.forEach((key, value) {
-      key.forEach((id, child) {
-        if (child != null) value.add(LayoutId(id: id, child: child));
-      });
+    // Wrap widgets with LayoutIds
+
+    List<Widget> navLayout = [];
+
+    navRelation.forEach((id, child) {
+      if (child != null) navLayout.add(LayoutId(id: id, child: child));
     });
 
     // TODO: wallaper adaptation
@@ -93,7 +94,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
       color: theme.backgroundColor,
       child: CustomMultiChildLayout(
         delegate: _NavScaffoldDelegate(),
-        children: layouts[navRelation]!,
+        children: navRelation[navRelation]!,
       ),
     );
   }
