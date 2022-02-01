@@ -45,7 +45,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
   Widget build(BuildContext context) {
     final theme = SlikkerTheme.of(context);
 
-    // Declare inner shell widgets.
+    // Declare inner shell widgets, which are placed into scrollable
 
     // TODO: topButton
     Widget topButton = const Text('topButton');
@@ -73,7 +73,19 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
     );
 
     // TODO: scrollView :: connect iwth InnerShell
-    Widget scrollView = const SizedBox();
+    Widget scrollView = CustomScrollView(
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      slivers: [
+        SliverPersistentHeader(
+          delegate: _PersistentHeaderDelegate(),
+        ),
+        SliverToBoxAdapter(
+          child: widget.content,
+        ),
+      ],
+    );
 
     // navRelation supposed to control navigation and scroll view
     Map<NavComponents, Widget?> navRelation = {
@@ -94,7 +106,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
       color: theme.backgroundColor,
       child: CustomMultiChildLayout(
         delegate: _NavScaffoldDelegate(),
-        children: navRelation[navRelation]!,
+        children: navLayout,
       ),
     );
   }
@@ -166,5 +178,27 @@ class _AppBarScaffoldDelegate extends MultiChildLayoutDelegate {
   @override
   bool shouldRelayout(covariant MultiChildLayoutDelegate oldDelegate) {
     return false;
+  }
+}
+
+class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+  @override
+  Widget build(context, shrinkOffset, overlapsContent) {
+    // TODO: implement build
+    throw UnimplementedError();
+  }
+
+  @override
+  // TODO: implement maxExtent
+  double get maxExtent => throw UnimplementedError();
+
+  @override
+  // TODO: implement minExtent
+  double get minExtent => throw UnimplementedError();
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
+    // TODO: implement shouldRebuild
+    throw UnimplementedError();
   }
 }
