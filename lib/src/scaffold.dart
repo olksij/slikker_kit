@@ -72,7 +72,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
       child: Text('nav'),
     );
 
-    // TODO: scrollView :: connect iwth InnerShell
+    // TODO: scrollView :: connect with InnerShell
     Widget scrollView = CustomScrollView(
       physics: const BouncingScrollPhysics(
         parent: AlwaysScrollableScrollPhysics(),
@@ -123,20 +123,35 @@ class _NavScaffoldDelegate extends MultiChildLayoutDelegate {
     bool wideInterface = size.width > 480;
 
     Size navSize = Size.zero;
-    Size titleSize = Size.zero;
+    Size scrollviewSize = Size.zero;
 
     // LAYOUT NAVIGATION
 
-    BoxConstraints constraints = BoxConstraints.tightFor(
-      height: size.height - titleSize.height,
+    BoxConstraints navConstraints = BoxConstraints.tightFor(
+      height: size.height,
     );
 
-    Offset offset = Offset(
+    Offset navOffset = Offset(
       wideInterface ? 0 : 0 - navSize.width,
-      titleSize.height + 100,
+      0,
     );
 
-    navSize = setChild(NavComponents.navigation, offset, constraints);
+    navSize = setChild(NavComponents.navigation, navOffset, navConstraints);
+
+    // LAYOUT SCROLLVIEW
+
+    BoxConstraints scrollConstraints = BoxConstraints.tightFor(
+      height: size.height,
+      width: size.width - (wideInterface ? navSize.width : 0),
+    );
+
+    Offset scrollOffset = Offset(
+      wideInterface ? navSize.width : 0,
+      0,
+    );
+
+    navSize =
+        setChild(NavComponents.scrollview, scrollOffset, scrollConstraints);
 
     return;
   }
