@@ -1,10 +1,7 @@
-import 'dart:ui';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:slikker_kit/slikker_kit.dart';
 
 import './theme.dart';
-import './top_button.dart';
 
 enum NavComponents { navigation, scrollview }
 
@@ -47,7 +44,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
 
     // Declare inner shell widgets, which are placed into scrollable
 
-    // TODO: topButton
+    // TODO: [WIDGET] implement topButton
     Widget topButton = const Text('topButton');
 
     // appBarRelation supposed to control elements on top of the screen,
@@ -72,18 +69,15 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
       child: Text('nav'),
     );
 
-    // TODO: scrollView :: connect with InnerShell
+    const scrollPhysics = BouncingScrollPhysics(
+      parent: AlwaysScrollableScrollPhysics(),
+    );
+
     Widget scrollView = CustomScrollView(
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
+      physics: scrollPhysics,
       slivers: [
-        SliverPersistentHeader(
-          delegate: _PersistentHeaderDelegate(),
-        ),
-        SliverToBoxAdapter(
-          child: widget.content,
-        ),
+        SliverPersistentHeader(delegate: _PersistentHeaderDelegate()),
+        SliverToBoxAdapter(child: widget.content),
       ],
     );
 
@@ -101,7 +95,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
       if (child != null) navLayout.add(LayoutId(id: id, child: child));
     });
 
-    // TODO: wallaper adaptation
+    // TODO: [DESIGN] implement wallaper adaptation
     return ColoredBox(
       color: theme.backgroundColor,
       child: CustomMultiChildLayout(
@@ -158,58 +152,39 @@ class _NavScaffoldDelegate extends MultiChildLayoutDelegate {
   }
 }
 
-class _AppBarScaffoldDelegate extends MultiChildLayoutDelegate {
-  Size setChild(Object childId, Offset offset, BoxConstraints constraints) {
-    positionChild(childId, offset);
-    return layoutChild(childId, constraints);
-  }
-
-  @override
-  void performLayout(Size size) {
-    if (hasChild(AppBarComponents.actionButton)) {
-      positionChild(AppBarComponents.actionButton, Offset.zero);
-      layoutChild(AppBarComponents.actionButton, BoxConstraints.loose(size));
-    }
-    if (hasChild(AppBarComponents.header)) {
-      positionChild(AppBarComponents.header, Offset.zero);
-      layoutChild(AppBarComponents.header, BoxConstraints.loose(size));
-    }
-    if (hasChild(AppBarComponents.title)) {
-      positionChild(AppBarComponents.title, Offset.zero);
-      layoutChild(AppBarComponents.title, BoxConstraints.loose(size));
-    }
-    if (hasChild(AppBarComponents.topButton)) {
-      positionChild(AppBarComponents.topButton, Offset.zero);
-      layoutChild(AppBarComponents.topButton, BoxConstraints.loose(size));
-    }
-
-    return;
-  }
-
-  @override
-  bool shouldRelayout(covariant MultiChildLayoutDelegate oldDelegate) {
-    return false;
-  }
-}
-
 class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+  /// Bool, which indicates if the reachability depends of element position.
+  /// Usually true for touchable devices;
+  // TODO: [DESIGN] implement lowReach
+  bool lowReach = true;
+
+  /// Percent of the screen size, to which user can comfortably reach.
+  double reachArea = 0.7;
+
+  /// One of the variables, on which layout type depends.
+  bool wideInterface = true;
+
   @override
   Widget build(context, shrinkOffset, overlapsContent) {
-    // TODO: implement build
-    throw UnimplementedError();
+    if (context.size != null) wideInterface = context.size!.width > 480;
+
+    // TODO: [WIDGETS] implement adaptive layouts
+    return const Center(
+      child: Text('woaaaa'),
+    );
   }
 
   @override
-  // TODO: implement maxExtent
-  double get maxExtent => throw UnimplementedError();
+  // TODO: implement lowReach
+  double get maxExtent => lowReach
+      ? minExtent
+      : (1 - reachArea) * MediaQuery.of(context).size.height;
 
   @override
-  // TODO: implement minExtent
-  double get minExtent => throw UnimplementedError();
+  double get minExtent => 72;
 
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-    // TODO: implement shouldRebuild
-    throw UnimplementedError();
+    return false;
   }
 }
