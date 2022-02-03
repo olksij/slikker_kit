@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:slikker_kit/slikker_kit.dart';
 
@@ -147,9 +148,7 @@ class _NavScaffoldDelegate extends MultiChildLayoutDelegate {
   }
 
   @override
-  bool shouldRelayout(covariant MultiChildLayoutDelegate oldDelegate) {
-    return false;
-  }
+  bool shouldRelayout(oldDelegate) => false;
 }
 
 class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
@@ -164,9 +163,12 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   /// One of the variables, on which layout type depends.
   bool wideInterface = true;
 
+  BuildContext? context;
+
   @override
   Widget build(context, shrinkOffset, overlapsContent) {
-    if (context.size != null) wideInterface = context.size!.width > 480;
+    this.context = context;
+    wideInterface = MediaQuery.of(context).size.width > 480;
 
     // TODO: [WIDGETS] implement adaptive layouts
     return const Center(
@@ -175,16 +177,15 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  // TODO: implement lowReach
-  double get maxExtent => lowReach
-      ? minExtent
-      : (1 - reachArea) * MediaQuery.of(context).size.height;
+  double get maxExtent {
+    if (!lowReach || context == null) return minExtent;
+    return (1 - reachArea) * MediaQuery.of(context!).size.height;
+  }
 
   @override
+  // TODO: implement toolbar-adaptive minExtent
   double get minExtent => 72;
 
   @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-    return false;
-  }
+  bool shouldRebuild(oldDelegate) => false;
 }
