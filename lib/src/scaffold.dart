@@ -127,31 +127,27 @@ class _NavScaffoldDelegate extends MultiChildLayoutDelegate {
 
     // LAYOUT NAVIGATION
 
-    BoxConstraints navConstraints = BoxConstraints.tightFor(
-      height: size.height,
-    );
+    BoxConstraints navConstraints =
+        BoxConstraints.tightFor(height: size.height);
 
-    Offset navOffset = Offset(
-      wideInterface ? 0 : 0 - navSize.width,
-      0,
-    );
+    navSize = layoutChild(NavComponents.navigation, navConstraints);
 
-    navSize = setChild(NavComponents.navigation, navOffset, navConstraints);
+    Offset navOffset = Offset(wideInterface ? 0 : 0 - navSize.width, 0);
+
+    positionChild(NavComponents.navigation, navOffset);
 
     // LAYOUT SCROLLVIEW
 
-    BoxConstraints scrollConstraints = BoxConstraints.tightFor(
-      height: size.height,
-      width: size.width - (wideInterface ? navSize.width : 0),
-    );
+    BoxConstraints scrollviewConstraints = BoxConstraints.tightFor(
+        height: size.height,
+        width: size.width - (wideInterface ? navSize.width : 0));
 
-    Offset scrollOffset = Offset(
-      wideInterface ? navSize.width : 0,
-      0,
-    );
+    scrollviewSize =
+        layoutChild(NavComponents.scrollview, scrollviewConstraints);
 
-    navSize =
-        setChild(NavComponents.scrollview, scrollOffset, scrollConstraints);
+    Offset scrollviewOffset = Offset(wideInterface ? navSize.width : 0, 0);
+
+    positionChild(NavComponents.scrollview, scrollviewOffset);
 
     return;
   }
