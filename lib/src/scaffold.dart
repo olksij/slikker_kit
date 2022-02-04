@@ -187,5 +187,8 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => 72;
 
   @override
+  get stretchConfiguration => OverScrollHeaderStretchConfiguration();
+
+  @override
   bool shouldRebuild(oldDelegate) => false;
 }
