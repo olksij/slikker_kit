@@ -74,10 +74,13 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
       parent: AlwaysScrollableScrollPhysics(),
     );
 
+    // TODO: [CODE] to pass header widgets
+    _PersistentHeaderDelegate headerDelegate = _PersistentHeaderDelegate();
+
     Widget scrollView = CustomScrollView(
       physics: scrollPhysics,
       slivers: [
-        SliverPersistentHeader(delegate: _PersistentHeaderDelegate()),
+        SliverPersistentHeader(delegate: headerDelegate),
         SliverToBoxAdapter(child: widget.content),
       ],
     );
@@ -171,8 +174,10 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
     wideInterface = MediaQuery.of(context).size.width > 480;
 
     // TODO: [WIDGETS] implement adaptive layouts
-    return const Center(
-      child: Text('woaaaa'),
+    return Stack(
+      children: [
+        const Text('to congure'),
+      ],
     );
   }
 

@@ -35,18 +35,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return SlikkerScaffold(
-      topButton: TopButton(
-        action: () => setState(() => count = 0),
-        icon: Icons.clear,
-        title: 'Clear',
-      ),
       title: 'Example',
-      floatingButton: SlikkerButton(
+      /*floatingButton: SlikkerButton(
         borderRadius: BorderRadius.circular(26),
         child: const Text('Tap!'),
         onTap: () => setState(() => count++),
         padding: const EdgeInsets.all(17),
-      ),
+      ),*/
       header: SlikkerContainer(
         child: Row(
           children: [
@@ -60,8 +55,10 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             SlikkerButton(
-              borderRadius:
-                  const BorderRadius.horizontal(right: Radius.circular(12)),
+              borderRadius: const BorderRadius.horizontal(
+                right: Radius.circular(12),
+              ),
+              onTap: () => setState(() => count++),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 17),
               child: Text(
                 count.toString(),
