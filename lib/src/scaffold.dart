@@ -48,21 +48,6 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
     // TODO: [WIDGET] implement topButton
     Widget topButton = const Text('topButton');
 
-    // appBarRelation supposed to control elements on top of the screen,
-    // which are inserted into scrollview
-    Map<AppBarComponents, Widget?> appBarRelation = {
-      AppBarComponents.actionButton: widget.actionButton,
-      AppBarComponents.topButton: topButton,
-      AppBarComponents.header: widget.header,
-      AppBarComponents.title: Text(widget.title ?? ''),
-    };
-
-    List<Widget> appBarLayout = [];
-
-    appBarRelation.forEach((id, child) {
-      if (child != null) appBarLayout.add(LayoutId(id: id, child: child));
-    });
-
     // Declare top shell widgets.
 
     Widget navigation = const ColoredBox(
@@ -71,11 +56,15 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
     );
 
     const scrollPhysics = BouncingScrollPhysics(
-      parent: AlwaysScrollableScrollPhysics(),
-    );
+        //parent: AlwaysScrollableScrollPhysics(),
+        );
 
-    // TODO: [CODE] to pass header widgets
-    _PersistentHeaderDelegate headerDelegate = _PersistentHeaderDelegate();
+    _PersistentHeaderDelegate headerDelegate = _PersistentHeaderDelegate(
+      header: widget.header,
+      title: widget.title,
+      topButton: topButton,
+      actionButton: widget.actionButton,
+    );
 
     Widget scrollView = CustomScrollView(
       physics: scrollPhysics,
@@ -155,6 +144,18 @@ class _NavScaffoldDelegate extends MultiChildLayoutDelegate {
 }
 
 class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+  Widget? header;
+  String? title;
+  Widget? topButton;
+  Widget? actionButton;
+
+  _PersistentHeaderDelegate({
+    this.header,
+    this.title,
+    this.topButton,
+    this.actionButton,
+  });
+
   /// Bool, which indicates if the reachability depends of element position.
   /// Usually true for touchable devices;
   // TODO: [DESIGN] implement lowReach
@@ -176,6 +177,9 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
     // TODO: [WIDGETS] implement adaptive layouts
     return Stack(
       children: [
+        header ?? SizedBox(),
+        topButton ?? SizedBox(),
+        actionButton ?? SizedBox(),
         const Text('to congure'),
       ],
     );
