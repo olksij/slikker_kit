@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:slikker_kit/slikker_kit.dart';
@@ -174,15 +176,28 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
     this.context = context;
     wideInterface = MediaQuery.of(context).size.width > 480;
 
+    List<Widget> children = [];
+
     // TODO: [WIDGETS] implement adaptive layouts
-    return Stack(
-      children: [
-        header ?? SizedBox(),
-        topButton ?? SizedBox(),
-        actionButton ?? SizedBox(),
-        const Text('to congure'),
-      ],
-    );
+
+    if (title != null) {
+      TextStyle titleStyle = TextStyle(
+        fontSize: lerpDouble(40, 20, shrinkOffset / (maxExtent - minExtent)),
+      );
+
+      children.add(AnimatedPositioned(
+        left: 20,
+        bottom: 20,
+        child: Text(
+          title!,
+          style: titleStyle,
+        ),
+        // TODO: [DESIGN] kinematics, remove DURATIONS
+        duration: const Duration(milliseconds: 300),
+      ));
+    }
+
+    return Stack(children: children);
   }
 
   @override
