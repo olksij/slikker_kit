@@ -112,7 +112,7 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
       );
 
       children.add(AnimatedPositioned(
-        left: 20,
+        left: wideInterface ? 20 : null,
         bottom: 20,
         child: Text(
           title!,
@@ -123,7 +123,7 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
       ));
     }
 
-    return Stack(children: children);
+    return Stack(alignment: Alignment.center, children: children);
   }
 
   @override
