@@ -6,10 +6,6 @@ import 'package:slikker_kit/slikker_kit.dart';
 
 import './theme.dart';
 
-enum NavComponents { navigation, scrollview }
-
-enum AppBarComponents { actionButton, topButton, title, header }
-
 /// Widget that helps to build a page.
 /// Full documentation will be later
 class SlikkerScaffold extends StatefulWidget {
@@ -50,16 +46,9 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
     // TODO: [WIDGET] implement topButton
     Widget topButton = const Text('topButton');
 
-    // Declare top shell widgets.
-
-    Widget navigation = const ColoredBox(
-      color: Color(0xFFFFFFFF),
-      child: Text('nav'),
-    );
-
     const scrollPhysics = BouncingScrollPhysics(
-        //parent: AlwaysScrollableScrollPhysics(),
-        );
+      parent: AlwaysScrollableScrollPhysics(),
+    );
 
     _PersistentHeaderDelegate headerDelegate = _PersistentHeaderDelegate(
       header: widget.header,
@@ -68,81 +57,18 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
       actionButton: widget.actionButton,
     );
 
-    Widget scrollView = CustomScrollView(
-      physics: scrollPhysics,
-      slivers: [
-        SliverPersistentHeader(delegate: headerDelegate),
-        SliverToBoxAdapter(child: widget.content),
-      ],
-    );
-
-    // navRelation supposed to control navigation and scroll view
-    Map<NavComponents, Widget?> navRelation = {
-      NavComponents.navigation: navigation,
-      NavComponents.scrollview: scrollView,
-    };
-
-    // Wrap widgets with LayoutIds
-
-    List<Widget> navLayout = [];
-
-    navRelation.forEach((id, child) {
-      if (child != null) navLayout.add(LayoutId(id: id, child: child));
-    });
-
     // TODO: [DESIGN] implement wallaper adaptation
     return ColoredBox(
       color: theme.backgroundColor,
-      child: CustomMultiChildLayout(
-        delegate: _NavScaffoldDelegate(),
-        children: navLayout,
+      child: CustomScrollView(
+        physics: scrollPhysics,
+        slivers: [
+          SliverPersistentHeader(delegate: headerDelegate),
+          SliverToBoxAdapter(child: widget.content),
+        ],
       ),
     );
   }
-}
-
-class _NavScaffoldDelegate extends MultiChildLayoutDelegate {
-  Size setChild(Object childId, Offset offset, BoxConstraints constraints) {
-    positionChild(childId, offset);
-    return layoutChild(childId, constraints);
-  }
-
-  @override
-  void performLayout(Size size) {
-    bool wideInterface = size.width > 480;
-
-    Size navSize = Size.zero;
-    Size scrollviewSize = Size.zero;
-
-    // LAYOUT NAVIGATION
-
-    BoxConstraints navConstraints =
-        BoxConstraints.tightFor(height: size.height);
-
-    navSize = layoutChild(NavComponents.navigation, navConstraints);
-
-    Offset navOffset = Offset(wideInterface ? 0 : 0 - navSize.width, 0);
-
-    positionChild(NavComponents.navigation, navOffset);
-
-    // LAYOUT SCROLLVIEW
-
-    BoxConstraints scrollviewConstraints = BoxConstraints.tightFor(
-        height: size.height,
-        width: size.width - (wideInterface ? navSize.width : 0));
-
-    scrollviewSize =
-        layoutChild(NavComponents.scrollview, scrollviewConstraints);
-
-    Offset scrollviewOffset = Offset(wideInterface ? navSize.width : 0, 0);
-
-    positionChild(NavComponents.scrollview, scrollviewOffset);
-
-    return;
-  }
-
-  @override
-  bool shouldRelayout(oldDelegate) => false;
 }
 
 class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
