@@ -44,13 +44,9 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
     // Declare inner shell widgets, which are placed into scrollable
 
     // TODO: [WIDGET] implement topButton
-    Widget topButton = const Text('topButton');
+    final Widget topButton = Text('topButton');
 
-    const scrollPhysics = BouncingScrollPhysics(
-      parent: AlwaysScrollableScrollPhysics(),
-    );
-
-    _PersistentHeaderDelegate headerDelegate = _PersistentHeaderDelegate(
+    final _PersistentHeaderDelegate headerDelegate = _PersistentHeaderDelegate(
       header: widget.header,
       title: widget.title,
       topButton: topButton,
@@ -61,13 +57,20 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
     return ColoredBox(
       color: theme.backgroundColor,
       child: CustomScrollView(
-        physics: scrollPhysics,
+        physics: const BouncingScrollPhysics(),
         slivers: [
           SliverPersistentHeader(delegate: headerDelegate),
           SliverToBoxAdapter(child: widget.content),
         ],
       ),
     );
+  }
+}
+
+class SlikkerScrollBehavior extends ScrollBehavior {
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const BouncingScrollPhysics();
   }
 }
 
