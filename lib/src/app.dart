@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart' show MaterialPageRoute;
 
 import './theme.dart';
+import './nav_bar.dart';
 
 enum AppElems { nav, app }
 
@@ -95,9 +96,8 @@ class _SlikkerAppState extends State<SlikkerApp> {
 
     overlays(theme);
 
-    Widget navigation = const ColoredBox(
-      color: Color(0xFFFFFFFF),
-      child: Text('nav'),
+    Widget navigation = SlikkerNavBar(
+      navigationEntries: [NavigationEntry(route: '', title: 'Yo')],
     );
 
     // navRelation supposed to control navigation and scroll view
@@ -154,7 +154,8 @@ class _NavbarDelegate extends MultiChildLayoutDelegate {
 
     // LAYOUT NAVIGATION BAR
 
-    BoxConstraints navLayout = BoxConstraints.tightFor(height: size.height);
+    BoxConstraints navLayout =
+        BoxConstraints.tightFor(height: size.height, width: 80);
     Size navSize = layoutChild(AppElems.nav, navLayout);
 
     Offset navPosition = Offset(wideInterface ? 0 : 0 - navSize.width, 0);
