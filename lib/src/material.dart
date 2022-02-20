@@ -164,7 +164,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
 
         // Give material padding if available
         Widget material = Transform.scale(
-          scale: 1 - depth * .1 / factor,
+          scale: 1 - depth * .15 / factor,
           alignment: Alignment.center,
           child: Padding(
             padding: widget.padding ?? theme.padding,
@@ -226,9 +226,9 @@ class _MaterialEffects extends CustomPainter {
     final sum =
         base.bottomRight + base.bottomLeft + base.bottomRight + base.bottomLeft;
 
-    final elevated = BorderRadius.all(sum * .64 / 4);
+    final elevated = BorderRadius.all(sum / 1.25 / 4);
 
-    final demoted = BorderRadius.all(sum / .64 / 4);
+    final demoted = BorderRadius.all(sum * 1.25 / 4);
 
     final elevationResult =
         BorderRadius.lerp(base, elevated, material.hover.value);
@@ -247,14 +247,14 @@ class _MaterialEffects extends CustomPainter {
     final Paint paintLight = Paint()..color = const Color(0x33FFFFFF);
 
     final Paint paintBox = Paint()
-      ..color = HSVColor.fromAHSV(.65, accent, .02, .99).toColor();
+      ..color = HSVColor.fromAHSV(.65, accent, 0, 1).toColor();
 
     final Paint paintKeyShadow = Paint()
-      ..color = HSVColor.fromAHSV(.2, accent, .05, .95).toColor();
+      ..color = HSVColor.fromAHSV(.02, accent, .35, .6).toColor();
 
     final Paint paintAmbientShadow = Paint()
-      ..color = HSVColor.fromAHSV(.5, accent, .1, .97).toColor()
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16);
+      ..color = HSVColor.fromAHSV(.1, accent, .35, .6).toColor()
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
 
     final double bottomBorder = max(
       borderRadius.bottomLeft.y,
@@ -276,11 +276,11 @@ class _MaterialEffects extends CustomPainter {
       Path()..addRRect(boxBase(2, size.height, 2)),
     );
 
-    final heightDelta = size.height - bottomBorder;
+    final heightDelta = size.height - bottomBorder * 2;
     final keyShadowPath = Path.combine(
       PathOperation.difference,
-      Path()..addRRect(boxBase(heightDelta + 3, bottomBorder)),
-      Path()..addRRect(boxBase(heightDelta, bottomBorder)),
+      Path()..addRRect(boxBase(heightDelta + 2, bottomBorder * 2)),
+      Path()..addRRect(boxBase(heightDelta, bottomBorder * 2)),
     );
 
     // Draw into canvas
