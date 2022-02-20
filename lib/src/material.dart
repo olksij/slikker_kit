@@ -15,6 +15,8 @@ const Duration _lightFadeOutDuration = Duration(milliseconds: 500);
 //const Duration _lightPressDuration = Duration(milliseconds: 1000);
 const Duration _lightRadiusDuration = Duration(milliseconds: 500);
 
+enum MaterialStyle { elevated, filled, flat }
+
 class SlikkerMaterial extends StatefulWidget {
   const SlikkerMaterial({
     Key? key,
@@ -25,6 +27,7 @@ class SlikkerMaterial extends StatefulWidget {
     this.disabled = false,
     this.padding,
     this.shape,
+    this.style,
   }) : super(key: key);
 
   @override
@@ -50,7 +53,11 @@ class SlikkerMaterial extends StatefulWidget {
   /// The [Function] that will be invoked on user's tap.
   final Function? onTap;
 
+  // TODO: COMMENT
   final BoxShape? shape;
+
+  // TODO: COMMENT
+  final MaterialStyle? style;
 }
 
 class _SlikkerMaterialState extends State<SlikkerMaterial>
@@ -240,22 +247,34 @@ class _MaterialEffects extends CustomPainter {
   Canvas paintBox(Canvas canvas, Size size) {
     // Extract variables.
     final double accent = material.theme.hue;
+    final MaterialStyle style = material.widget.style ?? MaterialStyle.elevated;
     final BorderRadius borderRadius = materialBorderRadius(size);
 
     // INIT PAINT OBJECTS
 
-    final Paint paintLight = Paint()..color = const Color(0x44FFFFFF);
+    final double alphaBlend = min(
+        max(style != MaterialStyle.elevated ? material.hover.value : 1, 0), 1);
 
-    final Paint paintBorder = Paint()..color = const Color(0x25FFFFFF);
+    final Paint paintLight = Paint()
+      ..color = HSVColor.fromAHSV(.3 * alphaBlend, 0, 0, 1).toColor();
+
+    final Paint paintBorder = Paint()
+      ..color = HSVColor.fromAHSV(.15 * alphaBlend, 0, 0, 1).toColor();
+
+    final double boxFillAlpha =
+        style == MaterialStyle.filled ? .05 * (1 - alphaBlend) : 0;
 
     final Paint paintBox = Paint()
-      ..color = HSVColor.fromAHSV(.65, accent, 0, 1).toColor();
+      ..color = Color.alphaBlend(
+        HSVColor.fromAHSV(boxFillAlpha, accent, .4, .3).toColor(),
+        HSVColor.fromAHSV(.65 * alphaBlend, accent, 0, 1).toColor(),
+      );
 
     final Paint paintKeyShadow = Paint()
-      ..color = HSVColor.fromAHSV(.02, accent, .35, .6).toColor();
+      ..color = HSVColor.fromAHSV(.02 * alphaBlend, accent, .35, .6).toColor();
 
     final Paint paintAmbientShadow = Paint()
-      ..color = HSVColor.fromAHSV(.1, accent, .35, .6).toColor()
+      ..color = HSVColor.fromAHSV(.1 * alphaBlend, accent, .35, .6).toColor()
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
 
     final double bottomBorder = max(

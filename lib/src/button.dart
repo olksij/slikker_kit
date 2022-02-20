@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import './material.dart';
@@ -16,6 +17,7 @@ class SlikkerButton extends StatelessWidget {
     this.center,
     this.spacing,
     this.shape,
+    this.style,
   }) : super(key: key);
 
   final BorderRadius? borderRadius;
@@ -29,6 +31,7 @@ class SlikkerButton extends StatelessWidget {
   final bool? center;
   final double? spacing;
   final BoxShape? shape;
+  final MaterialStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +56,7 @@ class SlikkerButton extends StatelessWidget {
       minor: minor,
       onTap: onTap,
       shape: shape,
+      style: style,
     );
   }
 }
