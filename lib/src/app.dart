@@ -97,7 +97,11 @@ class _SlikkerAppState extends State<SlikkerApp> {
     overlays(theme);
 
     Widget navigation = SlikkerNavBar(
-      navigationEntries: [NavigationEntry(route: '', title: 'Yo')],
+      navigationEntries: [
+        NavigationEntry(route: '', title: 'Label'),
+        NavigationEntry(route: '', title: 'Label'),
+        NavigationEntry(route: '', title: 'Label'),
+      ],
     );
 
     // navRelation supposed to control navigation and scroll view
