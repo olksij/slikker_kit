@@ -105,8 +105,8 @@ class _SlikkerAppState extends State<SlikkerApp> {
     List<Widget> navLayout = [];
 
     <AppElems, Widget>{
-      AppElems.nav: navigation,
       AppElems.app: child ?? const SizedBox(),
+      AppElems.nav: navigation,
     }.forEach((id, child) => navLayout.add(LayoutId(id: id, child: child)));
 
     return SlikkerTheme(

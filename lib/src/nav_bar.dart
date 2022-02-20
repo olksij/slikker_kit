@@ -38,6 +38,7 @@ class _SlikkerNavBarState extends State<SlikkerNavBar> {
       color: theme.backgroundColor,
       child: ListView.builder(
         padding: const EdgeInsets.all(8),
+        clipBehavior: Clip.none,
         //shrinkWrap: true,
         itemCount: widget.navigationEntries.length,
         itemBuilder: (context, index) {

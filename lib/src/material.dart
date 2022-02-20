@@ -242,9 +242,11 @@ class _MaterialEffects extends CustomPainter {
     final double accent = material.theme.hue;
     final BorderRadius borderRadius = materialBorderRadius(size);
 
-    // Initializing Paint objects.
+    // INIT PAINT OBJECTS
 
-    final Paint paintLight = Paint()..color = const Color(0x33FFFFFF);
+    final Paint paintLight = Paint()..color = const Color(0x44FFFFFF);
+
+    final Paint paintBorder = Paint()..color = const Color(0x25FFFFFF);
 
     final Paint paintBox = Paint()
       ..color = HSVColor.fromAHSV(.65, accent, 0, 1).toColor();
@@ -268,12 +270,23 @@ class _MaterialEffects extends CustomPainter {
       return borderRadius.toRRect(rect);
     }
 
-    // Generate required paths
+    // PAINT LAYERS
 
     final lightPath = Path.combine(
       PathOperation.difference,
       Path()..addRRect(boxBase(0, size.height)),
       Path()..addRRect(boxBase(2, size.height, 2)),
+    );
+
+    final innerBox = borderRadius
+        .subtract(BorderRadius.circular(2))
+        .resolve(TextDirection.ltr)
+        .toRRect(Rect.fromLTWH(2, 2, size.width - 4, size.height - 4));
+
+    final borderPath = Path.combine(
+      PathOperation.difference,
+      Path()..addRRect(boxBase(0, size.height)),
+      Path()..addRRect(innerBox),
     );
 
     final heightDelta = size.height - bottomBorder * 2;
@@ -283,12 +296,13 @@ class _MaterialEffects extends CustomPainter {
       Path()..addRRect(boxBase(heightDelta, bottomBorder * 2)),
     );
 
-    // Draw into canvas
+    // DRAW ON CANVAS
 
     return canvas
       ..drawRRect(boxBase(4, size.height), paintAmbientShadow)
       ..drawPath(keyShadowPath, paintKeyShadow)
       ..drawRRect(boxBase(0, size.height), paintBox)
+      ..drawPath(borderPath, paintBorder)
       ..drawPath(lightPath, paintLight);
   }
 
