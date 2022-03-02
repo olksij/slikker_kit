@@ -94,8 +94,6 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
   }) {
     return SlikkerAnimationController(
       duration: const Duration(milliseconds: 600),
-      curve: curve ?? const SlikkerCurve(smthns: 10),
-      reverseCurve: curve ?? const SlikkerCurve.reverse(smthns: 6),
       vsync: this,
     );
   }
@@ -146,13 +144,12 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
 
       // Run animations.
       press.run(true);
-      lightFade.run(true, duration: _lightFadeInDuration);
-      lightRadius.run(true, duration: _lightRadiusDuration);
+      lightFade.run(true); // TODO: CUSTOM VELOCITY
+      lightRadius.run(true); // TODO: CUSTOM VELOCITY
     } else {
       // Tap up event.
       press.run(false);
-      //lightRadius.duration = _lightRadiusDuration;
-      lightFade.run(false, duration: _lightFadeOutDuration);
+      lightFade.run(false); // TODO: CUSTOM VELOCITY
     }
   }
 
@@ -204,10 +201,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
           ),
         );
       },
-      animation: Listenable.merge([
-        hover.listenable,
-        press.listenable,
-      ]),
+      animation: Listenable.merge([hover, press]),
     );
   }
 }
