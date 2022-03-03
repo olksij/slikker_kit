@@ -320,6 +320,9 @@ class _MaterialEffects extends CustomPainter {
   }
 
   Canvas paintRipple(Canvas canvas, Size size) {
+    // Temporary disabled
+    return canvas;
+
     // Extract variables.
     final BorderRadius borderRadius = materialBorderRadius(size);
     final Offset tapPosition = material.tapPosition;
