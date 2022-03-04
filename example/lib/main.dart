@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:slikker_kit/slikker_kit.dart';
 
 void main() => runApp(const SlikkerExampleApp());

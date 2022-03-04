@@ -10,14 +10,33 @@ import 'theme.dart';
 
 // TODO: Implement minor state.
 
-const Duration _lightFadeInDuration = Duration(milliseconds: 200);
-const Duration _lightFadeOutDuration = Duration(milliseconds: 500);
+//const Duration _lightFadeInDuration = Duration(milliseconds: 200);
+//const Duration _lightFadeOutDuration = Duration(milliseconds: 500);
 //const Duration _lightPressDuration = Duration(milliseconds: 1000);
-const Duration _lightRadiusDuration = Duration(milliseconds: 500);
+//const Duration _lightRadiusDuration = Duration(milliseconds: 500);
 
-enum MaterialStyle { elevated, filled, flat }
+/// Define [SlikkerMaterial] style.
+/// - [elevated] value elevates material by changing to a brighter color,
+///   adding light and shadow. High emphasis.
+/// - [filled] value fills the material, crreating medium emphasis.
+/// - [flat] value makes material transperent, just showing inner content in rest state.
+enum MaterialStyle {
+  /// Elevates material by changing to a brighter color,
+  /// adding light and shadow. High emphasis.
+  elevated,
 
+  /// Fills the material, crreating medium emphasis.
+  filled,
+
+  /// Makes material transperent, just showing inner content in rest state.
+  flat,
+}
+
+/// A piece of material.
+/// Used to create widgets, which user can interact with.
 class SlikkerMaterial extends StatefulWidget {
+  /// A piece of material.
+  /// Used to create widgets, which user can interact with.
   const SlikkerMaterial({
     Key? key,
     this.minor = false,
@@ -53,10 +72,10 @@ class SlikkerMaterial extends StatefulWidget {
   /// The [Function] that will be invoked on user's tap.
   final Function? onTap;
 
-  // TODO: COMMENT
+  /// Defines the material's shape.
   final BoxShape? shape;
 
-  // TODO: COMMENT
+  // Define [SlikkerMaterial] style.
   final MaterialStyle? style;
 }
 
@@ -79,23 +98,17 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
   void initState() {
     super.initState();
     // Initialize slikker animation.
-    disabled = _initAnimation(value: widget.disabled);
-    minor = _initAnimation(value: widget.minor);
-    lightFade = _initAnimation(curve: Curves.easeInOut);
-    lightRadius = _initAnimation(curve: Curves.easeOut);
+    disabled = _initAnimation(widget.disabled);
+    minor = _initAnimation(widget.minor);
+    lightFade = _initAnimation();
+    lightRadius = _initAnimation();
     hover = _initAnimation();
     press = _initAnimation();
   }
 
   /// Generic slikker animation controller required.
-  SlikkerAnimationController _initAnimation({
-    bool value = false,
-    Curve? curve,
-  }) {
-    return SlikkerAnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
+  SlikkerAnimationController _initAnimation([bool value = false]) {
+    return SlikkerAnimationController(vsync: this, value: value ? 1 : 0);
   }
 
   @override
@@ -127,7 +140,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
   }
 
   /// Fired when user touch or press on material
-  void touchEvent({TapDownDetails? tapDown, TapUpDetails? tapUp}) {
+  void touchEvent({TapDownDetails? tapDown, TapUpDetails? tapUp}) async {
     if (widget.disabled) return;
 
     factor = calcFactor();
@@ -148,6 +161,11 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
       lightRadius.run(true); // TODO: CUSTOM VELOCITY
     } else {
       // Tap up event.
+      await Future.delayed(Duration(
+          milliseconds:
+              (press.duration!.inMilliseconds * 0.1 * (1 - press.visual) * 0.66)
+                  .round()));
+
       press.run(false);
       lightFade.run(false); // TODO: CUSTOM VELOCITY
     }
@@ -220,20 +238,28 @@ class _MaterialEffects extends CustomPainter {
   BorderRadius materialBorderRadius(Size size) {
     final circle = material.widget.shape == BoxShape.circle;
 
+    // Get the BorderRadius of the material.
     final base = circle
         ? BorderRadius.circular(size.shortestSide / 2)
         : material.widget.borderRadius ?? material.theme.borderRadius;
 
+    // Sum up borders for calculating avarage later.
     final sum =
         base.bottomRight + base.bottomLeft + base.bottomRight + base.bottomLeft;
 
+    // In elevated state borders are less rounded, so material fill
+    // more space and create more emphasis.
     final elevated = BorderRadius.all(sum / 1.25 / 4);
 
+    // In pressed state borders are more rounded,
+    // so material appears to be smaller, creating higher contrast between states.
     final demoted = BorderRadius.all(sum * 1.25 / 4);
 
+    // Blend with hover elevating.
     final elevationResult =
         BorderRadius.lerp(base, elevated, material.hover.value);
 
+    // Blend with pressed state.
     return BorderRadius.lerp(elevationResult, demoted, material.press.value)!;
   }
 
@@ -244,10 +270,11 @@ class _MaterialEffects extends CustomPainter {
     final MaterialStyle style = material.widget.style ?? MaterialStyle.elevated;
     final BorderRadius borderRadius = materialBorderRadius(size);
 
-    // INIT PAINT OBJECTS
-
+    // Used for defining material state for each material style.
     final double alphaBlend = min(
         max(style != MaterialStyle.elevated ? material.hover.value : 1, 0), 1);
+
+    // INIT PAINT OBJECTS
 
     final Paint paintLight = Paint()
       ..color = HSVColor.fromAHSV(.3 * alphaBlend, 0, 0, 1).toColor();

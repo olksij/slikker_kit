@@ -1,16 +1,16 @@
 # **Slikker Kit**
-### Slikker Kit is a Flutter package which provides Slikker Design System components
+### Slikker Kit is a Flutter package which provides Slikker Design System components.
 
 <br>
 
 ![UI Preview](./res/Preview.png)
-#### The preview of the planned version `1.1.0`, which was designed in summer 2021.
-> #### The new batch of research is coming later.
+#### The preview of the planned first research batch release, planned in 2022 Q2.
 
 <br>
 
-### [Alpha development changelog](1.1.0-alpha-CHANGELOG.md)
-#### For accessing **working code**, navigate into **dev branch**, with relative stable commits.
+## ⚠️ Implementation is not stable yet!
+> [`dev` branch changelog](1.1.0-alpha-CHANGELOG.md)
+#### For accessing working code, navigate into **dev branch**
 
 
 <br>
@@ -66,7 +66,7 @@ ___
 
 1. Clone the repository.
 ```shell
-$ git clone https://github.com/AlexBesida/slikker_kit.git
+$ git clone --branch dev https://github.com/AlexBesida/slikker_kit.git
 ```
 
 2. Move to the example directory

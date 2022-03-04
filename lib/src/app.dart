@@ -5,9 +5,48 @@ import 'package:flutter/material.dart' show MaterialPageRoute;
 import './theme.dart';
 import './nav_bar.dart';
 
-enum AppElems { nav, app }
+/// SlikkerApp consist of navigation, and application content itself, wrapped with router.
+enum _AppElems { nav, app }
 
+/// Creates a widget that wraps a number of widgets that are commonly
+/// required for an application.
+///
+/// Most callers will want to use the [home] or [routes] parameters, or both.
+/// The [home] parameter is a convenience for the following [routes] map:
+///
+/// ```dart
+/// <String, WidgetBuilder>{ '/': (BuildContext context) => myWidget }
+/// ```
+///
+/// It is possible to specify both [home] and [routes], but only if [routes] does
+///  _not_ contain an entry for `'/'`.  Conversely, if [home] is omitted, [routes]
+/// _must_ contain an entry for `'/'`.
+///
+/// The [builder] parameter is designed to provide the ability to wrap the visible
+/// content of the app in some other widget. It is recommended that you use [home]
+/// rather than [builder] if you intend to only display a single route in your app.
+///
+/// Copied from [WidgetsApp].
 class SlikkerApp extends StatefulWidget {
+  /// Creates a widget that wraps a number of widgets that are commonly
+  /// required for an application.
+  ///
+  /// Most callers will want to use the [home] or [routes] parameters, or both.
+  /// The [home] parameter is a convenience for the following [routes] map:
+  ///
+  /// ```dart
+  /// <String, WidgetBuilder>{ '/': (BuildContext context) => myWidget }
+  /// ```
+  ///
+  /// It is possible to specify both [home] and [routes], but only if [routes] does
+  ///  _not_ contain an entry for `'/'`.  Conversely, if [home] is omitted, [routes]
+  /// _must_ contain an entry for `'/'`.
+  ///
+  /// The [builder] parameter is designed to provide the ability to wrap the visible
+  /// content of the app in some other widget. It is recommended that you use [home]
+  /// rather than [builder] if you intend to only display a single route in your app.
+  ///
+  /// Copied from [WidgetsApp].
   const SlikkerApp({
     Key? key,
     this.initialRoute,
@@ -24,6 +63,7 @@ class SlikkerApp extends StatefulWidget {
   })  : routerDelegate = null,
         super(key: key);
 
+  /// Creates a [SlikkerApp] that uses the [Router] instead of a [Navigator].
   const SlikkerApp.router({
     Key? key,
     required this.routerDelegate,
@@ -40,40 +80,47 @@ class SlikkerApp extends StatefulWidget {
         initialRoute = null,
         super(key: key);
 
-  // TODO: [CODE] describe
+  /// Default visual properties, like colors fonts and shapes, for this app's
+  /// slikker widgets.
   final SlikkerThemeData? theme;
 
-  // TODO: [CODE] describe
+  /// The name of the first route to show, if a [Navigator] is built.
   final String? initialRoute;
 
-  // TODO: [CODE] describe
+  /// The application's top-level routing table.
   final Map<String, WidgetBuilder> routes;
 
-  // TODO: [CODE] describe
+  /// The primary color to use for the application in the operating system
+  /// interface.
   final Color? color;
 
-  // TODO: [CODE] describe
+  /// A one-line description used by the device to identify the app for the user.
   final String title;
 
-  // TODO: [CODE] describe
+  /// A delegate that configures a widget, typically a [Navigator], with
+  /// parsed result from the [routeInformationParser].
   final RouterDelegate? routerDelegate;
 
-  // TODO: [CODE] describe
+  /// The widget for the default route of the app ([Navigator.defaultRouteName],
+  /// which is `/`).
   final Widget? home;
 
-  // TODO: [CODE] describe
+  /// The route generator callback used when the app is navigated to a
+  /// named route.
   final Route<dynamic>? Function(RouteSettings)? onGenerateRoute;
 
-  // TODO: [CODE] describe
+  /// Called when [onGenerateRoute] fails to generate a route, except for the
+  /// [initialRoute].
   final Route<dynamic>? Function(RouteSettings)? onUnknownRoute;
 
-  // TODO: [CODE] describe
+  /// The list of observers for the [Navigator] created for this app.
   final List<NavigatorObserver> navigatorObservers;
 
-  // TODO: [CODE] describe
+  /// A key to use when building the [Navigator].
   final GlobalKey<NavigatorState>? navigatorKey;
 
-  // TODO: [CODE] describe
+  /// The routes generator callback used for generating initial routes if
+  /// [initialRoute] is provided.
   final List<Route<dynamic>> Function(String)? onGenerateInitialRoutes;
 
   @override
@@ -83,6 +130,7 @@ class SlikkerApp extends StatefulWidget {
 class _SlikkerAppState extends State<SlikkerApp> {
   bool get _usesRouter => widget.routerDelegate != null;
 
+  /// Configure system overlays style.
   void overlays(SlikkerThemeData theme) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarIconBrightness: Brightness.dark,
@@ -91,6 +139,7 @@ class _SlikkerAppState extends State<SlikkerApp> {
     ));
   }
 
+  /// Build navigation view
   Widget buildNavView(BuildContext context, Widget? child) {
     final SlikkerThemeData theme = widget.theme ?? SlikkerThemeData();
 
@@ -108,9 +157,9 @@ class _SlikkerAppState extends State<SlikkerApp> {
 
     List<Widget> navLayout = [];
 
-    <AppElems, Widget>{
-      AppElems.app: child ?? const SizedBox(),
-      AppElems.nav: navigation,
+    <_AppElems, Widget>{
+      _AppElems.app: child ?? const SizedBox(),
+      _AppElems.nav: navigation,
     }.forEach((id, child) => navLayout.add(LayoutId(id: id, child: child)));
 
     return SlikkerTheme(
@@ -151,6 +200,7 @@ class _SlikkerAppState extends State<SlikkerApp> {
   }
 }
 
+/// Delegate, which manages position and layout of app content and navigation view.
 class _NavbarDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
@@ -160,10 +210,10 @@ class _NavbarDelegate extends MultiChildLayoutDelegate {
 
     BoxConstraints navLayout =
         BoxConstraints.tightFor(height: size.height, width: 80);
-    Size navSize = layoutChild(AppElems.nav, navLayout);
+    Size navSize = layoutChild(_AppElems.nav, navLayout);
 
     Offset navPosition = Offset(wideInterface ? 0 : 0 - navSize.width, 0);
-    positionChild(AppElems.nav, navPosition);
+    positionChild(_AppElems.nav, navPosition);
 
     // LAYOUT APPLICATION VIEW
 
@@ -174,8 +224,8 @@ class _NavbarDelegate extends MultiChildLayoutDelegate {
       width: size.width - (wideInterface ? navSize.width : 0),
     );
 
-    layoutChild(AppElems.app, appLayout);
-    positionChild(AppElems.app, appPosition);
+    layoutChild(_AppElems.app, appLayout);
+    positionChild(_AppElems.app, appPosition);
 
     return;
   }

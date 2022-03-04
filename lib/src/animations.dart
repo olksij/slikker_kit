@@ -1,12 +1,8 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 
-// TODO: DurationlessAnimations
-
-const SlikkerCurve curve = SlikkerCurve();
-
+/// Smooth elastic customizable curve used in Slikker Design System.
 class SlikkerCurve {
   /// Period of wave in curve.
   final double period;
@@ -24,7 +20,11 @@ class SlikkerCurve {
 
   /// Smooth elastic customizable curve used in Slikker Design System.
   ///
-  /// Declare a new curve with every new parameter.
+  /// Curve is designed for new declaration for every new gesture.
+  /// That was done in such way cause every gesture in unique,
+  /// and animation should be unique too.
+  ///
+  /// Passing gesture parameters to curve can negatively impact CPU.
   const SlikkerCurve({
     this.period = .6,
     this.smoothness = 8,
@@ -40,6 +40,7 @@ class SlikkerCurve {
     return _transformInternal(t);
   }
 
+  /// Transforms [t] into curve value.
   double _transformInternal(double t) {
     final num base = pow(2, t * smoothness * (t >= 0 ? -1 : 1));
     final double curve = sin((t - s) * pc + deg * (t >= 0 ? 1 : -1));
@@ -50,7 +51,9 @@ class SlikkerCurve {
   String toString() => 'SlikkerCurve(period: $period, smoothness: $smoothness)';
 }
 
-/// A controller with an applied curve for an animation
+const SlikkerCurve curve = SlikkerCurve();
+
+/// A controller with an applied curve for an animation.
 class SlikkerAnimationController extends AnimationController {
   /// A controller with an applied curve for an animation
   SlikkerAnimationController({
@@ -58,19 +61,22 @@ class SlikkerAnimationController extends AnimationController {
     // TODO: DURATION TO VELOCITY
     Duration? duration,
     double value = 0.0,
-  }) : super(
-          vsync: vsync,
-          duration: duration,
-          value: value,
-          lowerBound: -1,
-        );
+  }) : super(vsync: vsync, duration: duration, value: value, lowerBound: -1);
 
-  /// The current value of the animation.
+  /// The current value of the animation returned from curve.
   @override
   double get value => curve.transform(super.value);
 
+  /// Returns visual value of the animation between `0.0` and `1.0`,
+  /// where `0.0` is animation visually at the beginning,
+  /// and `1.0` is animation visually finished.
+  double get visual => max(min(super.value * 10 + .5, 1), 0);
+
+  /// Method, which should be called every time gesture changes.
+  /// - [forward] - when `true`, animation is driving to the end (`visual == 1`).
+  /// - [velocity] - speed of finger or pointer, when gesture passed to controller.
   TickerFuture run(bool forward, {double? velocity}) {
-    // TODO: VELOCITY MANIPULATION
+    // TODO: [DESIGN] velocity and acceleration manipulation.
     super.duration = Duration(milliseconds: 1600);
 
     if (forward) return super.forward(from: max(super.value, -0.05));

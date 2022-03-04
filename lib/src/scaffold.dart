@@ -24,6 +24,8 @@ class SlikkerScaffold extends StatefulWidget {
   /// floats above the `content`.
   final Widget? actionButton;
 
+  /// Widget that helps to build a page.
+  /// Full documentation will be later
   const SlikkerScaffold({
     Key? key,
     this.title,
