@@ -1,10 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:slikker_kit/slikker_kit.dart';
-
-import './theme.dart';
 
 /// Widget that helps to build a page.
 /// Full documentation will be later
@@ -55,7 +52,6 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
       actionButton: widget.actionButton,
     );
 
-    // TODO: [DESIGN] implement wallaper adaptation
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
@@ -69,7 +65,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
 class SlikkerScrollBehavior extends ScrollBehavior {
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) {
-    return const BouncingScrollPhysics();
+    return const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
   }
 }
 
@@ -111,6 +107,7 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
     if (title != null) {
       TextStyle titleStyle = TextStyle(
         fontSize: lerpDouble(40, 20, shrinkOffset / (maxExtent - minExtent)),
+        fontWeight: FontWeight.w600,
       );
 
       children.add(AnimatedPositioned(

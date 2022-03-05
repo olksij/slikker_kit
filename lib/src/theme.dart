@@ -42,7 +42,7 @@ class SlikkerThemeData {
     EdgeInsets? padding,
     BorderRadius? borderRadius,
   }) {
-    theme ??= SlikkerThemeData.light();
+    theme ??= SlikkerThemeData.light(hue: hue ?? 240);
 
     return SlikkerThemeData.raw(
       hue: hue ?? theme.hue,

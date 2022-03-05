@@ -190,11 +190,16 @@ class _SlikkerAppState extends State<SlikkerApp> {
 
     Widget result = SlikkerTheme(
       theme: theme,
-      child: CustomMultiChildLayout(
-        delegate: _NavbarDelegate(),
-        children: navLayout,
+      child: SafeArea(
+        child: CustomMultiChildLayout(
+          delegate: _NavbarDelegate(),
+          children: navLayout,
+        ),
       ),
     );
+
+    // TODO: [DESIGN] Background adaptation
+    // TODO: [DESIGN] Hue adaptation
 
     if (shouldFillBackground) {
       result = ColoredBox(
@@ -244,7 +249,7 @@ class _NavbarDelegate extends MultiChildLayoutDelegate {
     // LAYOUT NAVIGATION BAR
 
     BoxConstraints navLayout =
-        BoxConstraints.tightFor(height: size.height, width: 80);
+        BoxConstraints.tightFor(height: size.height, width: 88);
     Size navSize = layoutChild(_AppElems.nav, navLayout);
 
     Offset navPosition = Offset(wideInterface ? 0 : 0 - navSize.width, 0);

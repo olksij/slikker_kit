@@ -1,5 +1,5 @@
 # **Slikker Kit**
-### Slikker Kit is a Flutter package which provides Slikker Design System components.
+Slikker Kit is a Flutter package which provides Slikker Design System components.
 
 <br>
 
@@ -9,8 +9,8 @@
 <br>
 
 ## ⚠️ Implementation is not stable yet!
+For accessing working code, navigate into **dev branch**
 > [`dev` branch changelog](1.1.0-alpha-CHANGELOG.md)
-#### For accessing working code, navigate into **dev branch**
 
 
 <br>
@@ -88,6 +88,6 @@ ___
 ## License
 MIT License
 
-Copyright (c) 2020-2021 Alexey Besida
+Copyright (c) 2020-2022 Alexey Besida
 
 [Full licence](LICENSE.md)
