@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart' show MaterialPageRoute;
+import 'package:flutter_acrylic/flutter_acrylic.dart';
 
 import './theme.dart';
 import './nav_bar.dart';
@@ -130,20 +131,45 @@ class SlikkerApp extends StatefulWidget {
 class _SlikkerAppState extends State<SlikkerApp> {
   bool get _usesRouter => widget.routerDelegate != null;
 
+  late final bool shouldFillBackground;
+
   /// Configure system overlays style.
-  void overlays(SlikkerThemeData theme) {
+  bool overlays(SlikkerThemeData theme) {
+    final bool shouldFillBackground;
+
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarIconBrightness: Brightness.dark,
       statusBarColor: theme.statusBarColor,
       systemNavigationBarColor: theme.navigationBarColor,
     ));
+
+    switch (theme.platform) {
+      case TargetPlatform.windows:
+        Window.initialize().then((_) {
+          Window.setEffect(effect: WindowEffect.mica, dark: false);
+        });
+        shouldFillBackground = false;
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        shouldFillBackground = true;
+        break;
+    }
+    return shouldFillBackground;
+  }
+
+  @override
+  void initState() {
+    shouldFillBackground = overlays(widget.theme ?? SlikkerThemeData());
+    super.initState();
   }
 
   /// Build navigation view
   Widget buildNavView(BuildContext context, Widget? child) {
     final SlikkerThemeData theme = widget.theme ?? SlikkerThemeData();
-
-    overlays(theme);
 
     Widget navigation = SlikkerNavBar(
       navigationEntries: [
@@ -162,13 +188,22 @@ class _SlikkerAppState extends State<SlikkerApp> {
       _AppElems.nav: navigation,
     }.forEach((id, child) => navLayout.add(LayoutId(id: id, child: child)));
 
-    return SlikkerTheme(
+    Widget result = SlikkerTheme(
       theme: theme,
       child: CustomMultiChildLayout(
         delegate: _NavbarDelegate(),
         children: navLayout,
       ),
     );
+
+    if (shouldFillBackground) {
+      result = ColoredBox(
+        color: theme.backgroundColor,
+        child: result,
+      );
+    }
+
+    return result;
   }
 
   @override

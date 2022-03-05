@@ -56,15 +56,12 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
     );
 
     // TODO: [DESIGN] implement wallaper adaptation
-    return ColoredBox(
-      color: theme.backgroundColor,
-      child: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          SliverPersistentHeader(delegate: headerDelegate),
-          SliverToBoxAdapter(child: widget.content),
-        ],
-      ),
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        SliverPersistentHeader(delegate: headerDelegate),
+        SliverToBoxAdapter(child: widget.content),
+      ],
     );
   }
 }

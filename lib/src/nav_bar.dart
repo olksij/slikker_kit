@@ -42,6 +42,7 @@ class _SlikkerNavBarState extends State<SlikkerNavBar> {
     return ColoredBox(
       color: theme.backgroundColor,
       child: ListView.builder(
+        physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(8),
         clipBehavior: Clip.none,
         itemCount: widget.navigationEntries.length,

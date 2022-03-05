@@ -108,7 +108,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
 
   /// Generic slikker animation controller required.
   SlikkerAnimationController _initAnimation([bool value = false]) {
-    return SlikkerAnimationController(vsync: this, value: value ? 1 : 0);
+    return SlikkerAnimationController(vsync: this, value: value ? 1 : -1);
   }
 
   @override

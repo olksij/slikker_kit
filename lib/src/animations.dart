@@ -60,7 +60,7 @@ class SlikkerAnimationController extends AnimationController {
     required TickerProvider vsync,
     // TODO: DURATION TO VELOCITY
     Duration? duration,
-    double value = 0.0,
+    double value = -1,
   }) : super(vsync: vsync, duration: duration, value: value, lowerBound: -1);
 
   /// The current value of the animation returned from curve.

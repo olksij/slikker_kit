@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
@@ -27,6 +28,7 @@ class SlikkerThemeData {
   factory SlikkerThemeData({
     SlikkerThemeData? theme,
     double? hue,
+    TargetPlatform? platform,
     Color? accentColor,
     Color? backgroundColor,
     Color? fontColor,
@@ -44,6 +46,7 @@ class SlikkerThemeData {
 
     return SlikkerThemeData.raw(
       hue: hue ?? theme.hue,
+      platform: platform ?? theme.platform,
       accentColor: accentColor ?? theme.accentColor,
       backgroundColor: backgroundColor ?? theme.backgroundColor,
       fontFamily: fontFamily ?? theme.fontFamily,
@@ -63,11 +66,12 @@ class SlikkerThemeData {
       : accentColor = _hsvColor(1, hue, .6, 1),
         backgroundColor = _hsvColor(1, hue, .05, .98),
         fontFamily = '',
+        platform = defaultTargetPlatform,
         fontWeight = FontWeight.w600,
         iconColor = _hsvColor(1, hue, .22, .56),
         iconBackgroundColor = _hsvColor(1, hue, .1, .89),
         iconSize = 28,
-        fontColor = _hsvColor(1, hue, .24, .4),
+        fontColor = _hsvColor(1, hue, .04, .1),
         statusBarColor = _hsvColor(.05, hue, .2, .2),
         navigationBarColor = _hsvColor(1, hue, .06, .97),
         padding = const EdgeInsets.all(16),
@@ -75,6 +79,7 @@ class SlikkerThemeData {
 
   SlikkerThemeData.dark({this.hue = 240})
       : accentColor = _hsvColor(1, hue, .6, 1),
+        platform = defaultTargetPlatform,
         backgroundColor = _hsvColor(1, hue, .05, .98),
         fontFamily = '',
         fontWeight = FontWeight.w600,
@@ -88,6 +93,7 @@ class SlikkerThemeData {
         borderRadius = BorderRadius.circular(12);
 
   const SlikkerThemeData.raw({
+    required this.platform,
     required this.hue,
     required this.accentColor,
     required this.backgroundColor,
@@ -105,6 +111,8 @@ class SlikkerThemeData {
 
   /// The Hue which will be used for your button. Expected value from 0.0 to 360.0
   final double hue;
+
+  final TargetPlatform platform;
 
   final Color accentColor;
 
