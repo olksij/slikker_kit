@@ -51,7 +51,7 @@ class SlikkerApp extends StatefulWidget {
   const SlikkerApp({
     Key? key,
     this.initialRoute,
-    this.routes = const <String, WidgetBuilder>{},
+    this.routes = const [],
     this.color,
     this.theme,
     this.title = '',
@@ -77,7 +77,7 @@ class SlikkerApp extends StatefulWidget {
         home = null,
         onGenerateInitialRoutes = null,
         onUnknownRoute = null,
-        routes = const {},
+        routes = const [],
         initialRoute = null,
         super(key: key);
 
@@ -89,7 +89,32 @@ class SlikkerApp extends StatefulWidget {
   final String? initialRoute;
 
   /// The application's top-level routing table.
-  final Map<String, WidgetBuilder> routes;
+  ///
+  /// When a named route is pushed with [Navigator.pushNamed], the route name is
+  /// looked up in this list of [NavigationEntry]'s. If the name is present, the associated
+  /// [widgets.WidgetBuilder] is used to construct a [PageRoute] specified by
+  /// [pageRouteBuilder] to perform an appropriate transition, including [Hero]
+  /// animations, to the new route.
+  ///
+  /// If the app only has one page, then you can specify it using [home] instead.
+  ///
+  /// If [home] is specified, then it implies an entry in this table for the
+  /// [Navigator.defaultRouteName] route (`/`), and it is an error to
+  /// redundantly provide such a route in the [routes] table.
+  ///
+  /// If a route is requested that is not specified in this table (or by
+  /// [home]), then the [onGenerateRoute] callback is called to build the page
+  /// instead.
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [builder] must not be null.
+  /// {@endtemplate}
+  ///
+  /// If the routes map is not empty, the [pageRouteBuilder] property must be set
+  /// so that the default route handler will know what kind of [PageRoute]s to
+  /// build.
+  final List<NavigationEntry> routes;
 
   /// The primary color to use for the application in the operating system
   /// interface.
@@ -171,21 +196,13 @@ class _SlikkerAppState extends State<SlikkerApp> {
   Widget buildNavView(BuildContext context, Widget? child) {
     final SlikkerThemeData theme = widget.theme ?? SlikkerThemeData();
 
-    Widget navigation = SlikkerNavBar(
-      navigationEntries: [
-        NavigationEntry(route: '', title: 'Label'),
-        NavigationEntry(route: '', title: 'Label'),
-        NavigationEntry(route: '', title: 'Label'),
-      ],
-    );
-
     // navRelation supposed to control navigation and scroll view
 
     List<Widget> navLayout = [];
 
     <_AppElems, Widget>{
       _AppElems.app: child ?? const SizedBox(),
-      _AppElems.nav: navigation,
+      _AppElems.nav: SlikkerNavBar(routes: widget.routes),
     }.forEach((id, child) => navLayout.add(LayoutId(id: id, child: child)));
 
     Widget result = SlikkerTheme(
@@ -215,6 +232,12 @@ class _SlikkerAppState extends State<SlikkerApp> {
   Widget build(BuildContext context) {
     final SlikkerThemeData theme = widget.theme ?? SlikkerThemeData();
 
+    final Map<String, Widget Function(BuildContext)> routes = {};
+
+    for (NavigationEntry entry in widget.routes) {
+      routes[entry.route] = entry.builder;
+    }
+
     final textStyle = TextStyle(
       fontSize: 16,
       fontFamily: theme.fontFamily,
@@ -232,7 +255,7 @@ class _SlikkerAppState extends State<SlikkerApp> {
       onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
           MaterialPageRoute<T>(settings: settings, builder: builder),
-      routes: widget.routes,
+      routes: routes,
       color: widget.color ?? theme.accentColor,
       title: widget.title,
       textStyle: textStyle,

@@ -1,32 +1,42 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:slikker_kit/slikker_kit.dart';
-import 'package:slikker_kit/src/material.dart';
 
 class NavigationEntry {
-  // TODO: [CODE] describe
+  /// Icon, which will be displayed in Navigation View.
   final IconData? icon;
 
-  // TODO: [CODE] describe
+  /// Route title, which will be displayed in Navigation View.
   final String title;
 
-  // TODO: [CODE] describe
+  /// Route name, which is looked up by [Navigator], when [Navigator.pushNamed] method is called.
   final String route;
 
-  NavigationEntry({
+  /// Function, which builds page. Used to construct a [PageRoute]
+  final Widget Function(BuildContext) builder;
+
+  /// When `true`, [SlikkerApp]'s components are hidden on this route.
+  ///
+  /// By default `false`.
+  ///
+  /// Useful in cases homepage present all routes to other pages in a focused UI,
+  /// or when homepage is a landing, or when page isn't meaned to look as an app.
+  final bool hideUI;
+
+  const NavigationEntry(
+    this.route,
+    this.builder, {
+    this.hideUI = false,
     this.icon,
-    this.title = 'Unnamed route',
-    required this.route,
+    this.title = 'Route',
   });
 }
 
 class SlikkerNavBar extends StatefulWidget {
   const SlikkerNavBar({
     Key? key,
-    required this.navigationEntries,
+    required this.routes,
   }) : super(key: key);
 
-  final List<NavigationEntry> navigationEntries;
+  final List<NavigationEntry> routes;
 
   // TODO: implement determination of current destination
   final int activeDestination = 0;
@@ -43,9 +53,9 @@ class _SlikkerNavBarState extends State<SlikkerNavBar> {
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.all(12),
       clipBehavior: Clip.none,
-      itemCount: widget.navigationEntries.length,
+      itemCount: widget.routes.length,
       itemBuilder: (context, index) {
-        final entry = widget.navigationEntries[index];
+        final entry = widget.routes[index];
 
         final icon = Padding(
           padding: const EdgeInsets.only(bottom: 4),
