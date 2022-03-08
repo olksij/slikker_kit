@@ -34,24 +34,35 @@ class SlikkerNavBar extends StatefulWidget {
   const SlikkerNavBar({
     Key? key,
     required this.routes,
+    required this.callback,
   }) : super(key: key);
 
+  /// Pass routes from [SlikkerApp] for proper displaying.
   final List<NavigationEntry> routes;
 
-  // TODO: implement determination of current destination
-  final int activeDestination = 0;
+  /// Used for pulling [BuildContext] of app content,
+  /// which is under [Navigator] widget,
+  /// so [Navigator.push()] can be odne securely.
+  final BuildContext Function() callback;
 
   @override
-  _SlikkerNavBarState createState() => _SlikkerNavBarState();
+  SlikkerNavBarState createState() => SlikkerNavBarState();
 }
 
-class _SlikkerNavBarState extends State<SlikkerNavBar> {
+class SlikkerNavBarState extends State<SlikkerNavBar> {
+  /// Current [RouteSettings] in [Navigator].
+  RouteSettings? route;
+
+  /// Used for keeping [RouteSettings] up to date with [Navigator].
+  void updateRoute(RouteSettings route) => setState(() => this.route = route);
+
   @override
   Widget build(BuildContext context) {
     final theme = SlikkerTheme.of(context);
+
     return ListView.builder(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.only(left: 12, top: 12),
       clipBehavior: Clip.none,
       itemCount: widget.routes.length,
       itemBuilder: (context, index) {
@@ -77,11 +88,11 @@ class _SlikkerNavBarState extends State<SlikkerNavBar> {
           padding: const EdgeInsets.only(bottom: 8),
           child: SlikkerButton(
             child: Column(children: [icon, label]),
-            style: widget.activeDestination == index
+            style: route?.name == entry.route
                 ? MaterialStyle.filled
                 : MaterialStyle.flat,
             padding: const EdgeInsets.all(8),
-            onTap: () /*=> Navigator.pushNamed(context, entry.route)*/ {},
+            onTap: () => Navigator.pushNamed(widget.callback(), entry.route),
           ),
         );
       },

@@ -156,7 +156,24 @@ class SlikkerApp extends StatefulWidget {
 class _SlikkerAppState extends State<SlikkerApp> {
   bool get _usesRouter => widget.routerDelegate != null;
 
+  /// Used for retrieving [BuildContext] of application view, which is
+  /// required by [Navigator] when [Navigator.push()] is fired in [NavigationBar].
+  late final GlobalKey<NavigatorState> navigatorKey;
+
+  /// Required for keeping [SlikkerNavBar] always up to date
+  /// with current [RouteSettings].
+  late final GlobalKey<SlikkerNavBarState> navViewKey;
+
+  /// Background shouldn't be filled on desktop apps as it will be transperent.
   late final bool shouldFillBackground;
+
+  @override
+  void initState() {
+    navigatorKey = GlobalKey();
+    navViewKey = GlobalKey();
+    shouldFillBackground = overlays(widget.theme ?? SlikkerThemeData());
+    super.initState();
+  }
 
   /// Configure system overlays style.
   bool overlays(SlikkerThemeData theme) {
@@ -186,12 +203,6 @@ class _SlikkerAppState extends State<SlikkerApp> {
     return shouldFillBackground;
   }
 
-  @override
-  void initState() {
-    shouldFillBackground = overlays(widget.theme ?? SlikkerThemeData());
-    super.initState();
-  }
-
   /// Build navigation view
   Widget buildNavView(BuildContext context, Widget? child) {
     final SlikkerThemeData theme = widget.theme ?? SlikkerThemeData();
@@ -201,8 +212,12 @@ class _SlikkerAppState extends State<SlikkerApp> {
     List<Widget> navLayout = [];
 
     <_AppElems, Widget>{
-      _AppElems.app: child ?? const SizedBox(),
-      _AppElems.nav: SlikkerNavBar(routes: widget.routes),
+      _AppElems.app: SizedBox(child: child),
+      _AppElems.nav: SlikkerNavBar(
+        key: navViewKey,
+        routes: widget.routes,
+        callback: () => navigatorKey.currentContext!,
+      ),
     }.forEach((id, child) => navLayout.add(LayoutId(id: id, child: child)));
 
     Widget result = SlikkerTheme(
@@ -251,14 +266,17 @@ class _SlikkerAppState extends State<SlikkerApp> {
       onGenerateRoute: widget.onGenerateRoute,
       onUnknownRoute: widget.onUnknownRoute,
       navigatorObservers: widget.navigatorObservers,
-      navigatorKey: widget.navigatorKey,
+      navigatorKey: navigatorKey,
       onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
-      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
-          MaterialPageRoute<T>(settings: settings, builder: builder),
+      pageRouteBuilder: <T>(route, builder) {
+        navViewKey.currentState?.updateRoute(route);
+        return MaterialPageRoute<T>(settings: route, builder: builder);
+      },
       routes: routes,
       color: widget.color ?? theme.accentColor,
       title: widget.title,
       textStyle: textStyle,
+      home: widget.home,
     );
   }
 }

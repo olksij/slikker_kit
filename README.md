@@ -9,7 +9,7 @@ Slikker Kit is a Flutter package which provides Slikker Design System components
 <br>
 
 ## ⚠️ Implementation is not stable yet!
-For accessing working code, navigate into **dev branch**
+For accessing working but `unfinished` code, navigate into **dev branch**
 > [`dev` branch changelog](1.1.0-alpha-CHANGELOG.md)
 
 
