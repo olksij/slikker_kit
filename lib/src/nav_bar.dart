@@ -56,9 +56,13 @@ class SlikkerNavBarState extends State<SlikkerNavBar> {
   /// Used for keeping [RouteSettings] up to date with [Navigator].
   void updateRoute(RouteSettings route) => setState(() => this.route = route);
 
+  final List<bool?> states = [];
+
   @override
   Widget build(BuildContext context) {
     final theme = SlikkerTheme.of(context);
+
+    states.length = widget.routes.length;
 
     return ListView.builder(
       physics: const BouncingScrollPhysics(),
@@ -67,32 +71,50 @@ class SlikkerNavBarState extends State<SlikkerNavBar> {
       itemCount: widget.routes.length,
       itemBuilder: (context, index) {
         final entry = widget.routes[index];
+        final active = route?.name == entry.route;
+        final boxed = active || (states[index] ?? false);
 
-        final icon = Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: IconExtended(entry.icon ?? SlikkerIcons.settings, size: 24),
+        final icon = AnimatedAlign(
+          curve: Curves.elasticOut,
+          duration: const Duration(milliseconds: 1000),
+          alignment: boxed ? Alignment.center : Alignment.topCenter,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: IconExtended(
+              entry.icon ?? SlikkerIcons.settings,
+              size: boxed ? 28 : 24,
+            ),
+          ),
         );
 
-        final label = Padding(
-          padding: const EdgeInsets.all(2),
-          child: Text(
-            entry.title,
-            style: const TextStyle(
-              fontSize: 12,
-              height: 1,
+        final label = Align(
+          alignment: Alignment.bottomCenter,
+          child: AnimatedPadding(
+            duration: const Duration(milliseconds: 1000),
+            curve: Curves.elasticOut,
+            padding: EdgeInsets.only(bottom: boxed ? 0 : 10),
+            child: AnimatedDefaultTextStyle(
+              child: Text(entry.title),
+              duration: const Duration(milliseconds: 100),
+              style: TextStyle(
+                color: theme.fontColor.withAlpha(boxed ? 0 : 150),
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         );
 
         return Padding(
           padding: const EdgeInsets.only(bottom: 8),
-          child: SlikkerButton(
-            child: Column(children: [icon, label]),
-            style: route?.name == entry.route
-                ? MaterialStyle.filled
-                : MaterialStyle.flat,
-            padding: const EdgeInsets.all(8),
+          child: SlikkerMaterial(
+            child: Stack(children: [icon, label]),
+            padding: const EdgeInsets.all(0),
+            style: active ? MaterialStyle.filled : MaterialStyle.flat,
             onTap: () => Navigator.pushNamed(widget.callback(), entry.route),
+            onMouseEnter: () => setState(() => states[index] = true),
+            onMouseExit: () => setState(() => states[index] = false),
+            height: 60,
           ),
         );
       },

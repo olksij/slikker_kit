@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -47,6 +48,10 @@ class SlikkerMaterial extends StatefulWidget {
     this.padding,
     this.shape,
     this.style,
+    this.height,
+    this.width,
+    this.onMouseEnter,
+    this.onMouseExit,
   }) : super(key: key);
 
   @override
@@ -72,11 +77,21 @@ class SlikkerMaterial extends StatefulWidget {
   /// The [Function] that will be invoked on user's tap.
   final Function? onTap;
 
+  /// Triggered when a mouse pointer has entered this widget.
+  final Function? onMouseEnter;
+
+  /// Triggered when a mouse pointer has exited this widget when the widget is still mounted.
+  final Function? onMouseExit;
+
   /// Defines the material's shape.
   final BoxShape? shape;
 
   // Define [SlikkerMaterial] style.
   final MaterialStyle? style;
+
+  final double? height;
+
+  final double? width;
 }
 
 class _SlikkerMaterialState extends State<SlikkerMaterial>
@@ -136,6 +151,8 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
   /// Fired when user hover material
   void hoverEvent(bool state) {
     factor = calcFactor();
+    if (state && widget.onMouseEnter != null) widget.onMouseEnter!();
+    if (!state && widget.onMouseExit != null) widget.onMouseExit!();
     if (!widget.disabled) hover.run(state);
   }
 
@@ -209,6 +226,12 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
             ),
           );
         }
+
+        material = SizedBox(
+          child: material,
+          height: widget.height,
+          width: widget.width,
+        );
 
         return Transform.scale(
           scale: 1 - depth * .1 / factor,

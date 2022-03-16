@@ -58,7 +58,6 @@ class SlikkerApp extends StatefulWidget {
     this.home,
     this.onGenerateRoute,
     this.onUnknownRoute,
-    this.navigatorKey,
     this.onGenerateInitialRoutes,
     this.navigatorObservers = const [],
   })  : routerDelegate = null,
@@ -72,7 +71,6 @@ class SlikkerApp extends StatefulWidget {
     this.theme,
     this.title = '',
   })  : navigatorObservers = const [],
-        navigatorKey = null,
         onGenerateRoute = null,
         home = null,
         onGenerateInitialRoutes = null,
@@ -141,9 +139,6 @@ class SlikkerApp extends StatefulWidget {
 
   /// The list of observers for the [Navigator] created for this app.
   final List<NavigatorObserver> navigatorObservers;
-
-  /// A key to use when building the [Navigator].
-  final GlobalKey<NavigatorState>? navigatorKey;
 
   /// The routes generator callback used for generating initial routes if
   /// [initialRoute] is provided.
@@ -290,7 +285,7 @@ class _NavbarDelegate extends MultiChildLayoutDelegate {
     // LAYOUT NAVIGATION BAR
 
     BoxConstraints navLayout =
-        BoxConstraints.tightFor(height: size.height, width: 88);
+        BoxConstraints.tightFor(height: size.height, width: 80);
     Size navSize = layoutChild(_AppElems.nav, navLayout);
 
     Offset navPosition = Offset(wideInterface ? 0 : 0 - navSize.width, 0);
