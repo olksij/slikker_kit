@@ -70,19 +70,30 @@ class SlikkerNavBarState extends State<SlikkerNavBar> {
       clipBehavior: Clip.none,
       itemCount: widget.routes.length,
       itemBuilder: (context, index) {
+        /// Retrive [NavigationEntry] object
         final entry = widget.routes[index];
+
+        /// Indicates the current [Navigator] destination
         final active = route?.name == entry.route;
-        final boxed = active || (states[index] ?? false);
+
+        /// Used to avoid label to be
+        final hover = states[index] ?? false;
 
         final icon = AnimatedAlign(
-          curve: Curves.elasticOut,
-          duration: const Duration(milliseconds: 1000),
-          alignment: boxed ? Alignment.center : Alignment.topCenter,
+          curve: ElasticOutCurve(0.6),
+          duration: const Duration(milliseconds: 700),
+          alignment: hover ? Alignment.center : Alignment.topCenter,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: IconExtended(
               entry.icon ?? SlikkerIcons.settings,
-              size: boxed ? 28 : 24,
+              color: HSVColor.fromColor(theme.iconColor)
+                  .withValue(active ? 0.4 : 0.6)
+                  .toColor(),
+              backgroundColor: HSVColor.fromColor(theme.iconColor)
+                  .withValue(active ? 0.6 : .9)
+                  .toColor(),
+              size: hover ? 28 : 26,
             ),
           ),
         );
@@ -90,14 +101,14 @@ class SlikkerNavBarState extends State<SlikkerNavBar> {
         final label = Align(
           alignment: Alignment.bottomCenter,
           child: AnimatedPadding(
-            duration: const Duration(milliseconds: 1000),
-            curve: Curves.elasticOut,
-            padding: EdgeInsets.only(bottom: boxed ? 0 : 10),
+            duration: const Duration(milliseconds: 700),
+            curve: ElasticOutCurve(0.6),
+            padding: EdgeInsets.only(bottom: hover ? 0 : 8),
             child: AnimatedDefaultTextStyle(
               child: Text(entry.title),
               duration: const Duration(milliseconds: 100),
               style: TextStyle(
-                color: theme.fontColor.withAlpha(boxed ? 0 : 150),
+                color: theme.fontColor.withAlpha(hover ? 0 : 150),
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
               ),
