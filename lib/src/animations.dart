@@ -2,8 +2,20 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 
-/// Smooth elastic customizable curve used in Slikker Design System.
-class SlikkerCurve {
+enum CurveType { curveIn, curveOut, curveInOut }
+
+/// An ideally symetric oscillating curve that grows and then shrinks
+/// in magnitude while overshooting its bounds used in Slikker Design System.
+///
+/// At it's core is ideally symetric curve with a range [-1, 1],
+/// at which at the center (`t == 0`) curve equals to `0.5`.
+///
+/// Most of the animation movement is laying in a range -[start] <= value <= [start].
+///
+/// The curve is designed for new declaration for every new gesture.
+/// That was done in such way cause every gesture in unique,
+/// and animation should be unique too.
+class SlikkerCurve extends Curve {
   /// Period of wave in curve.
   final double period;
 
@@ -15,33 +27,78 @@ class SlikkerCurve {
   /// - [pc] stands for period correction in [sin] function.
   final double s, pc;
 
+  /// If specified, the curve will behave as a regular [Curve] class
+  /// and adapt it's curve and input ranges to given type.
+  final CurveType? type;
+
   /// Static 60 degree for animation correction and avoiding unnecesary computation.
   static const double deg = pi / 3;
 
-  /// Smooth elastic customizable curve used in Slikker Design System.
+  /// An ideally symetric oscillating curve that grows and then shrinks
+  /// in magnitude while overshooting its bounds used in Slikker Design System.
   ///
-  /// Curve is designed for new declaration for every new gesture.
+  /// At it's core is ideally symetric curve with a range [-1, 1],
+  /// at which at the center (`t == 0`) curve equals to `0.5`.
+  ///
+  /// Most of the animation movement is laying in a range -[start] <= value <= [start].
+  ///
+  /// The curve is designed for new declaration for every new gesture.
   /// That was done in such way cause every gesture in unique,
   /// and animation should be unique too.
-  ///
-  /// Passing gesture parameters to curve can negatively impact CPU.
   const SlikkerCurve({
-    this.period = .6,
+    this.period = 1,
     this.smoothness = 8,
+    this.type,
   })  : s = period / 4,
         pc = (2 * pi) / period;
 
-  /// Argument [t] must be in range from `-1.0` to `1.0`,
-  /// where `t.abs() == 1.0` is the endpoints of the animation,
-  /// and `t == 0` is the middle point of the animation, value of which is `0.5`.
+  /// Returns the value of the curve at point t.
+  ///
+  /// This function must ensure the following:
+  /// - The value of [t] must be between `0.0` and `1.0`.
+  /// - Values of `t = 0.0` and `t = 1.0` must be mapped to `0.0` and `1.0`, respectively.
+  @override
   double transform(double t) {
-    assert(-1 <= t && t <= 1, 'value $t is outside of [-1, 1] range.');
-    if (t.abs() == 1) return t / 2 + .5;
-    return _transformInternal(t);
+    switch (type) {
+      case CurveType.curveInOut:
+        return compute(t * 2 - 1);
+      case CurveType.curveOut:
+        return compute(t - start);
+      case CurveType.curveIn:
+        return compute(-t + start);
+      case null:
+        throw FlutterError(
+          'SlikkerCurve.type value is not specified.\n'
+          'SlikkerCurve.transform() is used in case you need this class '
+          'to behave as regular Curve class. Please specify SlikkerCurve.type '
+          'value. In other case consider using SlikkerCurve.compute().',
+        );
+    }
   }
 
-  /// Transforms [t] into curve value.
-  double _transformInternal(double t) {
+  /// Returns a number, which indicates at which position curve visually starts & ends.
+  ///
+  /// [SlikkerCurve] at it's core is ideally symetric curve with a range [-1, 1],
+  /// at which at the center (`t == 0`) curve equals to `0.5`.
+  /// But it visually starts and ends earlier than `t.abs() == 1`.
+  /// The main animation is ranging in `[-start, start]` points.
+  // TODO: calculate curve startpoint.
+  double get start => 0.0833;
+
+  /// Argument [t] must be in range from `-1.0` to `1.0`.
+  /// where `t.abs() == 1.0` is the endpoints of the animation,
+  /// and `t == 0` is the middle point of the animation, value of which is `0.5`.
+  double compute(double t) {
+    assert(-1 <= t && t <= 1, 'value $t is outside of [-1, 1] range.');
+    if (t.abs() == 1) return t / 2 + .5;
+    return transformInternal(t);
+  }
+
+  /// Transforms [t] into curve value. [t] should be in range `-1.0 <= t <= 1.0`.
+  /// Returns evaluated by raw curve [t] value.
+  /// The curve is similar to [ElasticInOutCurve], but idealized and adapted for playback.
+  @override
+  double transformInternal(double t) {
     final num base = pow(2, t * smoothness * (t >= 0 ? -1 : 1));
     final double curve = sin((t - s) * pc + deg * (t >= 0 ? 1 : -1));
     return t >= 0 ? base * curve + 1 : -base * curve;
@@ -65,7 +122,7 @@ class SlikkerAnimationController extends AnimationController {
 
   /// The current value of the animation returned from curve.
   @override
-  double get value => curve.transform(super.value);
+  double get value => curve.compute(super.value);
 
   /// Returns visual value of the animation between `0.0` and `1.0`,
   /// where `0.0` is animation visually at the beginning,
@@ -77,7 +134,7 @@ class SlikkerAnimationController extends AnimationController {
   /// - [velocity] - speed of finger or pointer, when gesture passed to controller.
   TickerFuture run(bool forward, {double? velocity}) {
     // TODO: [DESIGN] velocity and acceleration manipulation.
-    super.duration = Duration(milliseconds: 1600);
+    super.duration = Duration(milliseconds: 1200);
 
     if (forward) return super.forward(from: max(super.value, -0.05));
     return super.reverse(from: min(super.value, 0.05));
