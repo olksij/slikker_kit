@@ -77,12 +77,16 @@ class SlikkerNavBarState extends State<SlikkerNavBar> {
         final active = route?.name == entry.route;
 
         /// Used to avoid label to be
-        final hover = states[index] ?? false;
+        final boxed = active || (states[index] ?? false);
 
         final icon = AnimatedAlign(
-          curve: ElasticOutCurve(0.6),
+          curve: const SlikkerCurve(
+            type: CurveType.curveOut,
+            smoothness: 10,
+            period: 1,
+          ),
           duration: const Duration(milliseconds: 700),
-          alignment: hover ? Alignment.center : Alignment.topCenter,
+          alignment: boxed ? Alignment.center : Alignment.topCenter,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: IconExtended(
@@ -93,39 +97,58 @@ class SlikkerNavBarState extends State<SlikkerNavBar> {
               backgroundColor: HSVColor.fromColor(theme.iconColor)
                   .withValue(active ? 0.6 : .9)
                   .toColor(),
-              size: hover ? 28 : 26,
+              size: boxed ? 28 : 26,
             ),
           ),
         );
 
-        final label = Align(
-          alignment: Alignment.bottomCenter,
-          child: AnimatedPadding(
-            duration: const Duration(milliseconds: 700),
-            curve: ElasticOutCurve(0.6),
-            padding: EdgeInsets.only(bottom: hover ? 0 : 8),
-            child: AnimatedDefaultTextStyle(
-              child: Text(entry.title),
-              duration: const Duration(milliseconds: 100),
-              style: TextStyle(
-                color: theme.fontColor.withAlpha(hover ? 0 : 150),
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
+        final label = AnimatedPositioned(
+          duration: const Duration(milliseconds: 700),
+          curve: const SlikkerCurve(
+            type: CurveType.curveOut,
+            smoothness: 10,
+            period: 1,
+          ),
+          bottom: active ? -16 : 2,
+          child: AnimatedDefaultTextStyle(
+            child: Text(entry.title),
+            duration: const Duration(milliseconds: 150),
+            style: TextStyle(
+              color: theme.fontColor.withAlpha(active
+                  ? 175
+                  : boxed
+                      ? 0
+                      : 100),
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        );
+
+        return AnimatedPadding(
+          duration: const Duration(milliseconds: 1000),
+          curve: const SlikkerCurve(
+            type: CurveType.curveOut,
+            smoothness: 10,
+            period: 1,
+          ),
+          padding: EdgeInsets.only(bottom: active ? 28 : 12),
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              label,
+              SlikkerMaterial(
+                child: icon,
+                padding: const EdgeInsets.all(0),
+                style: active ? MaterialStyle.filled : MaterialStyle.flat,
+                onTap: () =>
+                    Navigator.pushNamed(widget.callback(), entry.route),
+                onMouseEnter: () => setState(() => states[index] = true),
+                onMouseExit: () => setState(() => states[index] = false),
+                height: 56,
               ),
-            ),
-          ),
-        );
-
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: SlikkerMaterial(
-            child: Stack(children: [icon, label]),
-            padding: const EdgeInsets.all(0),
-            style: active ? MaterialStyle.filled : MaterialStyle.flat,
-            onTap: () => Navigator.pushNamed(widget.callback(), entry.route),
-            onMouseEnter: () => setState(() => states[index] = true),
-            onMouseExit: () => setState(() => states[index] = false),
-            height: 60,
+            ],
           ),
         );
       },
