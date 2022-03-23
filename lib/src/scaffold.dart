@@ -46,6 +46,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
     final Widget topButton = Text('topButton');
 
     final _PersistentHeaderDelegate headerDelegate = _PersistentHeaderDelegate(
+      callback: () => context,
       header: widget.header,
       title: widget.title,
       topButton: topButton,
@@ -74,8 +75,10 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   String? title;
   Widget? topButton;
   Widget? actionButton;
+  BuildContext Function() callback;
 
   _PersistentHeaderDelegate({
+    required this.callback,
     this.header,
     this.title,
     this.topButton,
@@ -127,8 +130,8 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   double get maxExtent {
-    if (!lowReach || context == null) return minExtent;
-    return (1 - reachArea) * MediaQuery.of(context!).size.height;
+    if (!lowReach) return minExtent;
+    return (1 - reachArea) * MediaQuery.of(callback()).size.height;
   }
 
   @override

@@ -112,7 +112,7 @@ class SlikkerNavBarState extends State<SlikkerNavBar> {
           bottom: active ? -16 : 2,
           child: AnimatedDefaultTextStyle(
             child: Text(entry.title),
-            duration: const Duration(milliseconds: 150),
+            duration: const Duration(milliseconds: 100),
             style: TextStyle(
               color: theme.fontColor.withAlpha(active
                   ? 175
