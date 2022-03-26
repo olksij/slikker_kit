@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart' show MaterialPageRoute;
+
 import 'package:flutter_acrylic/flutter_acrylic.dart';
 
 import './theme.dart';
@@ -179,6 +181,8 @@ class _SlikkerAppState extends State<SlikkerApp> {
       statusBarColor: theme.statusBarColor,
       systemNavigationBarColor: theme.navigationBarColor,
     ));
+
+    if (kIsWeb) return true;
 
     switch (theme.platform) {
       case TargetPlatform.windows:

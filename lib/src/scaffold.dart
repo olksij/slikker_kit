@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 import 'package:slikker_kit/slikker_kit.dart';
+import 'package:flutter/material.dart';
 
 /// Widget that helps to build a page.
 /// Full documentation will be later
@@ -35,7 +36,8 @@ class SlikkerScaffold extends StatefulWidget {
   _SlikkerScaffoldState createState() => _SlikkerScaffoldState();
 }
 
-class _SlikkerScaffoldState extends State<SlikkerScaffold> {
+class _SlikkerScaffoldState extends State<SlikkerScaffold>
+    with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final theme = SlikkerTheme.of(context);
@@ -45,18 +47,23 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold> {
     // TODO: [WIDGET] implement topButton
     final Widget topButton = Text('topButton');
 
+    final scrollController = ScrollController();
+
     final _PersistentHeaderDelegate headerDelegate = _PersistentHeaderDelegate(
-      callback: () => context,
+      vsync: this,
+      context: () => context,
       header: widget.header,
+      controller: scrollController,
       title: widget.title,
       topButton: topButton,
       actionButton: widget.actionButton,
     );
 
     return CustomScrollView(
+      controller: scrollController,
       physics: const BouncingScrollPhysics(),
       slivers: [
-        SliverPersistentHeader(delegate: headerDelegate),
+        SliverPersistentHeader(delegate: headerDelegate, floating: true),
         SliverToBoxAdapter(child: widget.content),
       ],
     );
@@ -75,20 +82,24 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   String? title;
   Widget? topButton;
   Widget? actionButton;
-  BuildContext Function() callback;
+  BuildContext Function() context;
+
+  @override
+  TickerProvider vsync;
+
+  ScrollController controller;
 
   _PersistentHeaderDelegate({
-    required this.callback,
+    required this.controller,
+    required this.context,
+    required this.vsync,
     this.header,
     this.title,
     this.topButton,
     this.actionButton,
   });
 
-  /// Bool, which indicates if the reachability depends of element position.
-  /// Usually true for touchable devices;
-  // TODO: [DESIGN] implement lowReach
-  bool lowReach = true;
+  bool scrolled = false;
 
   /// Percent of the screen size, to which user can comfortably reach.
   double reachArea = 0.7;
@@ -96,12 +107,17 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   /// One of the variables, on which layout type depends.
   bool wideInterface = true;
 
-  BuildContext? context;
-
   @override
   Widget build(context, shrinkOffset, overlapsContent) {
-    this.context = context;
     wideInterface = MediaQuery.of(context).size.width > 480;
+
+    if (scrolled && controller.offset == 0) {
+      scrolled = false;
+      controller.jumpTo(maxExtent - minExtent);
+    } else if (!scrolled && controller.offset > maxExtent - minExtent) {
+      scrolled = true;
+      controller.jumpTo(maxExtent - minExtent);
+    }
 
     List<Widget> children = [];
 
@@ -109,29 +125,38 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
 
     if (title != null) {
       TextStyle titleStyle = TextStyle(
-        fontSize: lerpDouble(40, 20, shrinkOffset / (maxExtent - minExtent)),
+        fontSize: scrolled ? 24 : 48,
         fontWeight: FontWeight.w600,
+        color: Color(0xFF000000),
       );
 
       children.add(AnimatedPositioned(
+        //curve: const SlikkerCurve(type: CurveType.curveOut),
         left: wideInterface ? 20 : null,
         bottom: 20,
-        child: Text(
-          title!,
+        child: AnimatedDefaultTextStyle(
+          curve: const SlikkerCurve(type: CurveType.curveOut),
+          duration: const Duration(milliseconds: 800),
+          child: Text(title!),
           style: titleStyle,
         ),
-        // TODO: [DESIGN] kinematics, remove DURATIONS
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 800),
       ));
     }
 
-    return Stack(alignment: Alignment.center, children: children);
+    return ColoredBox(
+      color: Color(0xFF00FF00),
+      child: Stack(
+        alignment: Alignment.center,
+        children: children,
+      ),
+    );
   }
 
   @override
   double get maxExtent {
-    if (!lowReach) return minExtent;
-    return (1 - reachArea) * MediaQuery.of(callback()).size.height;
+    if (scrolled) return minExtent;
+    return (1 - reachArea) * MediaQuery.of(context()).size.height;
   }
 
   @override
