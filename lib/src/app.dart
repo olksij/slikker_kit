@@ -231,8 +231,9 @@ class _SlikkerAppState extends State<SlikkerApp> {
 
     // TODO: [DESIGN] Background adaptation
     // TODO: [DESIGN] Hue adaptation
+    // TODO: [FIX] HIDE UI LANDING FALSE
 
-    if (shouldFillBackground) {
+    if (shouldFillBackground && /*!route.hideUI*/ !true) {
       result = ColoredBox(
         color: theme.backgroundColor,
         child: result,
@@ -284,7 +285,8 @@ class _SlikkerAppState extends State<SlikkerApp> {
 class _NavbarDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
-    bool wideInterface = size.width > 480;
+    // TODO: [FIX]
+    bool wideInterface = size.width > 480 && /*!route.hideUI*/ !true;
 
     // LAYOUT NAVIGATION BAR
 
