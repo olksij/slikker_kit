@@ -16,7 +16,7 @@ class SlikkerExampleApp extends StatelessWidget {
       title: 'Slikker App Example',
       theme: SlikkerThemeData(fontFamily: 'Manrope'),
       initialRoute: '',
-      routes: {'/': (context) => const HomePage()},
+      //routes: {'/': (context) => const HomePage()},
     );
   }
 }

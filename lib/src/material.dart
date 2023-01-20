@@ -9,8 +9,6 @@ import 'theme.dart';
 
 // TODO: Implement disabled state.
 
-// TODO: Implement minor state.
-
 //const Duration _lightFadeInDuration = Duration(milliseconds: 200);
 //const Duration _lightFadeOutDuration = Duration(milliseconds: 500);
 //const Duration _lightPressDuration = Duration(milliseconds: 1000);
@@ -26,8 +24,11 @@ enum MaterialStyle {
   /// adding light and shadow. High emphasis.
   elevated,
 
-  /// Fills the material, crreating medium emphasis.
+  /// Fills the material, creating medium emphasis.
   filled,
+
+  /// Fills the material, crreating medium emphasis.
+  stroked,
 
   /// Makes material transperent, just showing inner content in rest state.
   flat,
@@ -107,7 +108,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
   /// Keeps the position where user have tapped.
   Offset tapPosition = const Offset(0, 0);
 
-  double? factor;
+  double weight = 1;
 
   @override
   void initState() {
@@ -134,23 +135,22 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
     super.dispose();
   }
 
-  /// Number ranging from -1/1.6 to 1.0, where 1.0 means that element is
+  /// Number ranging from -(1 / 1.6) to 1.0, where 1.0 means that element is
   /// demoted (pressed or clicked).
   ///
   /// Depth represents material's state.
   double get depth => press.value - hover.value / 1.6;
 
-  /// Calculates the strength of the animation of interactions.
-  /// Lower value means more sensetive.
-  double? calcFactor() {
+  /// Calculates the weight of the object using surface area.
+  /// Used in scale caltulations.
+  double calculateWeight() {
     final size = context.size;
-    if (size != null) return (size.height + size.width) / 2 / 56;
-    return null;
+    return size != null ? (size.width * size.height) / 512 : 1;
   }
 
   /// Fired when user hover material
   void hoverEvent(bool state) {
-    factor = calcFactor();
+    weight = calculateWeight();
     if (state && widget.onMouseEnter != null) widget.onMouseEnter!();
     if (!state && widget.onMouseExit != null) widget.onMouseExit!();
     if (!widget.disabled) hover.run(state);
@@ -160,7 +160,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
   void touchEvent({TapDownDetails? tapDown, TapUpDetails? tapUp}) async {
     if (widget.disabled) return;
 
-    factor = calcFactor();
+    weight = calculateWeight();
 
     if (tapDown != null) {
       // Tap down event.
@@ -199,14 +199,12 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
       builder: (context, child) {
         theme = SlikkerTheme.of(context);
 
-        final factor = this.factor ?? 1;
-
         // Give material padding if available
         Widget material = Transform.scale(
-          scale: 1 - depth * .15 / factor,
+          scale: 1 - depth / weight,
           alignment: Alignment.center,
           child: Padding(
-            padding: widget.padding ?? theme.padding,
+            padding: widget.padding ?? const EdgeInsets.all(0),
             child: child,
           ),
         );
@@ -234,7 +232,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
         );
 
         return Transform.scale(
-          scale: 1 - depth * .1 / factor,
+          scale: 1 - depth / weight,
           alignment: Alignment.center,
           child: CustomPaint(
             painter: _MaterialEffects(this),
@@ -295,7 +293,7 @@ class _MaterialEffects extends CustomPainter {
 
     // Used for defining material state for each material style.
     final double alphaBlend = min(
-        max(style != MaterialStyle.elevated ? material.hover.value : 1, 0), 1);
+        max(style != MaterialStyle.elevated && style != MaterialStyle.stroked ? material.hover.value : 1, 0), 1);
 
     // INIT PAINT OBJECTS
 
@@ -303,7 +301,9 @@ class _MaterialEffects extends CustomPainter {
       ..color = HSVColor.fromAHSV(.3 * alphaBlend, 0, 0, 1).toColor();
 
     final Paint paintBorder = Paint()
-      ..color = HSVColor.fromAHSV(.15 * alphaBlend, 0, 0, 1).toColor();
+      ..color = style == MaterialStyle.stroked
+      ? HSVColor.fromAHSV(.10 * alphaBlend, 0, 0, 0).toColor()
+      : HSVColor.fromAHSV(.15 * alphaBlend, 0, 0, 1).toColor();
 
     final double boxFillAlpha =
         style == MaterialStyle.filled ? .05 * (1 - alphaBlend) : 0;
@@ -311,14 +311,16 @@ class _MaterialEffects extends CustomPainter {
     final Paint paintBox = Paint()
       ..color = Color.alphaBlend(
         HSVColor.fromAHSV(boxFillAlpha, accent, .4, .3).toColor(),
-        HSVColor.fromAHSV(.65 * alphaBlend, accent, 0, 1).toColor(),
+        HSVColor.fromAHSV(alphaBlend, accent, 0, 1).toColor(),
       );
+    
+    final shadowK = style == MaterialStyle.stroked ? 0 : 1;
 
     final Paint paintKeyShadow = Paint()
-      ..color = HSVColor.fromAHSV(.02 * alphaBlend, accent, .35, .6).toColor();
+      ..color = HSVColor.fromAHSV(.02 * shadowK * alphaBlend, accent, .35, .6).toColor();
 
     final Paint paintAmbientShadow = Paint()
-      ..color = HSVColor.fromAHSV(.1 * alphaBlend, accent, .35, .6).toColor()
+      ..color = HSVColor.fromAHSV(.1 * shadowK * alphaBlend, accent, .35, .6).toColor()
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
 
     final double bottomBorder = max(
@@ -342,9 +344,9 @@ class _MaterialEffects extends CustomPainter {
     );
 
     final innerBox = borderRadius
-        .subtract(BorderRadius.circular(2))
+        .subtract(BorderRadius.circular(1))
         .resolve(TextDirection.ltr)
-        .toRRect(Rect.fromLTWH(2, 2, size.width - 4, size.height - 4));
+        .toRRect(Rect.fromLTWH(1, 1, size.width - 2, size.height - 2));
 
     final borderPath = Path.combine(
       PathOperation.difference,

@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/material.dart' show MaterialPageRoute;
+import 'package:flutter/material.dart' show DefaultMaterialLocalizations, MaterialLocalizations, MaterialPageRoute;
 
-import 'package:flutter_acrylic/flutter_acrylic.dart';
+//import 'package:flutter_acrylic/flutter_acrylic.dart';
 
 import './theme.dart';
 import './nav_bar.dart';
@@ -182,9 +182,9 @@ class _SlikkerAppState extends State<SlikkerApp> {
       systemNavigationBarColor: theme.navigationBarColor,
     ));
 
-    if (kIsWeb) return true;
+    return true;
 
-    switch (theme.platform) {
+    /*switch (theme.platform) {
       case TargetPlatform.windows:
         Window.initialize().then((_) {
           Window.setEffect(effect: WindowEffect.mica, dark: false);
@@ -199,7 +199,7 @@ class _SlikkerAppState extends State<SlikkerApp> {
         shouldFillBackground = true;
         break;
     }
-    return shouldFillBackground;
+    return shouldFillBackground;*/
   }
 
   /// Build navigation view
@@ -233,7 +233,7 @@ class _SlikkerAppState extends State<SlikkerApp> {
     // TODO: [DESIGN] Hue adaptation
     // TODO: [FIX] HIDE UI LANDING FALSE
 
-    if (shouldFillBackground && /*!route.hideUI*/ !true) {
+    if (shouldFillBackground) {
       result = ColoredBox(
         color: theme.backgroundColor,
         child: result,
@@ -268,6 +268,7 @@ class _SlikkerAppState extends State<SlikkerApp> {
       navigatorObservers: widget.navigatorObservers,
       navigatorKey: navigatorKey,
       onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
+      localizationsDelegates: const [DefaultMaterialLocalizations.delegate],
       pageRouteBuilder: <T>(route, builder) {
         navViewKey.currentState?.updateRoute(route);
         return MaterialPageRoute<T>(settings: route, builder: builder);

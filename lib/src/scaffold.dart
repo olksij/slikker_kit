@@ -61,7 +61,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold>
 
     return CustomScrollView(
       controller: scrollController,
-      physics: const BouncingScrollPhysics(),
+      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       slivers: [
         SliverPersistentHeader(delegate: headerDelegate, floating: true),
         SliverToBoxAdapter(child: widget.content),
@@ -102,10 +102,10 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   bool scrolled = false;
 
   /// Percent of the screen size, to which user can comfortably reach.
-  double reachArea = 0.7;
+  double reachArea = 0.66;
 
   /// One of the variables, on which layout type depends.
-  bool wideInterface = true;
+  bool wideInterface = false;
 
   @override
   Widget build(context, shrinkOffset, overlapsContent) {
@@ -126,7 +126,9 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
     if (title != null) {
       TextStyle titleStyle = TextStyle(
         fontSize: scrolled ? 24 : 48,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
+        fontFamily: 'Display',
+        letterSpacing: -1.92,
         color: Color(0xFF000000),
       );
 
@@ -144,12 +146,9 @@ class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
       ));
     }
 
-    return ColoredBox(
-      color: Color(0xFF00FF00),
-      child: Stack(
-        alignment: Alignment.center,
-        children: children,
-      ),
+    return Stack(
+      alignment: Alignment.center,
+      children: children,
     );
   }
 
