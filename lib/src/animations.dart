@@ -29,7 +29,7 @@ class SlikkerCurve extends Curve {
 
   /// If specified, the curve will behave as a regular [Curve] class
   /// and adapt it's curve and input ranges to given type.
-  final CurveType? type;
+  final CurveType type;
 
   /// Static 60 degree for animation correction and avoiding unnecesary computation.
   static const double deg = pi / 3;
@@ -48,7 +48,7 @@ class SlikkerCurve extends Curve {
   const SlikkerCurve({
     this.period = 1,
     this.smoothness = 8,
-    this.type,
+    this.type = CurveType.curveOut,
   })  : s = period / 4,
         pc = (2 * pi) / period;
 
@@ -66,13 +66,6 @@ class SlikkerCurve extends Curve {
         return compute(t - start);
       case CurveType.curveIn:
         return compute(-t + start);
-      case null:
-        throw FlutterError(
-          'SlikkerCurve.type value is not specified.\n'
-          'SlikkerCurve.transform() is used in case you need this class '
-          'to behave as regular Curve class. Please specify SlikkerCurve.type '
-          'value. In other case consider using SlikkerCurve.compute().',
-        );
     }
   }
 
@@ -108,17 +101,27 @@ class SlikkerCurve extends Curve {
   String toString() => 'SlikkerCurve(period: $period, smoothness: $smoothness)';
 }
 
-const SlikkerCurve curve = SlikkerCurve();
-
 /// A controller with an applied curve for an animation.
 class SlikkerAnimationController extends AnimationController {
+  // TODO: Doc
+  final SlikkerCurve curve;
+
   /// A controller with an applied curve for an animation
+  ///
+  /// You can pass a [SlikkerCurve] you want to create directly to [curve],
+  /// or use these parameters:
+  /// - period - Period for the [SlikkerCurve] that will be created
+  /// - smoothness - the higher value, the lower Inertia of the object is.
   SlikkerAnimationController({
     required TickerProvider vsync,
     // TODO: DURATION TO VELOCITY
     Duration? duration,
     double value = -1,
-  }) : super(vsync: vsync, duration: duration, value: value, lowerBound: -1);
+    double period = 1,
+    SlikkerCurve? curve,
+    double smoothness = 8,
+  })  : curve = curve ?? SlikkerCurve(period: period, smoothness: smoothness),
+        super(vsync: vsync, duration: duration, value: value, lowerBound: -1);
 
   /// The current value of the animation returned from curve.
   @override
@@ -127,6 +130,9 @@ class SlikkerAnimationController extends AnimationController {
   /// Returns visual value of the animation between `0.0` and `1.0`,
   /// where `0.0` is animation visually at the beginning,
   /// and `1.0` is animation visually finished.
+  ///
+  /// This is implemented since the animation usually visually
+  /// finished earlier than it's whole duration.
   double get visual => max(min(super.value * 10 + .5, 1), 0);
 
   /// Method, which should be called every time gesture changes.
@@ -134,7 +140,7 @@ class SlikkerAnimationController extends AnimationController {
   /// - [velocity] - speed of finger or pointer, when gesture passed to controller.
   TickerFuture run(bool forward, {double? velocity}) {
     // TODO: [DESIGN] velocity and acceleration manipulation.
-    super.duration = Duration(milliseconds: 1200);
+    super.duration = super.duration ?? const Duration(milliseconds: 1200);
 
     if (forward) return super.forward(from: max(super.value, -0.05));
     return super.reverse(from: min(super.value, 0.05));
