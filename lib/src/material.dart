@@ -48,11 +48,13 @@ class SlikkerMaterial extends StatefulWidget {
     this.disabled = false,
     this.padding,
     this.shape,
+    this.color,
     this.style,
     this.height,
     this.width,
     this.onMouseEnter,
     this.onMouseExit,
+    this.theme,
   }) : super(key: key);
 
   @override
@@ -81,6 +83,9 @@ class SlikkerMaterial extends StatefulWidget {
   /// Triggered when a mouse pointer has entered this widget.
   final Function? onMouseEnter;
 
+  // TODO: Doc
+  final Color? color;
+
   /// Triggered when a mouse pointer has exited this widget when the widget is still mounted.
   final Function? onMouseExit;
 
@@ -93,6 +98,8 @@ class SlikkerMaterial extends StatefulWidget {
   final double? height;
 
   final double? width;
+
+  final SlikkerThemeData? theme;
 }
 
 class _SlikkerMaterialState extends State<SlikkerMaterial>
@@ -197,11 +204,11 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
       key: _key,
       child: widget.child,
       builder: (context, child) {
-        theme = SlikkerTheme.of(context);
+        theme = widget.theme ?? SlikkerTheme.of(context);
 
         // Give material padding if available
         Widget material = Transform.scale(
-          scale: 1 - depth / weight,
+          scale: 1 - depth / ((weight + 32) / 2),
           alignment: Alignment.center,
           child: Padding(
             padding: widget.padding ?? const EdgeInsets.all(0),
@@ -232,7 +239,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
         );
 
         return Transform.scale(
-          scale: 1 - depth / weight,
+          scale: 1 - depth / ((weight + 32) / 2),
           alignment: Alignment.center,
           child: CustomPaint(
             painter: _MaterialEffects(this),
@@ -293,7 +300,12 @@ class _MaterialEffects extends CustomPainter {
 
     // Used for defining material state for each material style.
     final double alphaBlend = min(
-        max(style != MaterialStyle.elevated && style != MaterialStyle.stroked ? material.hover.value : 1, 0), 1);
+        max(
+            style != MaterialStyle.elevated && style != MaterialStyle.stroked
+                ? material.hover.value
+                : 1,
+            0),
+        1);
 
     // INIT PAINT OBJECTS
 
@@ -302,25 +314,28 @@ class _MaterialEffects extends CustomPainter {
 
     final Paint paintBorder = Paint()
       ..color = style == MaterialStyle.stroked
-      ? HSVColor.fromAHSV(.10 * alphaBlend, 0, 0, 0).toColor()
-      : HSVColor.fromAHSV(.15 * alphaBlend, 0, 0, 1).toColor();
+          ? HSVColor.fromAHSV(.10 * alphaBlend, 0, 0, 0).toColor()
+          : HSVColor.fromAHSV(.15 * alphaBlend, 0, 0, 1).toColor();
 
     final double boxFillAlpha =
         style == MaterialStyle.filled ? .05 * (1 - alphaBlend) : 0;
 
     final Paint paintBox = Paint()
-      ..color = Color.alphaBlend(
-        HSVColor.fromAHSV(boxFillAlpha, accent, .4, .3).toColor(),
-        HSVColor.fromAHSV(alphaBlend, accent, 0, 1).toColor(),
-      );
-    
+      ..color = material.widget.color ??
+          Color.alphaBlend(
+            HSVColor.fromAHSV(boxFillAlpha, accent, .4, .3).toColor(),
+            HSVColor.fromAHSV(alphaBlend, accent, 0, 1).toColor(),
+          );
+
     final shadowK = style == MaterialStyle.stroked ? 0 : 1;
 
     final Paint paintKeyShadow = Paint()
-      ..color = HSVColor.fromAHSV(.02 * shadowK * alphaBlend, accent, .35, .6).toColor();
+      ..color = HSVColor.fromAHSV(.02 * shadowK * alphaBlend, accent, .35, .6)
+          .toColor();
 
     final Paint paintAmbientShadow = Paint()
-      ..color = HSVColor.fromAHSV(.1 * shadowK * alphaBlend, accent, .35, .6).toColor()
+      ..color = HSVColor.fromAHSV(.1 * shadowK * alphaBlend, accent, .35, .6)
+          .toColor()
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
 
     final double bottomBorder = max(
