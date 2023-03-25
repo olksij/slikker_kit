@@ -1,3 +1,4 @@
+import 'dart:html';
 import 'dart:math';
 import 'dart:ui';
 
@@ -6,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'animations.dart';
 import 'theme.dart';
+import 'math.dart';
 
 // TODO: Implement disabled state.
 
@@ -148,6 +150,9 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
   /// Depth represents material's state.
   double get depth => press.value - hover.value / 1.6;
 
+  /// Evaluates in which direction should the surface tilt or elevate.
+  Vector tilt = Vector(0, 0, 1);
+
   /// Calculates the weight of the object using surface area.
   /// Used in scale caltulations.
   double calculateWeight() {
@@ -155,9 +160,20 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
     return size != null ? (size.width * size.height) / 512 : 1;
   }
 
+  /// Calculates the tilt of the object's surface and returns it as a
+  /// [Vector] object
+  calculateTilt(Offset position) {
+    final size = (context.size ?? Size.zero);
+    final center = size.center(Offset.zero);
+
+    final centered = position - center;
+    return Vector.z(centered.dx / size.width, centered.dy / size.height, 1);
+  }
+
   /// Fired when user hover material
-  void hoverEvent(bool state) {
+  void hoverEvent(bool state, PointerEvent event) {
     weight = calculateWeight();
+    tilt = calculateTilt(event.localPosition);
     if (state && widget.onMouseEnter != null) widget.onMouseEnter!();
     if (!state && widget.onMouseExit != null) widget.onMouseExit!();
     if (!widget.disabled) hover.run(state);
@@ -206,9 +222,11 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
       builder: (context, child) {
         theme = widget.theme ?? SlikkerTheme.of(context);
 
+        final elevation = 1 - depth / ((weight + 32) / 2) * tilt.z;
+
         // Give material padding if available
         Widget material = Transform.scale(
-          scale: 1 - depth / ((weight + 32) / 2),
+          scale: elevation,
           alignment: Alignment.center,
           child: Padding(
             padding: widget.padding ?? const EdgeInsets.all(0),
@@ -224,27 +242,39 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
             onTapCancel: () => touchEvent(),
             onTap: () => widget.onTap!(),
             child: MouseRegion(
-              onEnter: (event) => hoverEvent(true),
-              onExit: (event) => hoverEvent(false),
+              onEnter: (event) => hoverEvent(true, event),
+              onExit: (event) => hoverEvent(false, event),
+              onHover: (event) => hoverEvent(true, event),
               cursor: SystemMouseCursors.click,
               child: material,
             ),
           );
         }
 
-        material = SizedBox(
-          child: material,
-          height: widget.height,
-          width: widget.width,
+        material = ClipRRect(
+          borderRadius: widget.borderRadius,
+          child: SizedBox(
+            child: material,
+            height: widget.height,
+            width: widget.width,
+          ),
         );
 
-        return Transform.scale(
-          scale: 1 - depth / ((weight + 32) / 2),
+        final scaled = Transform.scale(
+          scale: elevation,
           alignment: Alignment.center,
           child: CustomPaint(
             painter: _MaterialEffects(this),
             child: material,
           ),
+        );
+
+        return Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..rotateX(tilt.y * depth)
+            ..rotateY(tilt.x * depth),
+          child: scaled,
         );
       },
       animation: Listenable.merge([hover, press]),
@@ -324,7 +354,7 @@ class _MaterialEffects extends CustomPainter {
       ..color = material.widget.color ??
           Color.alphaBlend(
             HSVColor.fromAHSV(boxFillAlpha, accent, .4, .3).toColor(),
-            HSVColor.fromAHSV(alphaBlend, accent, 0, 1).toColor(),
+            HSVColor.fromAHSV(alphaBlend * 0.9, accent, 0, 1).toColor(),
           );
 
     final shadowK = style == MaterialStyle.stroked ? 0 : 1;
