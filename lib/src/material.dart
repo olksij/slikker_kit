@@ -57,6 +57,7 @@ class SlikkerMaterial extends StatefulWidget {
     this.onMouseEnter,
     this.onMouseExit,
     this.theme,
+    this.onMouseHover,
   }) : super(key: key);
 
   @override
@@ -84,6 +85,9 @@ class SlikkerMaterial extends StatefulWidget {
 
   /// Triggered when a mouse pointer has entered this widget.
   final Function? onMouseEnter;
+
+  /// Triggered when a mouse pointer has entered this widget.
+  final Function? onMouseHover;
 
   // TODO: Doc
   final Color? color;
@@ -165,18 +169,18 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
   calculateTilt(Offset position) {
     final size = (context.size ?? Size.zero);
     final center = size.center(Offset.zero);
-
     final centered = position - center;
-    return Vector.z(centered.dx / size.width, centered.dy / size.height, 1);
+    return Vector.z(centered.dx / size.width, centered.dy / size.height, 1.5);
   }
 
   /// Fired when user hover material
-  void hoverEvent(bool state, PointerEvent event) {
+  void hoverEvent(bool? state, PointerEvent event) {
     weight = calculateWeight();
-    tilt = calculateTilt(event.localPosition);
-    if (state && widget.onMouseEnter != null) widget.onMouseEnter!();
-    if (!state && widget.onMouseExit != null) widget.onMouseExit!();
-    if (!widget.disabled) hover.run(state);
+    setState(() => tilt = calculateTilt(event.localPosition));
+    if (state == true) widget.onMouseEnter?.call();
+    if (state == false) widget.onMouseExit?.call();
+    if (state == null) widget.onMouseHover?.call();
+    if (!widget.disabled && state != null) hover.run(state);
   }
 
   /// Fired when user touch or press on material
@@ -244,7 +248,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
             child: MouseRegion(
               onEnter: (event) => hoverEvent(true, event),
               onExit: (event) => hoverEvent(false, event),
-              onHover: (event) => hoverEvent(true, event),
+              onHover: (event) => hoverEvent(null, event),
               cursor: SystemMouseCursors.click,
               child: material,
             ),
@@ -272,8 +276,9 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
         return Transform(
           alignment: Alignment.center,
           transform: Matrix4.identity()
-            ..rotateX(tilt.y * depth)
-            ..rotateY(tilt.x * depth),
+            ..setEntry(3, 2, 0.005)
+            ..rotateX(tilt.y * depth / 2)
+            ..rotateY(-tilt.x * depth / 2),
           child: scaled,
         );
       },
