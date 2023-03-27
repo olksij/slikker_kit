@@ -58,6 +58,7 @@ class SlikkerMaterial extends StatefulWidget {
     this.onMouseExit,
     this.theme,
     this.onMouseHover,
+    this.tilt = false,
   }) : super(key: key);
 
   @override
@@ -70,6 +71,9 @@ class SlikkerMaterial extends StatefulWidget {
 
   /// Whether the material is enabled or disabled.
   final bool disabled;
+
+  /// Should the material tilt in response to mouse pointer?
+  final bool tilt;
 
   /// If non-null, the corners of this box are rounded by this [BorderRadiusGeometry] value.
   final BorderRadius? borderRadius;
@@ -164,22 +168,35 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
     return size != null ? (size.width * size.height) / 512 : 1;
   }
 
-  /// Calculates the tilt of the object's surface and returns it as a
-  /// [Vector] object
-  calculateTilt(Offset position) {
+  /// Calculates the tilt of the object's surface based on the provided position.
+  /// The result is returned as a [Vector] object.
+  updateTilt(Offset position) {
+    // Get the size of the object
     final size = (context.size ?? Size.zero);
-    final center = size.center(Offset.zero);
-    final centered = position - center;
-    return Vector.z(centered.dx / size.width, centered.dy / size.height, 1.5);
+
+    // Calculate the position relative to the center of the object
+    final centered = position - size.center(Offset.zero);
+
+    // Calculate the x and y tilt values based on the centered position
+    final x = centered.dx / size.width;
+    final y = centered.dy / size.height;
+
+    // Update the tilt state using the calculated x and y tilt values
+    setState(() => tilt = Vector.z(x, y, 1));
   }
 
   /// Fired when user hover material
   void hoverEvent(bool? state, PointerEvent event) {
+    // calculate the weight of the surface before animating
     weight = calculateWeight();
-    setState(() => tilt = calculateTilt(event.localPosition));
+
+    // run callbacks
     if (state == true) widget.onMouseEnter?.call();
     if (state == false) widget.onMouseExit?.call();
     if (state == null) widget.onMouseHover?.call();
+
+    // if the material is not disabled make it interactive
+    if (!widget.disabled && widget.tilt) updateTilt(event.localPosition);
     if (!widget.disabled && state != null) hover.run(state);
   }
 
@@ -223,10 +240,11 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
     return AnimatedBuilder(
       key: _key,
       child: widget.child,
+      animation: Listenable.merge([hover, press]),
       builder: (context, child) {
         theme = widget.theme ?? SlikkerTheme.of(context);
 
-        final elevation = 1 - depth / ((weight + 32) / 2) * tilt.z;
+        final elevation = 1 - depth / ((weight + 32) / 2) /* * tilt.z*/;
 
         // Give material padding if available
         Widget material = Transform.scale(
@@ -264,25 +282,21 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
           ),
         );
 
-        final scaled = Transform.scale(
-          scale: elevation,
+        final transform = Matrix4.identity()
+          ..setEntry(3, 2, 0.005)
+          ..scale(elevation)
+          ..rotateX(tilt.y * depth / 2)
+          ..rotateY(-tilt.x * depth / 2);
+
+        return Transform(
           alignment: Alignment.center,
+          transform: transform,
           child: CustomPaint(
             painter: _MaterialEffects(this),
             child: material,
           ),
         );
-
-        return Transform(
-          alignment: Alignment.center,
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.005)
-            ..rotateX(tilt.y * depth / 2)
-            ..rotateY(-tilt.x * depth / 2),
-          child: scaled,
-        );
       },
-      animation: Listenable.merge([hover, press]),
     );
   }
 }
