@@ -8,6 +8,7 @@ export 'src/icons.dart';
 export 'src/material.dart';
 export 'src/nav_bar.dart';
 export 'src/scaffold.dart';
+export 'src/slide.dart';
 export 'src/text_field.dart';
 export 'src/theme.dart';
 

@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/material.dart' show DefaultMaterialLocalizations, MaterialLocalizations, MaterialPageRoute;
+import 'package:flutter/material.dart'
+    show DefaultMaterialLocalizations, MaterialLocalizations, MaterialPageRoute;
 
 //import 'package:flutter_acrylic/flutter_acrylic.dart';
 
