@@ -1,4 +1,3 @@
-// TODO: Doc
 import 'dart:math';
 
 /// This function takes a doubleber as input and returns the square of that doubleber.
