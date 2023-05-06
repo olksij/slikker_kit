@@ -1,74 +1,75 @@
 import 'package:slikker_kit/slikker_kit.dart';
-import 'package:flutter/material.dart';
 
-/// A widget that slides between two given Widgets with an optional opacity effect.
-///
-/// The class takes in five parameters: `regular`, `state`, `animation`, `opacity`, and `relation`.
-/// - `regular`: An initial widget that is displayed when the [animation.value] is 0.
-/// - `state`: An animated widget that is displayed after the animation completes.
-/// - `animation`: The animation used to animate the transition from `regular` to `state`.
-/// - `opacity`: Controls whether or not to add an opacity effect in the transition animation.
-/// - `relation`: A map linking the `regular` and `state` widgets to their corresponding position transitions with a Tween object.
-class Slide extends StatelessWidget {
-  /// An initial widget that is displayed when the [animation.value] is 0.
-  final Widget regular;
+/// A widget that slides between a list of widgets.
+/// Used to display a state of user interaction in Slikker Design System.
+class Slide extends StatefulWidget {
+  /// A list of widgets to be displayed in the Slide widget.
+  final List<Widget> widgets;
 
-  /// An animated widget that is displayed after the [animation] completes
-  final Widget state;
+  /// The initial index of the widget in `widget.widgets`.
+  final int? initial;
 
-  /// Controls the transition between the states.
-  final Animation<double> animation;
+  /// A constructor for creating a Slide widget.
+  /// The `widgets` and `callback` parameters are required.
+  Slide({required this.widgets, this.initial, GlobalKey? key})
+      : super(key: key ?? GlobalKey());
 
-  /// Controls whether or not to add an opacity effect in the transition animation.
-  final bool opacity;
+  /// A static method for updating the value of a Slide widget.
+  /// It finds the nearest _SlideState instance in the widget tree
+  /// and calls its [updateValue] method with the [value] parameter.
+  void update(int value) => state?.updateValue(value);
 
-  /// A map linking the `regular` and `state` widgets to their corresponding position transitions with a Tween object.
-  final Map<Widget, Tween<Offset>> relation;
+  /// A getter for getting the current index of a Slide widget.
+  int get index => state?.current ?? initial ?? 0;
 
-  /// Creates a [Slide] widget.
-  ///
-  /// The [animation], [regular], and [state] parameters must not be null.
-  Slide({
-    super.key,
-    required this.animation,
-    this.regular = const SizedBox(),
-    this.state = const SizedBox(),
-    this.opacity = true,
-  }) : relation = {regular: _regularPosition, state: _statePosition};
+  /// A getter for getting the current state of a Slide widget.
+  _SlideState? get state => (super.key as GlobalKey<_SlideState>).currentState;
 
-  static final _regularPosition = Tween<Offset>(
-    begin: Offset.zero,
-    end: const Offset(0, -1),
-  );
+  @override
+  State<Slide> createState() => _SlideState();
+}
 
-  static final _statePosition = Tween<Offset>(
-    begin: const Offset(0, 1),
-    end: Offset.zero,
-  );
+class _SlideState extends State<Slide> {
+  /// The current index of the widget in `widget.widgets`.
+  late int current;
+
+  @override
+  void initState() {
+    current = widget.initial ?? 0;
+    super.initState();
+  }
+
+  /// A method for updating the value of [_SlideState.current].
+  void updateValue(int value) => setState(() => current = value);
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> result = [];
+
+    /// Iterate over each widget in `widget.widgets` along with its index.
+    widget.widgets.asMap().forEach((index, widget) {
+      final offset = current < index ? .5 : (current > index ? -.5 : .0);
+
+      result.add(Center(
+        child: AnimatedOpacity(
+          opacity: index == current ? 1 : 0,
+          duration: const Duration(milliseconds: 300),
+          child: AnimatedSlide(
+            duration: const Duration(milliseconds: 600),
+            curve: const SlikkerCurve(type: CurveType.curveOut),
+            offset: Offset.zero.translate(0, offset),
+            child: widget,
+          ),
+        ),
+      ));
+    });
+
+    // Return a ClipRect with a Stack of widgets.
     return ClipRect(
       clipBehavior: Clip.hardEdge,
-      child: AnimatedBuilder(
-        animation: animation,
-        builder: (_, __) {
-          final children = <Widget>[];
-
-          for (final widget in relation.entries) {
-            children.add(
-              SlideTransition(
-                position: widget.value.animate(animation),
-                child: widget.key,
-              ),
-            );
-          }
-
-          return Stack(
-            alignment: Alignment.center,
-            children: children,
-          );
-        },
+      child: Stack(
+        alignment: Alignment.center,
+        children: result,
       ),
     );
   }
