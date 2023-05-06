@@ -1,6 +1,4 @@
-import 'dart:html';
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -59,6 +57,7 @@ class SlikkerMaterial extends StatefulWidget {
     this.theme,
     this.onMouseHover,
     this.tilt = false,
+    this.clipBehavior,
   }) : super(key: key);
 
   @override
@@ -110,6 +109,8 @@ class SlikkerMaterial extends StatefulWidget {
   final double? width;
 
   final SlikkerThemeData? theme;
+
+  final Clip? clipBehavior;
 }
 
 class _SlikkerMaterialState extends State<SlikkerMaterial>
@@ -208,7 +209,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
 
     if (tapDown != null) {
       // Tap down event.
-      HapticFeedback.lightImpact();
+      //HapticFeedback.selectionClick();
 
       // Save current tap position.
       tapPosition = Offset(
@@ -273,14 +274,18 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
           );
         }
 
-        material = ClipRRect(
-          borderRadius: widget.borderRadius,
-          child: SizedBox(
-            child: material,
-            height: widget.height,
-            width: widget.width,
-          ),
+        material = SizedBox(
+          child: material,
+          height: widget.height,
+          width: widget.width,
         );
+
+        if (widget.clipBehavior != null) {
+          material = ClipPath(
+            clipBehavior: widget.clipBehavior!,
+            child: material,
+          );
+        }
 
         final transform = Matrix4.identity()
           ..setEntry(3, 2, 0.005)

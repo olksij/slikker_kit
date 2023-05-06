@@ -12,7 +12,7 @@ class Slide extends StatefulWidget {
   /// A constructor for creating a Slide widget.
   /// The `widgets` and `callback` parameters are required.
   Slide({required this.widgets, this.initial, GlobalKey? key})
-      : super(key: key ?? GlobalKey());
+      : super(key: key ?? GlobalKey<_SlideState>());
 
   /// A static method for updating the value of a Slide widget.
   /// It finds the nearest _SlideState instance in the widget tree
