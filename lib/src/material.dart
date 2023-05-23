@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'animations.dart';
+import 'gesture_detector.dart';
 import 'theme.dart';
 import 'math.dart';
 
@@ -61,7 +62,7 @@ class SlikkerMaterial extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _SlikkerMaterialState createState() => _SlikkerMaterialState();
+  SlikkerMaterialState createState() => SlikkerMaterialState();
 
   /// If [minor] is true, element lowers by z axis, becoming less noticable.
   ///
@@ -108,12 +109,12 @@ class SlikkerMaterial extends StatefulWidget {
 
   final double? width;
 
-  final SlikkerThemeData? theme;
+  final SLThemeData? theme;
 
   final Clip? clipBehavior;
 }
 
-class _SlikkerMaterialState extends State<SlikkerMaterial>
+class SlikkerMaterialState extends State<SlikkerMaterial>
     with TickerProviderStateMixin {
   /// Represents state of the material.
   late final SlikkerAnimationController disabled, hover, minor, press;
@@ -121,7 +122,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
 
   final _key = GlobalKey();
 
-  late SlikkerThemeData theme;
+  late SLThemeData theme;
 
   /// Keeps the position where user have tapped.
   Offset tapPosition = const Offset(0, 0);
@@ -243,7 +244,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
       child: widget.child,
       animation: Listenable.merge([hover, press]),
       builder: (context, child) {
-        theme = widget.theme ?? SlikkerTheme.of(context);
+        theme = widget.theme ?? SLTheme.of(context);
 
         final elevation = 1 - depth / ((weight + 32) / 2) /* * tilt.z*/;
 
@@ -307,7 +308,7 @@ class _SlikkerMaterialState extends State<SlikkerMaterial>
 }
 
 class _MaterialEffects extends CustomPainter {
-  _SlikkerMaterialState material;
+  SlikkerMaterialState material;
 
   _MaterialEffects(this.material) : super();
 
@@ -323,11 +324,10 @@ class _MaterialEffects extends CustomPainter {
     // Get the BorderRadius of the material.
     final base = circle
         ? BorderRadius.circular(size.shortestSide / 2)
-        : material.widget.borderRadius ?? material.theme.borderRadius;
+        : material.widget.borderRadius ?? material.theme.materialTheme.borderRadius;
 
     // Sum up borders for calculating avarage later.
-    final sum =
-        base.bottomRight + base.bottomLeft + base.bottomRight + base.bottomLeft;
+    final sum = base.bottomRight + base.bottomLeft + base.bottomRight + base.bottomLeft;
 
     // In elevated state borders are less rounded, so material fill
     // more space and create more emphasis.
@@ -345,6 +345,149 @@ class _MaterialEffects extends CustomPainter {
     return BorderRadius.lerp(elevationResult, demoted, material.press.value)!;
   }
 
+  /// Paints shadows, light paths, and material itself.
+  Canvas paintBox(Canvas canvas, Size size) {
+    // Extract variables.
+    final theme = material.theme.materialTheme;
+    final style = material.widget.style ?? MaterialStyle.elevated;
+    final borderRadius = materialBorderRadius(size);
+    final themePaintBox = theme.paintBox;
+
+    // if [theme.paintBox] is not null, use it instead of default.
+    if (themePaintBox != null) {
+      return themePaintBox(canvas, size, borderRadius, material);
+    }
+
+    // Used for defining material state for each material style.
+    final double alphaBlend = min(
+        max(style != MaterialStyle.elevated && style != MaterialStyle.stroked
+                ? material.hover.value : 1, 0), 1);
+
+    // INIT PAINT OBJECTS
+
+    final Paint paintLight = Paint()
+      ..color = theme.light.withAlpha(theme.light.alpha * alphaBlend ~/ 1);
+
+    final Paint paintBorder = Paint()
+      ..color = theme.border.withAlpha(theme.border.alpha * alphaBlend ~/ 1);
+
+    final double boxFillAlpha =
+        style == MaterialStyle.filled ? theme.fill.alpha * (1 - alphaBlend) : 0;
+
+    final Paint paintBox = Paint()
+      ..color = material.widget.color ??
+          Color.alphaBlend(
+            theme.fill.withAlpha(boxFillAlpha ~/ 1),
+            theme.elevated.withAlpha(theme.elevated.alpha * alphaBlend ~/ 1),
+          );
+
+    final shadowK = (style == MaterialStyle.stroked ? 0 : 1) * alphaBlend;
+
+    final Paint paintKeyShadow = Paint()
+      ..color = theme.keyShadow.withAlpha(theme.keyShadow.alpha * shadowK ~/ 1);
+
+    final Paint paintAmbientShadow = Paint()
+      ..color = theme.ambientShadow.withAlpha(theme.ambientShadow.alpha * shadowK ~/ 1)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
+
+    final double bottomBorder = max(
+      borderRadius.bottomLeft.y,
+      borderRadius.bottomRight.y,
+    );
+
+    // Box Base
+
+    RRect boxBase(double top, double height, [int wd = 0]) {
+      final rect = Rect.fromLTWH(-wd / 2, top, size.width + wd, height);
+      return borderRadius.toRRect(rect);
+    }
+
+    // PAINT LAYERS
+
+    final lightPath = Path.combine(
+      PathOperation.difference,
+      Path()..addRRect(boxBase(0, size.height)),
+      Path()..addRRect(boxBase(2, size.height, 2)),
+    );
+
+    final innerBox = borderRadius
+        .subtract(BorderRadius.circular(1))
+        .resolve(TextDirection.ltr)
+        .toRRect(Rect.fromLTWH(1, 1, size.width - 2, size.height - 2));
+
+    final borderPath = Path.combine(
+      PathOperation.difference,
+      Path()..addRRect(boxBase(0, size.height)),
+      Path()..addRRect(innerBox),
+    );
+
+    final heightDelta = size.height - bottomBorder * 2;
+    final keyShadowPath = Path.combine(
+      PathOperation.difference,
+      Path()..addRRect(boxBase(heightDelta + 2, bottomBorder * 2)),
+      Path()..addRRect(boxBase(heightDelta, bottomBorder * 2)),
+    );
+
+    // DRAW ON CANVAS
+
+    return canvas
+      ..drawRRect(boxBase(4, size.height), paintAmbientShadow)
+      ..drawPath(keyShadowPath, paintKeyShadow)
+      ..drawRRect(boxBase(0, size.height), paintBox)
+      ..drawPath(borderPath, paintBorder)
+      ..drawPath(lightPath, paintLight);
+  }
+
+  Canvas paintRipple(Canvas canvas, Size size) {
+    // Temporary disabled
+    return canvas;
+
+    // Extract variables.
+    final BorderRadius borderRadius = materialBorderRadius(size);
+    final Offset tapPosition = material.tapPosition;
+    final int fade = material.lightFade.value * 255 ~/ 2;
+    final double radius = material.lightRadius.value *
+        sqrt(pow(size.width, 2) + pow(size.height, 2));
+
+    final List<Color> colors = [
+      const Color(0xFFFFFFFF).withAlpha(fade ~/ 1.5),
+      const Color(0xFFFFFFFF).withAlpha(fade),
+    ];
+
+    final rect = Rect.fromCircle(center: tapPosition, radius: radius);
+
+    final Paint paintRipple = Paint()
+      ..shader = RadialGradient(colors: colors).createShader(rect);
+
+    // Clip canvas, so ripple doesnt overflow.
+    canvas.clipRRect(borderRadius.toRRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+    ));
+
+    return canvas..drawOval(rect, paintRipple);
+  }
+
+  @override
+  bool shouldRepaint(_MaterialEffects old) =>
+      old.material.lightFade.value != material.lightFade.value ||
+      old.material.lightRadius.value != material.lightRadius.value ||
+      old.material.minor.value != material.minor.value ||
+      old.material.disabled.value != material.disabled.value;
+}
+
+class SLMaterialTheme {
+  final BorderRadius borderRadius = BorderRadius.circular(12);
+  final Color light = const Color(0x4DFFFFFF);
+  final Color border = const Color(0x26FFFFFF);
+  final Color elevated = const Color(0xE3FFFFFF);
+  final Color fill =const Color(0x0D2E2E4D);
+  final Color keyShadow = const Color(0x05636399);
+  final Color ambientShadow = const Color(0x1A636399);
+
+  final Canvas Function(Canvas, Size, BorderRadius, SlikkerMaterialState)? paintBox = null;
+}
+
+/* _MaterialEffects.paintBox() 2021
   /// Paints shadows, light paths, and material itself.
   Canvas paintBox(Canvas canvas, Size size) {
     // Extract variables.
@@ -438,64 +581,6 @@ class _MaterialEffects extends CustomPainter {
       ..drawRRect(boxBase(0, size.height), paintBox)
       ..drawPath(borderPath, paintBorder)
       ..drawPath(lightPath, paintLight);
-  }
+)
 
-  Canvas paintRipple(Canvas canvas, Size size) {
-    // Temporary disabled
-    return canvas;
-
-    // Extract variables.
-    final BorderRadius borderRadius = materialBorderRadius(size);
-    final Offset tapPosition = material.tapPosition;
-    final int fade = material.lightFade.value * 255 ~/ 2;
-    final double radius = material.lightRadius.value *
-        sqrt(pow(size.width, 2) + pow(size.height, 2));
-
-    final List<Color> colors = [
-      const Color(0xFFFFFFFF).withAlpha(fade ~/ 1.5),
-      const Color(0xFFFFFFFF).withAlpha(fade),
-    ];
-
-    final rect = Rect.fromCircle(center: tapPosition, radius: radius);
-
-    final Paint paintRipple = Paint()
-      ..shader = RadialGradient(colors: colors).createShader(rect);
-
-    // Clip canvas, so ripple doesnt overflow.
-    canvas.clipRRect(borderRadius.toRRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-    ));
-
-    return canvas..drawOval(rect, paintRipple);
-  }
-
-  @override
-  bool shouldRepaint(_MaterialEffects old) =>
-      old.material.lightFade.value != material.lightFade.value ||
-      old.material.lightRadius.value != material.lightRadius.value ||
-      old.material.minor.value != material.minor.value ||
-      old.material.disabled.value != material.disabled.value;
-}
-
-class SlikkerMaterialTheme {
-  factory SlikkerMaterialTheme({
-    SlikkerMaterialTheme? theme,
-    double? hue,
-  }) {
-    theme ??= const SlikkerMaterialTheme.light();
-
-    return SlikkerMaterialTheme.raw(
-      hue: hue ?? theme.hue,
-    );
-  }
-
-  const SlikkerMaterialTheme.light() : hue = 240;
-
-  const SlikkerMaterialTheme.dark() : hue = 240;
-
-  const SlikkerMaterialTheme.raw({
-    required this.hue,
-  });
-
-  final double hue;
-}
+*/
