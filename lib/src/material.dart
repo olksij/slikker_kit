@@ -260,7 +260,7 @@ class SlikkerMaterialState extends State<SlikkerMaterial>
 
         // Add gesture listeners if not disabled
         if (!widget.disabled && widget.onTap != null) {
-          material = GestureDetector(
+          material = SLGestureDetector(
             onTapDown: (details) => touchEvent(tapDown: details),
             onTapUp: (details) => touchEvent(tapUp: details),
             onTapCancel: () => touchEvent(),
