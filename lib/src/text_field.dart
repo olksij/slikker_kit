@@ -33,19 +33,14 @@ class SlikkerTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = SlikkerTheme.of(context);
+    final theme = SLTheme.of(context);
 
     final EditableText editableText = EditableText(
       controller: controller,
       focusNode: focusNode,
-      style: TextStyle(
-        fontSize: 17,
-        color: theme.fontColor,
-        fontFamily: theme.fontFamily,
-        fontWeight: theme.fontWeight,
-      ),
-      cursorColor: theme.accentColor,
-      backgroundCursorColor: theme.accentColor,
+      style: theme.textStyle.copyWith(fontSize: 17),
+      cursorColor: const Color(0xFF000000), //theme.accentColor,
+      backgroundCursorColor: const Color(0xFF000000), //theme.accentColor,
       maxLines: maxLines,
       minLines: minLines,
     );

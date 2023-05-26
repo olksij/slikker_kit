@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart'
-    show DefaultMaterialLocalizations, MaterialLocalizations, MaterialPageRoute;
+    show DefaultMaterialLocalizations, MaterialPageRoute;
 
 //import 'package:flutter_acrylic/flutter_acrylic.dart';
 
@@ -53,6 +51,7 @@ class SlikkerApp extends StatefulWidget {
   /// Copied from [WidgetsApp].
   const SlikkerApp({
     Key? key,
+    this.builder,
     this.initialRoute,
     this.routes = const [],
     this.color,
@@ -63,6 +62,7 @@ class SlikkerApp extends StatefulWidget {
     this.onUnknownRoute,
     this.onGenerateInitialRoutes,
     this.navigatorObservers = const [],
+    this.pageRouteBuilder,
   })  : routerDelegate = null,
         super(key: key);
 
@@ -70,9 +70,11 @@ class SlikkerApp extends StatefulWidget {
   const SlikkerApp.router({
     Key? key,
     required this.routerDelegate,
+    this.builder,
     this.color,
     this.theme,
     this.title = '',
+    this.pageRouteBuilder,
   })  : navigatorObservers = const [],
         onGenerateRoute = null,
         home = null,
@@ -81,10 +83,13 @@ class SlikkerApp extends StatefulWidget {
         routes = const [],
         initialRoute = null,
         super(key: key);
+  
+  /// {@macro flutter.widgets.widgetsApp.builder}
+  final Widget Function(BuildContext context, Widget? child)? builder;
 
   /// Default visual properties, like colors fonts and shapes, for this app's
   /// slikker widgets.
-  final SlikkerThemeData? theme;
+  final SLThemeData? theme;
 
   /// The name of the first route to show, if a [Navigator] is built.
   final String? initialRoute;
@@ -147,6 +152,28 @@ class SlikkerApp extends StatefulWidget {
   /// [initialRoute] is provided.
   final List<Route<dynamic>> Function(String)? onGenerateInitialRoutes;
 
+  /// The [PageRoute] generator callback used when the app is navigated to a
+  /// named route.
+  ///
+  /// A [PageRoute] represents the page in a [Navigator], so that it can
+  /// correctly animate between pages, and to represent the "return value" of
+  /// a route (e.g. which button a user selected in a modal dialog).
+  ///
+  /// This callback can be used, for example, to specify that a [MaterialPageRoute]
+  /// or a [CupertinoPageRoute] should be used for building page transitions.
+  ///
+  /// The [PageRouteFactory] type is generic, meaning the provided function must
+  /// itself be generic. For example (with special emphasis on the `<T>` at the
+  /// start of the closure):
+  ///
+  /// ```dart
+  /// pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) => PageRouteBuilder<T>(
+  ///   settings: settings,
+  ///   pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => builder(context),
+  /// ),
+  /// ```
+  final PageRouteFactory? pageRouteBuilder;
+
   @override
   _SlikkerAppState createState() => _SlikkerAppState();
 }
@@ -169,19 +196,20 @@ class _SlikkerAppState extends State<SlikkerApp> {
   void initState() {
     navigatorKey = GlobalKey();
     navViewKey = GlobalKey();
-    shouldFillBackground = overlays(widget.theme ?? SlikkerThemeData());
+    shouldFillBackground = overlays(widget.theme ?? SLThemeData());
     super.initState();
   }
 
   /// Configure system overlays style.
-  bool overlays(SlikkerThemeData theme) {
+  bool overlays(SLThemeData theme) {
     final bool shouldFillBackground;
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    // TODO: Implement overlay options & customizations
+    /*SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarIconBrightness: Brightness.dark,
-      statusBarColor: theme.statusBarColor,
-      systemNavigationBarColor: theme.navigationBarColor,
-    ));
+      statusBarColor: theme.backgroundColor,
+      systemNavigationBarColor: theme.backgroundColor,
+    ));*/
 
     return true;
 
@@ -205,7 +233,7 @@ class _SlikkerAppState extends State<SlikkerApp> {
 
   /// Build navigation view
   Widget buildNavView(BuildContext context, Widget? child) {
-    final SlikkerThemeData theme = widget.theme ?? SlikkerThemeData();
+    final SLThemeData theme = widget.theme ?? SLThemeData();
 
     // navRelation supposed to control navigation and scroll view
 
@@ -220,13 +248,11 @@ class _SlikkerAppState extends State<SlikkerApp> {
       ),
     }.forEach((id, child) => navLayout.add(LayoutId(id: id, child: child)));
 
-    Widget result = SlikkerTheme(
+    Widget result = SLTheme(
       theme: theme,
-      child: SafeArea(
-        child: CustomMultiChildLayout(
-          delegate: _NavbarDelegate(),
-          children: navLayout,
-        ),
+      child: CustomMultiChildLayout(
+        delegate: _NavbarDelegate(),
+        children: navLayout,
       ),
     );
 
@@ -246,7 +272,7 @@ class _SlikkerAppState extends State<SlikkerApp> {
 
   @override
   Widget build(BuildContext context) {
-    final SlikkerThemeData theme = widget.theme ?? SlikkerThemeData();
+    final SLThemeData theme = widget.theme ?? SLThemeData();
 
     final Map<String, Widget Function(BuildContext)> routes = {};
 
@@ -254,15 +280,11 @@ class _SlikkerAppState extends State<SlikkerApp> {
       routes[entry.route] = entry.builder;
     }
 
-    final textStyle = TextStyle(
-      fontSize: 16,
-      fontFamily: theme.fontFamily,
-      color: theme.fontColor,
-      fontWeight: theme.fontWeight,
-    );
-
     return WidgetsApp(
-      builder: (context, child) => buildNavView(context, child),
+      builder: (context, child) {
+        final navView = buildNavView(context, child);
+        return widget.builder?.call(context, navView) ?? navView;
+      },
       initialRoute: widget.initialRoute,
       onGenerateRoute: widget.onGenerateRoute,
       onUnknownRoute: widget.onUnknownRoute,
@@ -270,14 +292,17 @@ class _SlikkerAppState extends State<SlikkerApp> {
       navigatorKey: navigatorKey,
       onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
       localizationsDelegates: const [DefaultMaterialLocalizations.delegate],
-      pageRouteBuilder: <T>(route, builder) {
-        navViewKey.currentState?.updateRoute(route);
-        return MaterialPageRoute<T>(settings: route, builder: builder);
-      },
+      // TODO: Add option to modify banners
+      debugShowCheckedModeBanner: false,
+      pageRouteBuilder: widget.pageRouteBuilder ??
+          <T>(route, builder) {
+            navViewKey.currentState?.updateRoute(route);
+            return MaterialPageRoute<T>(settings: route, builder: builder);
+          },
       routes: routes,
-      color: widget.color ?? theme.accentColor,
+      color: widget.color ?? const Color(0xFF000000),
       title: widget.title,
-      textStyle: textStyle,
+      textStyle: theme.textStyle,
       home: widget.home,
     );
   }

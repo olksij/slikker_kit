@@ -53,7 +53,7 @@ class IconExtended extends StatelessWidget {
 
   /// The color to use when drawing the icon foreground.
   ///
-  /// Defaults to the current [SlikkerTheme.iconColor] icon color, if any.
+  /// Defaults to the current [SLTheme.iconColor] icon color, if any.
   final Color? color;
 
   /// The color to use when drawing the icon background.
@@ -62,7 +62,7 @@ class IconExtended extends StatelessWidget {
   /// value.
   ///
   /// If both [color] and [backgroundColor] are unspecified,
-  /// [SlikkerTheme.iconColor] and [SlikkerTheme.iconBackgeoundColor] are used.
+  /// [SLTheme.iconColor] and [SLTheme.iconBackgeoundColor] are used.
   final Color? backgroundColor;
 
   /// Semantic label for the icon.
@@ -101,8 +101,6 @@ class IconExtended extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = SlikkerTheme.of(context);
-
     IconData backgroundIcon = IconData(
       icon.codePoint + 1,
       fontFamily: icon.fontFamily,
@@ -110,17 +108,10 @@ class IconExtended extends StatelessWidget {
       matchTextDirection: icon.matchTextDirection,
     );
 
-    HSVColor? _tmp;
-    if (color != null) {
-      _tmp = HSVColor.fromAHSV(1, HSVColor.fromColor(color!).hue, .1, .89);
-    }
-
-    final background = _tmp?.toColor() ?? theme.iconBackgroundColor;
-
     return Stack(
       children: [
-        _genIcon(backgroundIcon, backgroundColor ?? background),
-        _genIcon(icon, color ?? theme.iconColor),
+        _genIcon(backgroundIcon, backgroundColor),
+        _genIcon(icon, color),
       ],
     );
   }

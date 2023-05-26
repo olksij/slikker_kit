@@ -40,7 +40,7 @@ class _SlikkerScaffoldState extends State<SlikkerScaffold>
     with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    final theme = SlikkerTheme.of(context);
+    final theme = SLTheme.of(context);
 
     // Declare inner shell widgets, which are placed into scrollable
 

@@ -4,15 +4,13 @@ import 'package:flutter/widgets.dart';
 
 /// An instant version of Flutter's [GestureDetector].
 // TODO: Finish documentation
-class SLGestureDetector extends StatelessWidget {
+class SLTouchDetector extends StatelessWidget {
 
-  const SLGestureDetector({
+  const SLTouchDetector({
     super.key,
     this.child,
-    this.onTapDown,
-    this.onTapUp,
-    this.onTap,
-    this.onTapCancel,
+    this.onTouchDown,
+    this.onTouchUp,
     this.supportedDevices,
   });
 
@@ -25,13 +23,13 @@ class SLGestureDetector extends StatelessWidget {
   /// screen at a particular location.
   ///
   /// This is called after a short timeout, even if the winning gesture has not
-  /// yet been selected. If the tap gesture wins, [onTapUp] will be called,
+  /// yet been selected. If the tap gesture wins, [onTouchUp] will be called,
   /// otherwise [onTapCancel] will be called.
   ///
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  final GestureTapDownCallback? onTapDown;
+  final GestureTapDownCallback? onTouchDown;
 
   /// A pointer that will trigger a tap with a primary button has stopped
   /// contacting the screen at a particular location.
@@ -42,31 +40,8 @@ class SLGestureDetector extends StatelessWidget {
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  final GestureTapUpCallback? onTapUp;
-
-  /// A tap with a primary button has occurred.
-  ///
-  /// This triggers when the tap gesture wins. If the tap gesture did not win,
-  /// [onTapCancel] is called instead.
-  ///
-  /// See also:
-  ///
-  ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [onTapUp], which is called at the same time but includes details
-  ///    regarding the pointer position.
-  final GestureTapCallback? onTap;
-
-  /// The pointer that previously triggered [onTapDown] will not end up causing
-  /// a tap.
-  ///
-  /// This is called after [onTapDown], and instead of [onTapUp] and [onTap], if
-  /// the tap gesture did not win.
-  ///
-  /// See also:
-  ///
-  ///  * [kPrimaryButton], the button this callback responds to.
-  final GestureTapCancelCallback? onTapCancel;
-
+  final GestureTapUpCallback? onTouchUp;
+  
   /// The kind of devices that are allowed to be recognized.
   ///
   /// If set to null, events from all device types will be recognized. Defaults to null.
@@ -81,10 +56,8 @@ class SLGestureDetector extends StatelessWidget {
       () => SLTapGestureRecognizer(debugOwner: this, supportedDevices: supportedDevices),
       (SLTapGestureRecognizer instance) {
         instance
-          ..onTapDown = onTapDown
-          ..onTapUp = onTapUp
-          ..onTap = onTap
-          ..onTapCancel = onTapCancel
+          ..onTapDown = onTouchDown
+          ..onTapUp = onTouchUp
           ..gestureSettings = gestureSettings
           ..supportedDevices = supportedDevices;
       },
@@ -583,7 +556,7 @@ abstract class SLBaseTapGestureRecognizer extends PrimaryPointerGestureRecognize
   }
 
   void _checkUp() {
-    if (!_wonArenaForPrimaryPointer || _up == null) {
+    if (_up == null) {
       return;
     }
     assert(_up!.pointer == _down!.pointer);

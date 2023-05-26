@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'animations.dart';
-import 'gesture_detector.dart';
+import 'touch_detector.dart';
 import 'theme.dart';
 import 'math.dart';
 
@@ -254,24 +254,28 @@ class SlikkerMaterialState extends State<SlikkerMaterial>
           alignment: Alignment.center,
           child: Padding(
             padding: widget.padding ?? const EdgeInsets.all(0),
-            child: child,
+            // TODO: Opaqcity as an option
+            // TODO: ease the visual value
+            child: Opacity(opacity: 1-press.visual*0.5, child: child),
           ),
         );
 
         // Add gesture listeners if not disabled
         if (!widget.disabled && widget.onTap != null) {
-          material = SLGestureDetector(
-            onTapDown: (details) => touchEvent(tapDown: details),
-            onTapUp: (details) => touchEvent(tapUp: details),
-            onTapCancel: () => touchEvent(),
-            onTap: () => widget.onTap!(),
-            child: MouseRegion(
-              onEnter: (event) => hoverEvent(true, event),
-              onExit: (event) => hoverEvent(false, event),
-              onHover: (event) => hoverEvent(null, event),
-              cursor: SystemMouseCursors.click,
-              child: material,
-            ),
+          material = SLTouchDetector(
+            onTouchDown: (details) => touchEvent(tapDown: details),
+            onTouchUp: (details) => touchEvent(tapUp: details),
+            child: GestureDetector(
+              onTapCancel: () => touchEvent(),
+              onTap: () => widget.onTap?.call(),
+              child: MouseRegion(
+                onEnter: (event) => hoverEvent(true, event),
+                onExit: (event) => hoverEvent(false, event),
+                onHover: (event) => hoverEvent(null, event),
+                cursor: SystemMouseCursors.click,
+                child: material,
+              ),
+            )
           );
         }
 
@@ -290,7 +294,8 @@ class SlikkerMaterialState extends State<SlikkerMaterial>
 
         final transform = Matrix4.identity()
           ..setEntry(3, 2, 0.005)
-          ..scale(elevation)
+          // TODO: Double elevation as an option
+          ..scale(1.0 /*elevation*/)
           ..rotateX(tilt.y * depth / 2)
           ..rotateY(-tilt.x * depth / 2);
 

@@ -60,7 +60,7 @@ class SlikkerNavBarState extends State<SlikkerNavBar> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = SlikkerTheme.of(context);
+    final theme = SLTheme.of(context);
 
     states.length = widget.routes.length;
 
@@ -91,12 +91,13 @@ class SlikkerNavBarState extends State<SlikkerNavBar> {
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: IconExtended(
               entry.icon ?? SlikkerIcons.settings,
-              color: HSVColor.fromColor(theme.iconColor)
+              // TODO: Dynamic icon color
+              /*color: HSVColor.fromColor(theme.iconColor)
                   .withValue(active ? 0.4 : 0.6)
                   .toColor(),
               backgroundColor: HSVColor.fromColor(theme.iconColor)
                   .withValue(active ? 0.6 : .9)
-                  .toColor(),
+                  .toColor(),*/
               size: boxed ? 28 : 26,
             ),
           ),
@@ -113,14 +114,10 @@ class SlikkerNavBarState extends State<SlikkerNavBar> {
           child: AnimatedDefaultTextStyle(
             child: Text(entry.title),
             duration: const Duration(milliseconds: 100),
-            style: TextStyle(
-              color: theme.fontColor.withAlpha(active
-                  ? 175
-                  : boxed
-                      ? 0
-                      : 100),
-              fontSize: 10,
+            style: theme.textStyle.copyWith(
+              color: theme.textStyle.color?.withAlpha(active ? 175 : (boxed ? 0 : 100)),
               fontWeight: FontWeight.w600,
+              fontSize: 10,
             ),
           ),
         );
